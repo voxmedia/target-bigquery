@@ -211,16 +211,17 @@ def persist_lines_job(
 
         rows[table].seek(0)
         logger.info("loading {} to Bigquery.\n".format(table))
+        
         try:
             load_job = bigquery_client.load_table_from_file(
                 rows[table], table_ref, job_config=load_config
             )
+            logger.info("loading job {}".format(load_job.job_id))
+            logger.info(load_job.result())
         except exceptions.BadRequest as err:
-            logger.error(f"failed to load table: {err.errors}")
+            logger.error("failed to load table:\n{}".format('\n'.join(err.errors)))
             raise
-
-        logger.info("loading job {}".format(load_job.job_id))
-        logger.info(load_job.result())
+            
 
     # for table in errors.keys():
     #     if not errors[table]:
