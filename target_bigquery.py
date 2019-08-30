@@ -10,6 +10,7 @@ import threading
 import http.client
 import urllib
 import pkg_resources
+import decimal
 
 from jsonschema import validate
 import singer
@@ -134,6 +135,12 @@ def persist_lines_job(
     rows = {}
     errors = {}
 
+    class DecimalEncoder(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, decimal.Decimal):
+                return str(o)
+            return super(DecimalEncoder, self).default(o)
+
     bigquery_client = bigquery.Client(project=project_id)
 
     # try:
@@ -162,7 +169,7 @@ def persist_lines_job(
                 validate(msg.record, schema)
 
             # NEWLINE_DELIMITED_JSON expects literal JSON formatted data, with a newline character splitting each row.
-            dat = bytes(json.dumps(msg.record) + "\n", "UTF-8")
+            dat = bytes(json.dumps(msg.record, cls=DecimalEncoder) + "\n", "UTF-8")
 
             rows[msg.stream].write(dat)
             # rows[msg.stream].write(bytes(str(msg.record) + '\n', 'UTF-8'))
@@ -204,9 +211,14 @@ def persist_lines_job(
 
         rows[table].seek(0)
         logger.info("loading {} to Bigquery.\n".format(table))
-        load_job = bigquery_client.load_table_from_file(
-            rows[table], table_ref, job_config=load_config
-        )
+        try:
+            load_job = bigquery_client.load_table_from_file(
+                rows[table], table_ref, job_config=load_config
+            )
+        except exceptions.BadRequest as err:
+            logger.error(f"failed to load table: {err.errors}")
+            raise
+
         logger.info("loading job {}".format(load_job.job_id))
         logger.info(load_job.result())
 
@@ -257,10 +269,17 @@ def persist_lines_stream(project_id, dataset_id, lines=None, validate_records=Tr
 
             if validate_records:
                 validate(msg.record, schema)
+            
+            err = None
+            try:
+                err = bigquery_client.insert_rows_json(
+                    tables[msg.stream], [msg.record]
+                )
+            except Exception as exc:
+                logger.error(f"failed to insert rows for {tables[msg.stream]}: {str(exc)}\n{msg.record}")
+                raise
 
-            errors[msg.stream] = bigquery_client.insert_rows_json(
-                tables[msg.stream], [msg.record]
-            )
+            errors[msg.stream] = err
             rows[msg.stream] += 1
 
             state = None
