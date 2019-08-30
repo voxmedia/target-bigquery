@@ -10,6 +10,7 @@ import threading
 import http.client
 import urllib
 import pkg_resources
+import decimal
 
 from jsonschema import validate
 import singer
@@ -134,6 +135,12 @@ def persist_lines_job(
     rows = {}
     errors = {}
 
+    class DecimalEncoder(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, decimal.Decimal):
+                return str(o)
+            return super(DecimalEncoder, self).default(o)
+
     bigquery_client = bigquery.Client(project=project_id)
 
     # try:
@@ -162,7 +169,7 @@ def persist_lines_job(
                 validate(msg.record, schema)
 
             # NEWLINE_DELIMITED_JSON expects literal JSON formatted data, with a newline character splitting each row.
-            dat = bytes(json.dumps(msg.record) + "\n", "UTF-8")
+            dat = bytes(json.dumps(msg.record, cls=DecimalEncoder) + "\n", "UTF-8")
 
             rows[msg.stream].write(dat)
             # rows[msg.stream].write(bytes(str(msg.record) + '\n', 'UTF-8'))
