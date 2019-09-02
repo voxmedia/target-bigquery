@@ -218,7 +218,9 @@ def persist_lines_job(
             logger.info("loading job {}".format(load_job.job_id))
             logger.info(load_job.result())
         except exceptions.BadRequest as err:
-            logger.error("failed to load table:\n{}".format(err.errors))
+            logger.error("failed to load table {} from file: {}".format(str(err), table))
+            if errors:
+                logger.error("errors:{}".format("\n- ".join(load_job.errors)))
             raise
             
 
