@@ -209,12 +209,11 @@ def persist_lines_job(
         if truncate:
             load_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
 
-        rows[table].seek(0)
         logger.info("loading {} to Bigquery.\n".format(table))
         
         try:
             load_job = bigquery_client.load_table_from_file(
-                rows[table], table_ref, job_config=load_config
+                rows[table], table_ref, job_config=load_config, rewind=True, 
             )
             logger.info("loading job {}".format(load_job.job_id))
             logger.info(load_job.result())
