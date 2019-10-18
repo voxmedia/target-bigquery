@@ -98,6 +98,8 @@ def define_schema(field, name):
         if "format" in field:
             if field["format"] == "date-time":
                 schema_type = "timestamp"
+            if field["format"] == "date":
+                schema_type = "date"
 
     if schema_type == "number":
         schema_type = "FLOAT"
