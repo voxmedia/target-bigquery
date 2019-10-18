@@ -212,20 +212,24 @@ def persist_lines_job(
             load_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
 
         logger.info("loading {} to Bigquery.\n".format(table))
-        
+
         try:
             load_job = bigquery_client.load_table_from_file(
-                rows[table], table_ref, job_config=load_config, rewind=True, 
+                rows[table], table_ref, job_config=load_config, rewind=True
             )
             logger.info("loading job {}".format(load_job.job_id))
             logger.info(load_job.result())
         except exceptions.BadRequest as err:
-            logger.error("failed to load table {} from file: {}".format(table, str(err)))
+            logger.error(
+                "failed to load table {} from file: {}".format(table, str(err))
+            )
             if load_job.errors:
-                messages = [f"reason: {err['reason']}, message: {err['message']}" for err in load_job.errors]
+                messages = [
+                    f"reason: {err['reason']}, message: {err['message']}"
+                    for err in load_job.errors
+                ]
                 logger.error("errors:\n{}".format("\n".join(messages)))
             raise
-            
 
     # for table in errors.keys():
     #     if not errors[table]:
@@ -274,14 +278,14 @@ def persist_lines_stream(project_id, dataset_id, lines=None, validate_records=Tr
 
             if validate_records:
                 validate(msg.record, schema)
-            
+
             err = None
             try:
-                err = bigquery_client.insert_rows_json(
-                    tables[msg.stream], [msg.record]
-                )
+                err = bigquery_client.insert_rows_json(tables[msg.stream], [msg.record])
             except Exception as exc:
-                logger.error(f"failed to insert rows for {tables[msg.stream]}: {str(exc)}\n{msg.record}")
+                logger.error(
+                    f"failed to insert rows for {tables[msg.stream]}: {str(exc)}\n{msg.record}"
+                )
                 raise
 
             errors[msg.stream] = err
