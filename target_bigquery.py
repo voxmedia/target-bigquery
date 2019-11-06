@@ -157,11 +157,13 @@ def persist_lines_job(
             logger.error("Unable to parse:\n{}".format(line))
             raise
 
+        table_name = msg.stream + table_suffix
+
         if isinstance(msg, singer.RecordMessage):
-            if msg.stream not in schemas:
+            if table_name not in schemas:
                 raise Exception(
                     "A record for stream {} was encountered before a corresponding schema".format(
-                        msg.stream
+                        table_name
                     )
                 )
 
@@ -182,11 +184,10 @@ def persist_lines_job(
             state = msg.value
 
         elif isinstance(msg, singer.SchemaMessage):
-            table = msg.stream + table_suffix
-            schemas[table] = msg.schema
-            key_properties[table] = msg.key_properties
-            rows[table] = TemporaryFile(mode="w+b")
-            errors[table] = None
+            schemas[table_name] = msg.schema
+            key_properties[table_name] = msg.key_properties
+            rows[table_name] = TemporaryFile(mode="w+b")
+            errors[table_name] = None
 
         elif isinstance(msg, singer.ActivateVersionMessage):
             # This is experimental and won't be used yet
