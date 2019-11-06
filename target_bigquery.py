@@ -128,14 +128,19 @@ def build_schema(schema):
 
 
 def persist_lines_job(
-    project_id, dataset_id, lines=None, truncate=False, validate_records=True
+    project_id,
+    dataset_id,
+    lines=None,
+    truncate=False,
+    validate_records=True,
+    table_suffix=None,
 ):
     state = None
     schemas = {}
     key_properties = {}
-    tables = {}
     rows = {}
     errors = {}
+    table_suffix = table_suffix or ""
 
     class DecimalEncoder(json.JSONEncoder):
         def default(self, o):
@@ -144,11 +149,6 @@ def persist_lines_job(
             return super(DecimalEncoder, self).default(o)
 
     bigquery_client = bigquery.Client(project=project_id)
-
-    # try:
-    #     dataset = bigquery_client.create_dataset(Dataset(dataset_ref)) or Dataset(dataset_ref)
-    # except exceptions.Conflict:
-    #     pass
 
     for line in lines:
         try:
@@ -174,7 +174,6 @@ def persist_lines_job(
             dat = bytes(json.dumps(msg.record, cls=DecimalEncoder) + "\n", "UTF-8")
 
             rows[msg.stream].write(dat)
-            # rows[msg.stream].write(bytes(str(msg.record) + '\n', 'UTF-8'))
 
             state = None
 
@@ -183,16 +182,11 @@ def persist_lines_job(
             state = msg.value
 
         elif isinstance(msg, singer.SchemaMessage):
-            table = msg.stream
+            table = msg.stream + table_suffix
             schemas[table] = msg.schema
             key_properties[table] = msg.key_properties
-            # tables[table] = bigquery.Table(dataset.table(table), schema=build_schema(schemas[table]))
             rows[table] = TemporaryFile(mode="w+b")
             errors[table] = None
-            # try:
-            #     tables[table] = bigquery_client.create_table(tables[table])
-            # except exceptions.Conflict:
-            #     pass
 
         elif isinstance(msg, singer.ActivateVersionMessage):
             # This is experimental and won't be used yet
@@ -230,12 +224,6 @@ def persist_lines_job(
                 ]
                 logger.error("errors:\n{}".format("\n".join(messages)))
             raise
-
-    # for table in errors.keys():
-    #     if not errors[table]:
-    #         print('Loaded {} row(s) into {}:{}'.format(rows[table], dataset_id, table), tables[table].path)
-    #     else:
-    #         print('Errors:', errors[table], sep=" ")
 
     return state
 
@@ -368,6 +356,8 @@ def main():
     else:
         truncate = False
 
+    table_suffix = config.get("table_suffix")
+
     validate_records = config.get("validate_records", True)
 
     input = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
@@ -386,6 +376,7 @@ def main():
             input,
             truncate=truncate,
             validate_records=validate_records,
+            table_suffix=table_suffix,
         )
 
     emit_state(state)
