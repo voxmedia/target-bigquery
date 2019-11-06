@@ -128,7 +128,12 @@ def build_schema(schema):
 
 
 def persist_lines_job(
-    project_id, dataset_id, lines=None, truncate=False, validate_records=True
+    project_id,
+    dataset_id,
+    lines=None,
+    truncate=False,
+    validate_records=True,
+    table_suffix=None,
 ):
     state = None
     schemas = {}
@@ -136,6 +141,7 @@ def persist_lines_job(
     tables = {}
     rows = {}
     errors = {}
+    table_suffix = table_suffix or ""
 
     class DecimalEncoder(json.JSONEncoder):
         def default(self, o):
@@ -183,7 +189,7 @@ def persist_lines_job(
             state = msg.value
 
         elif isinstance(msg, singer.SchemaMessage):
-            table = msg.stream
+            table = msg.stream + table_suffix
             schemas[table] = msg.schema
             key_properties[table] = msg.key_properties
             # tables[table] = bigquery.Table(dataset.table(table), schema=build_schema(schemas[table]))
@@ -368,6 +374,8 @@ def main():
     else:
         truncate = False
 
+    table_suffix = config.get("table_suffix")
+
     validate_records = config.get("validate_records", True)
 
     input = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
@@ -386,6 +394,7 @@ def main():
             input,
             truncate=truncate,
             validate_records=validate_records,
+            table_suffix=table_suffix,
         )
 
     emit_state(state)
