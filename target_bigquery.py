@@ -167,7 +167,7 @@ def persist_lines_job(
                     )
                 )
 
-            schema = schemas[msg.stream]
+            schema = schemas[table_name]
 
             if validate_records:
                 validate(msg.record, schema)
@@ -175,7 +175,7 @@ def persist_lines_job(
             # NEWLINE_DELIMITED_JSON expects literal JSON formatted data, with a newline character splitting each row.
             dat = bytes(json.dumps(msg.record, cls=DecimalEncoder) + "\n", "UTF-8")
 
-            rows[msg.stream].write(dat)
+            rows[table_name].write(dat)
 
             state = None
 
