@@ -138,7 +138,6 @@ def persist_lines_job(
     state = None
     schemas = {}
     key_properties = {}
-    tables = {}
     rows = {}
     errors = {}
     table_suffix = table_suffix or ""
