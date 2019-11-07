@@ -157,9 +157,9 @@ def persist_lines_job(
             logger.error("Unable to parse:\n{}".format(line))
             raise
 
-        table_name = msg.stream + table_suffix
-
         if isinstance(msg, singer.RecordMessage):
+            table_name = msg.stream + table_suffix
+
             if table_name not in schemas:
                 raise Exception(
                     "A record for stream {} was encountered before a corresponding schema".format(
@@ -184,6 +184,7 @@ def persist_lines_job(
             state = msg.value
 
         elif isinstance(msg, singer.SchemaMessage):
+            table_name = msg.stream + table_suffix
             schemas[table_name] = msg.schema
             key_properties[table_name] = msg.key_properties
             rows[table_name] = TemporaryFile(mode="w+b")
