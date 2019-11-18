@@ -75,11 +75,18 @@ def define_schema(field, name):
                 field = types
 
     if isinstance(field["type"], list):
-        if field["type"][0] == "null":
+        types = set(field["type"])
+        if "null" in types:
             schema_mode = "NULLABLE"
+            types.remove("null")
         else:
             schema_mode = "required"
-        schema_type = field["type"][-1]
+
+        single_type = list(types)
+        if len(single_type) > 1:
+            raise ValueError(f"ambiguous types: {single_type}")
+
+        schema_type = single_type[0]
     else:
         schema_type = field["type"]
     if schema_type == "object":
