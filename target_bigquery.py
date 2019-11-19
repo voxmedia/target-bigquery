@@ -24,7 +24,7 @@ from google.cloud.bigquery import Dataset, WriteDisposition
 from google.cloud.bigquery import LoadJobConfig
 from google.api_core import exceptions
 
-from schema import build_schema
+from target_bigquery.schema import build_schema
 
 try:
     parser = argparse.ArgumentParser(parents=[tools.argparser])
