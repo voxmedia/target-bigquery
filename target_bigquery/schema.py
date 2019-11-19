@@ -24,10 +24,8 @@ def define_schema(field, name):
             schema_mode = "required"
 
         single_type = list(types)
-        if len(single_type) > 1:
-            raise ValueError(f"ambiguous types: {single_type}")
 
-        schema_type = single_type[0]
+        schema_type = single_type[-1]
     else:
         schema_type = field["type"]
     if schema_type == "object":
