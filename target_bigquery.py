@@ -119,6 +119,10 @@ def persist_lines_job(
 
         elif isinstance(msg, singer.SchemaMessage):
             table_name = msg.stream + table_suffix
+
+            if table_name in rows:
+                continue
+
             schemas[table_name] = msg.schema
             key_properties[table_name] = msg.key_properties
             rows[table_name] = TemporaryFile(mode="w+b")
