@@ -1,6 +1,28 @@
 from google.cloud.bigquery import SchemaField
 
 
+def defineArrayType(field, name):
+    schema_type = field.get("items").get("type")
+    schema_mode = "REPEATED"
+    schema_description = None
+    schema_fields = ()
+  
+    if schema_type == 'array':
+        return defineArrayType(field['items'], name)
+    if isinstance(schema_type, list):
+        if "null" in schema_type and schema_type.index('null') != 0:
+            schema_type.remove('null')
+            schema_type.insert(0, 'null')
+            schema_type = schema_type[-1]
+        else:    
+            schema_type = schema_type[-1]
+    if schema_type == "object":
+        schema_type = "RECORD"
+        schema_fields = tuple(build_schema(field.get("items")))
+
+    return (name, schema_type, schema_mode, schema_description, schema_fields)
+
+
 def define_schema(field, name):
     schema_name = name
     schema_type = "STRING"
@@ -22,23 +44,14 @@ def define_schema(field, name):
             types.remove("null")
         else:
             schema_mode = "required"
-
         single_type = list(types)
-
         schema_type = single_type[-1]
     else:
         schema_type = field["type"]
+
     if schema_type == "object":
         schema_type = "RECORD"
         schema_fields = tuple(build_schema(field))
-    if schema_type == "array":
-        schema_type = field.get("items").get("type")
-        if isinstance(schema_type, list):
-            schema_type = schema_type[-1]
-        schema_mode = "REPEATED"
-        if schema_type == "object":
-            schema_type = "RECORD"
-            schema_fields = tuple(build_schema(field.get("items")))
 
     if schema_type == "string":
         if "format" in field:
@@ -49,6 +62,9 @@ def define_schema(field, name):
 
     if schema_type == "number":
         schema_type = "FLOAT"
+
+    if schema_type == "array":
+        return defineArrayType(field, name)
 
     return (schema_name, schema_type, schema_mode, schema_description, schema_fields)
 
