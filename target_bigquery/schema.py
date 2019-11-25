@@ -1,12 +1,13 @@
-from google.cloud.bigquery import SchemaField
+import re
 
+from google.cloud.bigquery import SchemaField
 
 def defineArrayType(field, name):
     schema_type = field.get("items").get("type")
     schema_mode = "REPEATED"
     schema_description = None
     schema_fields = ()
-  
+
     if schema_type == 'array':
         return defineArrayType(field['items'], name)
     if isinstance(schema_type, list):
@@ -14,7 +15,7 @@ def defineArrayType(field, name):
             schema_type.remove('null')
             schema_type.insert(0, 'null')
             schema_type = schema_type[-1]
-        else:    
+        else:
             schema_type = schema_type[-1]
     if schema_type == "object":
         schema_type = "RECORD"
@@ -69,6 +70,12 @@ def define_schema(field, name):
     return (schema_name, schema_type, schema_mode, schema_description, schema_fields)
 
 
+def bigquery_transformed_key(key):
+    if re.search('\.|-', key):
+        return re.sub('\.|-', '_', key)
+    else:
+        return key
+
 def build_schema(schema):
     SCHEMA = []
     for key in schema["properties"].keys():
@@ -78,7 +85,7 @@ def build_schema(schema):
             continue
 
         schema_name, schema_type, schema_mode, schema_description, schema_fields = define_schema(
-            schema["properties"][key], key
+            schema["properties"][key], bigquery_transformed_key(key)
         )
         SCHEMA.append(
             SchemaField(
