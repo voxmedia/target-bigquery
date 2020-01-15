@@ -1,10 +1,15 @@
 def get_type(property):
     nullable = False
+    prop_type = None
 
-    if "type" not in property:
-        raise ValueError(f"type not in property: {property}")
-
-    prop_type = property["type"]
+    if "anyOf" in property:
+        return "anyOf", nullable
+    elif "type" in property:
+        prop_type = property["type"]
+    else:
+        raise ValueError(
+            f"'type' or 'anyOf' are required fields in property: {property}"
+        )
 
     if isinstance(prop_type, str):
         return prop_type, nullable
@@ -30,6 +35,18 @@ def filter(schema, record):
     # return literals without checking
     if field_type in JSON_SCHEMA_LITERALS:
         return record
+    elif field_type == "anyOf":
+        for prop in schema["anyOf"]:
+            prop_type, _ = get_type(prop)
+
+            if prop_type == "null":
+                continue
+
+            # anyOf can be an array of properties, the choice here
+            # is to ignore the case where anyOf is two types (not including "null")
+            # and simply choose the first one. This might bite us.
+            return filter(prop, record)
+
     elif field_type == "object":
         props = schema.get("properties", {})
         obj_results = {}
