@@ -24,7 +24,7 @@ from google.cloud.bigquery import Dataset, WriteDisposition
 from google.cloud.bigquery import LoadJobConfig
 from google.api_core import exceptions
 
-from target_bigquery.schema import build_schema
+from target_bigquery.schema import build_schema, filter
 
 try:
     parser = argparse.ArgumentParser(parents=[tools.argparser])
@@ -107,8 +107,10 @@ def persist_lines_job(
             if validate_records:
                 validate(msg.record, schema)
 
+            new_rec = filter(schema, msg.record)
+
             # NEWLINE_DELIMITED_JSON expects literal JSON formatted data, with a newline character splitting each row.
-            dat = bytes(json.dumps(msg.record, cls=DecimalEncoder) + "\n", "UTF-8")
+            dat = bytes(json.dumps(new_rec, cls=DecimalEncoder) + "\n", "UTF-8")
 
             rows[table_name].write(dat)
 
