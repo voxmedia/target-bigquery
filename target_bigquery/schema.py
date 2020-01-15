@@ -7,24 +7,22 @@ def defineArrayType(field, name):
     schema_mode = "REPEATED"
     schema_description = None
     schema_fields = ()
-    if schema_type == 'array':
-        return defineArrayType(field['items'], name)
+    if schema_type == "array":
+        return defineArrayType(field["items"], name)
     if isinstance(schema_type, list):
-        if 'array' in schema_type:
-            return defineArrayType(field['items'], name)
+        if "array" in schema_type:
+            return defineArrayType(field["items"], name)
 
-        if "null" in schema_type and schema_type.index('null') != 0:
-            schema_type.remove('null')
-            schema_type.insert(0, 'null')
+        if "null" in schema_type and schema_type.index("null") != 0:
+            schema_type.remove("null")
+            schema_type.insert(0, "null")
             schema_type = schema_type[-1]
         else:
             schema_type = schema_type[-1]
-           
-          
+
     if schema_type == "object":
         schema_type = "RECORD"
         schema_fields = tuple(build_schema(field.get("items")))
-     
 
     return (name, schema_type, schema_mode, schema_description, schema_fields)
 
@@ -76,12 +74,13 @@ def define_schema(field, name):
 
 
 def bigquery_transformed_key(key):
-    if re.search(r'\.|-', key):
-        return re.sub(r'\.|-', '_', key)
-    elif re.search(r'^\d', key):
-        return re.sub(r'^\d.+', f'_{key}', key)
+    if re.search(r"\.|-", key):
+        return re.sub(r"\.|-", "_", key)
+    elif re.search(r"^\d", key):
+        return re.sub(r"^\d.+", f"_{key}", key)
     else:
         return key
+
 
 def build_schema(schema):
     SCHEMA = []
@@ -91,9 +90,13 @@ def build_schema(schema):
             # if we endup with an empty record.
             continue
 
-        schema_name, schema_type, schema_mode, schema_description, schema_fields = define_schema(
-            schema["properties"][key], bigquery_transformed_key(key)
-        )
+        (
+            schema_name,
+            schema_type,
+            schema_mode,
+            schema_description,
+            schema_fields,
+        ) = define_schema(schema["properties"][key], bigquery_transformed_key(key))
         SCHEMA.append(
             SchemaField(
                 schema_name, schema_type, schema_mode, schema_description, schema_fields
