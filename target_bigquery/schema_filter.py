@@ -21,57 +21,55 @@ def get_type(property):
     return field_type, nullable
 
 
+JSON_SCHEMA_LITERALS = {"boolean", "number", "integer", "string"}
+
+
 def filter(schema, record):
     field_type, _ = get_type(schema)
 
     # return literals without checking
-    if field_type in {"boolean", "number", "integer", "string"}:
+    if field_type in JSON_SCHEMA_LITERALS:
         return record
-
     elif field_type == "object":
-        properties = schema.get("properties", {})
+        props = schema.get("properties", {})
         obj_results = {}
-        for key, prop_schema in properties.items():
+        for key, prop_schema in props.items():
             if key not in record:
                 continue
 
-            prop_type, _ = get_type(prop_schema)
-
-            # return literals without checking
-            if prop_type in {"boolean", "number", "integer", "string"}:
-                obj_results[key] = record[key]
-            else:
-                obj_results[key] = filter(prop_schema, record[key])
+            obj_results[key] = filter(prop_schema, record[key])
 
         return obj_results
-
     elif field_type == "array":
-        prop_schema = schema["items"]
+        props = schema.get("items", {})
 
-        prop_type, _ = get_type(prop_schema)
+        prop_type, _ = get_type(props)
 
-        # if type is a literal, return list of literals
-        # without further consideration
+        # array can contain either an object or literals
+        # - if it contains literals, simply return those
         if prop_type != "object":
             return record
 
         arr_result = []
         for obj in record:
-            arr_result.append(filter(prop_schema, obj))
+            arr_result.append(filter(props, obj))
 
         return arr_result
     else:
-        raise ValueError("type is neither object or array")
+        raise ValueError(f"type {field_type} is unknown")
 
 
 if __name__ == "__main__":
     schema = {
         "type": ["null", "object"],
-        "properties": {"field1": {"type": ["string", "null"]}},
+        "properties": {
+            "field1": {"type": ["string", "null"]},
+            "an_object": {"type": "object", "properties": {"k1": {"type": "string"}}},
+        },
     }
 
     records = [
-        {"field1": "yes!", "field2": "no!"},
+        {"field1": "yes!", "an_object": {"k2": "no!", "k1": "yes!"}},
         {"field1": "yes!", "field2": "no!"},
         {"field1": "yes!", "field2": "no!"},
     ]
@@ -91,4 +89,3 @@ if __name__ == "__main__":
         {"field1": "yes!", "field2": "no!"},
     ]
     print(filter(schema, records))
-
