@@ -64,12 +64,17 @@ if __name__ == "__main__":
         "type": ["null", "object"],
         "properties": {
             "field1": {"type": ["string", "null"]},
-            "an_object": {"type": "object", "properties": {"k1": {"type": "string"}}},
+            "an_object": {
+                "anyOf": [
+                    {"type": "object", "properties": {"k1": {"type": "string"}}},
+                    {"type": "null"},
+                ]
+            },
         },
     }
 
     records = [
-        {"field1": "yes!", "an_object": {"k2": "no!", "k1": "yes!"}},
+        {"field1": "yes!", "an_object": {"k2": "no!", "k1": "yes!"}, "field2": "no"},
         {"field1": "yes!", "field2": "no!"},
         {"field1": "yes!", "field2": "no!"},
     ]
