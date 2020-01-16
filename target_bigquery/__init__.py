@@ -28,7 +28,7 @@ from target_bigquery.schema import build_schema, filter
 from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.job import persist_lines_job
 from target_bigquery.stream import persist_lines_stream
-from target_bigquery.utils import emit_state
+from target_bigquery.utils import emit_state, collect
 
 try:
     parser = argparse.ArgumentParser(parents=[tools.argparser])
@@ -51,25 +51,6 @@ APPLICATION_NAME = "Singer BigQuery Target"
 StreamMeta = collections.namedtuple(
     "StreamMeta", ["schema", "key_properties", "bookmark_properties"]
 )
-
-
-def collect():
-    try:
-        version = pkg_resources.get_distribution("target-bigquery").version
-        conn = http.client.HTTPConnection("collector.singer.io", timeout=10)
-        conn.connect()
-        params = {
-            "e": "se",
-            "aid": "singer",
-            "se_ca": "target-bigquery",
-            "se_ac": "open",
-            "se_la": version,
-        }
-        conn.request("GET", "/i?" + urllib.parse.urlencode(params))
-        conn.getresponse()
-        conn.close()
-    except:
-        logger.debug("Collection request failed")
 
 
 def main():
