@@ -53,10 +53,6 @@ StreamMeta = collections.namedtuple(
 )
 
 
-def clear_dict_hook(items):
-    return {k: v if v is not None else "" for k, v in items}
-
-
 def collect():
     try:
         version = pkg_resources.get_distribution("target-bigquery").version
