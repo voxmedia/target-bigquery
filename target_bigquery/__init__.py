@@ -27,6 +27,7 @@ from google.api_core import exceptions
 from target_bigquery.schema import build_schema, filter
 from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.job import persist_lines_job
+from target_bigquery.utils import emit_state
 
 try:
     parser = argparse.ArgumentParser(parents=[tools.argparser])
@@ -49,14 +50,6 @@ APPLICATION_NAME = "Singer BigQuery Target"
 StreamMeta = collections.namedtuple(
     "StreamMeta", ["schema", "key_properties", "bookmark_properties"]
 )
-
-
-def emit_state(state):
-    if state is not None:
-        line = json.dumps(state)
-        logger.debug("Emitting state {}".format(line))
-        sys.stdout.write("{}\n".format(line))
-        sys.stdout.flush()
 
 
 def clear_dict_hook(items):
