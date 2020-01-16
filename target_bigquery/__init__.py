@@ -100,14 +100,15 @@ def main():
     input = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
 
     if config.get("stream_data", True):
-        state = persist_lines_stream(
+        state_iterator = persist_lines_stream(
             config["project_id"],
             config["dataset_id"],
             input,
             validate_records=validate_records,
         )
+
     else:
-        state = persist_lines_job(
+        state_iterator = persist_lines_job(
             config["project_id"],
             config["dataset_id"],
             input,
@@ -116,8 +117,8 @@ def main():
             table_suffix=table_suffix,
         )
 
-    emit_state(state)
-    logger.debug("Exiting normally")
+    for state in state_iterator:
+        emit_state(state)
 
 
 if __name__ == "__main__":

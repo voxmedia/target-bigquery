@@ -101,8 +101,6 @@ def persist_lines_stream(project_id, dataset_id, lines=None, validate_records=Tr
                     rows[table], dataset_id, table, tables[table].path
                 )
             )
-            emit_state(state)
+            yield state
         else:
             logging.error("Errors: %s", errors[table])
-
-    return state

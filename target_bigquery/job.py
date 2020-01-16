@@ -118,4 +118,4 @@ def persist_lines_job(
                 logger.error("errors:\n{}".format("\n".join(messages)))
             raise
 
-    return state
+    yield state
