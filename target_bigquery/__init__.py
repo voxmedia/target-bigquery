@@ -104,9 +104,9 @@ def persist_lines_job(
             new_rec = filter(schema, msg.record)
 
             # NEWLINE_DELIMITED_JSON expects literal JSON formatted data, with a newline character splitting each row.
-            dat = bytes(json.dumps(new_rec, cls=DecimalEncoder) + "\n", "UTF-8")
+            data = bytes(json.dumps(new_rec, cls=DecimalEncoder) + "\n", "UTF-8")
 
-            rows[table_name].write(dat)
+            rows[table_name].write(data)
 
             state = None
 
