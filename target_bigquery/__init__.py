@@ -25,6 +25,7 @@ from google.cloud.bigquery import LoadJobConfig
 from google.api_core import exceptions
 
 from target_bigquery.schema import build_schema, filter
+from target_bigquery.encoders import DecimalEncoder
 
 try:
     parser = argparse.ArgumentParser(parents=[tools.argparser])
@@ -75,13 +76,6 @@ def persist_lines_job(
     rows = {}
     errors = {}
     table_suffix = table_suffix or ""
-
-    class DecimalEncoder(json.JSONEncoder):
-        # pylint: disable=method-hidden
-        def default(self, o):
-            if isinstance(o, decimal.Decimal):
-                return str(o)
-            return super(DecimalEncoder, self).default(o)
 
     bigquery_client = bigquery.Client(project=project_id)
 
@@ -289,8 +283,8 @@ def main():
     if not config.get("disable_collection", False):
         logger.info(
             "Sending version information to stitchdata.com. "
-            + "To disable sending anonymous usage data, set "
-            + 'the config parameter "disable_collection" to true'
+            "To disable sending anonymous usage data, set "
+            "the config parameter 'disable_collection' to true"
         )
         threading.Thread(target=collect).start()
 
