@@ -110,7 +110,7 @@ def define_schema(field, name):
         props = field.get("items")
         schema_type, _ = get_type(props)
         schema_mode = "REPEATED"
-        return (
+        return SchemaField(
             schema_name,
             schema_type,
             schema_mode,
@@ -130,7 +130,9 @@ def define_schema(field, name):
     if not schema_type:
         schema_type = field_type
 
-    return (schema_name, schema_type, schema_mode, schema_description, schema_fields)
+    return SchemaField(
+        schema_name, schema_type, schema_mode, schema_description, schema_fields
+    )
 
 
 def bigquery_transformed_key(key):
@@ -140,23 +142,12 @@ def bigquery_transformed_key(key):
 
 def build_schema(schema):
     SCHEMA = []
-    for key in schema["properties"].keys():
+    for key, props in schema["properties"].items():
 
-        if not (bool(schema["properties"][key])):
+        if not props:
             # if we endup with an empty record.
             continue
 
-        (
-            schema_name,
-            schema_type,
-            schema_mode,
-            schema_description,
-            schema_fields,
-        ) = define_schema(schema["properties"][key], bigquery_transformed_key(key))
-        SCHEMA.append(
-            SchemaField(
-                schema_name, schema_type, schema_mode, schema_description, schema_fields
-            )
-        )
+        SCHEMA.append(define_schema(props, bigquery_transformed_key(key)))
 
     return SCHEMA
