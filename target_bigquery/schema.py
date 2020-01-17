@@ -107,46 +107,26 @@ def defineArrayType(field, name):
 
 def define_schema(field, name):
     schema_name = name
-    schema_type = "STRING"
-    schema_mode = "NULLABLE"
     schema_description = None
     schema_fields = ()
 
-    if "type" not in field and "anyOf" in field:
-        for types in field["anyOf"]:
-            if types["type"] == "null":
-                schema_mode = "NULLABLE"
-            else:
-                field = types
-
-    if isinstance(field["type"], list):
-        types = set(field["type"])
-        if "null" in types:
-            schema_mode = "NULLABLE"
-            types.remove("null")
-        else:
-            schema_mode = "required"
-        single_type = list(types)
-        schema_type = single_type[-1]
-    else:
-        schema_type = field["type"]
+    schema_type, nullable = get_type(field)
 
     if schema_type == "object":
         schema_type = "RECORD"
         schema_fields = tuple(build_schema(field))
-
-    if schema_type == "string":
-        if "format" in field:
-            if field["format"] == "date-time":
-                schema_type = "timestamp"
-            if field["format"] == "date":
-                schema_type = "date"
-
-    if schema_type == "number":
+    elif schema_type == "array":
+        return defineArrayType(field, name)
+    elif schema_type == "string" and "format" in field:
+        format = field["format"]
+        if format == "date-time":
+            schema_type = "timestamp"
+        elif format == "date":
+            schema_type = "date"
+    elif schema_type == "number":
         schema_type = "FLOAT"
 
-    if schema_type == "array":
-        return defineArrayType(field, name)
+    schema_mode = "NULLABLE" if nullable else "required"
 
     return (schema_name, schema_type, schema_mode, schema_description, schema_fields)
 
