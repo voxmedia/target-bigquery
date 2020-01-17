@@ -82,10 +82,12 @@ def filter(schema, record):
 
 def define_schema(field, name):
     schema_name = name
+    schema_type = None
     schema_description = None
     schema_fields = ()
 
     field_type, nullable = get_type(field)
+    schema_mode = "NULLABLE" if nullable else "required"
 
     if field_type == "anyOf":
         nullable = False
@@ -108,14 +110,18 @@ def define_schema(field, name):
         schema_fields = tuple(build_schema(field))
     elif field_type == "array":
         props = field.get("items")
-        schema_type, _ = get_type(props)
+        props_type, _ = get_type(props)
+
+        if props_type == "object":
+            schema_type = "RECORD"
+            schema_fields = build_schema(props)
+        else:
+            schema_type = props_type
+            schema_fields = ()
+
         schema_mode = "REPEATED"
         return SchemaField(
-            schema_name,
-            schema_type,
-            schema_mode,
-            schema_description,
-            () if schema_type != "object" else build_schema(props),
+            schema_name, schema_type, schema_mode, schema_description, schema_fields,
         )
     elif field_type == "string" and "format" in field:
         format = field["format"]
@@ -126,7 +132,6 @@ def define_schema(field, name):
     elif field_type == "number":
         schema_type = "FLOAT"
 
-    schema_mode = "NULLABLE" if nullable else "required"
     if not schema_type:
         schema_type = field_type
 
