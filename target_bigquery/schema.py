@@ -110,23 +110,41 @@ def define_schema(field, name):
     schema_description = None
     schema_fields = ()
 
-    schema_type, nullable = get_type(field)
+    field_type, nullable = get_type(field)
 
-    if schema_type == "object":
+    if field_type == "anyOf":
+        nullable = False
+        props = field["anyOf"]
+        # select first non-null property
+        for prop in props:
+            prop_type, prop_null = get_type(prop)
+            # if any of the properties are nullable
+            # they all are
+            if prop_null:
+                nullable = True
+
+            # take the first property that is not None
+            # of the possible types
+            if field_type == "anyOf" and prop_type:
+                field_type = prop_type
+
+    if field_type == "object":
         schema_type = "RECORD"
         schema_fields = tuple(build_schema(field))
-    elif schema_type == "array":
+    elif field_type == "array":
         return defineArrayType(field, name)
-    elif schema_type == "string" and "format" in field:
+    elif field_type == "string" and "format" in field:
         format = field["format"]
         if format == "date-time":
             schema_type = "timestamp"
         elif format == "date":
             schema_type = "date"
-    elif schema_type == "number":
+    elif field_type == "number":
         schema_type = "FLOAT"
 
     schema_mode = "NULLABLE" if nullable else "required"
+    if not schema_type:
+        schema_type = field_type
 
     return (schema_name, schema_type, schema_mode, schema_description, schema_fields)
 
