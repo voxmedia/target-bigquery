@@ -134,12 +134,8 @@ def define_schema(field, name):
 
 
 def bigquery_transformed_key(key):
-    if re.search(r"\.|-", key):
-        return re.sub(r"\.|-", "_", key)
-    elif re.search(r"^\d", key):
-        return re.sub(r"^\d.+", f"_{key}", key)
-    else:
-        return key
+    nodash = re.sub(r"-", "_", key)
+    return re.sub(r"^\d+", "_", nodash)
 
 
 def build_schema(schema):
