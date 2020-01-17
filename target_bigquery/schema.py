@@ -80,31 +80,6 @@ def filter(schema, record):
         raise ValueError(f"type {field_type} is unknown")
 
 
-def defineArrayType(field, name):
-    schema_type = field.get("items").get("type")
-    schema_mode = "REPEATED"
-    schema_description = None
-    schema_fields = ()
-    if schema_type == "array":
-        return defineArrayType(field["items"], name)
-    if isinstance(schema_type, list):
-        if "array" in schema_type:
-            return defineArrayType(field["items"], name)
-
-        if "null" in schema_type and schema_type.index("null") != 0:
-            schema_type.remove("null")
-            schema_type.insert(0, "null")
-            schema_type = schema_type[-1]
-        else:
-            schema_type = schema_type[-1]
-
-    if schema_type == "object":
-        schema_type = "RECORD"
-        schema_fields = tuple(build_schema(field.get("items")))
-
-    return (name, schema_type, schema_mode, schema_description, schema_fields)
-
-
 def define_schema(field, name):
     schema_name = name
     schema_description = None
@@ -132,7 +107,16 @@ def define_schema(field, name):
         schema_type = "RECORD"
         schema_fields = tuple(build_schema(field))
     elif field_type == "array":
-        return defineArrayType(field, name)
+        props = field.get("items")
+        schema_type, _ = get_type(props)
+        schema_mode = "REPEATED"
+        return (
+            schema_name,
+            schema_type,
+            schema_mode,
+            schema_description,
+            () if schema_type != "object" else build_schema(props),
+        )
     elif field_type == "string" and "format" in field:
         format = field["format"]
         if format == "date-time":
