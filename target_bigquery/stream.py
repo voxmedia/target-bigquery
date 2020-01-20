@@ -16,24 +16,13 @@ logger = singer.get_logger()
 from google.cloud.bigquery import Dataset, WriteDisposition
 
 
-def persist_lines_stream(project_id, dataset_id, lines=None, validate_records=True):
+def persist_lines_stream(client, dataset, lines=None, validate_records=True):
     state = None
     schemas = {}
     key_properties = {}
     tables = {}
     rows = {}
     errors = {}
-
-    bigquery_client = bigquery.Client(project=project_id)
-
-    dataset_ref = bigquery_client.dataset(dataset_id)
-    dataset = Dataset(dataset_ref)
-    try:
-        dataset = bigquery_client.create_dataset(Dataset(dataset_ref)) or Dataset(
-            dataset_ref
-        )
-    except exceptions.Conflict:
-        pass
 
     for line in lines:
         try:
@@ -57,7 +46,7 @@ def persist_lines_stream(project_id, dataset_id, lines=None, validate_records=Tr
 
             err = None
             try:
-                err = bigquery_client.insert_rows_json(tables[msg.stream], [msg.record])
+                err = client.insert_rows_json(tables[msg.stream], [msg.record])
             except Exception as exc:
                 logger.error(
                     f"failed to insert rows for {tables[msg.stream]}: {str(exc)}\n{msg.record}"
@@ -83,7 +72,7 @@ def persist_lines_stream(project_id, dataset_id, lines=None, validate_records=Tr
             rows[table] = 0
             errors[table] = None
             try:
-                tables[table] = bigquery_client.create_table(tables[table])
+                tables[table] = client.create_table(tables[table])
             except exceptions.Conflict:
                 pass
 
@@ -98,7 +87,7 @@ def persist_lines_stream(project_id, dataset_id, lines=None, validate_records=Tr
         if not errors[table]:
             logging.info(
                 "Loaded {} row(s) from {} into {}:{}".format(
-                    rows[table], dataset_id, table, tables[table].path
+                    rows[table], dataset.dataset_id, table, tables[table].path
                 )
             )
             yield state

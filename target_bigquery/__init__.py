@@ -72,22 +72,25 @@ def main():
 
     table_suffix = config.get("table_suffix")
 
+    location = config.get("location", "EU")
+
     validate_records = config.get("validate_records", True)
 
     input = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
 
+    project_id, dataset_id = config["project_id"], config["dataset_id"]
+
+    client, dataset = ensure_dataset(project_id, dataset_id, location)
+
     if config.get("stream_data", True):
         state_iterator = persist_lines_stream(
-            config["project_id"],
-            config["dataset_id"],
-            input,
-            validate_records=validate_records,
+            client, dataset, input, validate_records=validate_records,
         )
 
     else:
         state_iterator = persist_lines_job(
-            config["project_id"],
-            config["dataset_id"],
+            client,
+            dataset,
             input,
             truncate=truncate,
             validate_records=validate_records,
@@ -96,6 +99,19 @@ def main():
 
     for state in state_iterator:
         emit_state(state)
+
+
+def ensure_dataset(project_id, dataset_id, location):
+    client = bigquery.Client(project=project_id, location=location)
+
+    dataset_ref = client.dataset(dataset_id)
+    try:
+        client.create_dataset(dataset_ref, exists_ok=True)
+    except Exception:
+        # attempt to run even if creation fails due to permissions etc.
+        pass
+
+    return client, Dataset(dataset_ref)
 
 
 if __name__ == "__main__":

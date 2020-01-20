@@ -19,8 +19,8 @@ logger = singer.get_logger()
 
 
 def persist_lines_job(
-    project_id,
-    dataset_id,
+    client,
+    dataset,
     lines=None,
     truncate=False,
     validate_records=True,
@@ -32,8 +32,6 @@ def persist_lines_job(
     rows = {}
     errors = {}
     table_suffix = table_suffix or ""
-
-    bigquery_client = bigquery.Client(project=project_id)
 
     for line in lines:
         try:
@@ -89,7 +87,6 @@ def persist_lines_job(
             raise Exception("Unrecognized message {}".format(msg))
 
     for table in rows.keys():
-        table_ref = bigquery_client.dataset(dataset_id).table(table)
         SCHEMA = build_schema(schemas[table])
         load_config = LoadJobConfig()
         load_config.schema = SCHEMA
@@ -101,8 +98,8 @@ def persist_lines_job(
         logger.info("loading {} to Bigquery.\n".format(table))
 
         try:
-            load_job = bigquery_client.load_table_from_file(
-                rows[table], table_ref, job_config=load_config, rewind=True
+            load_job = client.load_table_from_file(
+                rows[table], dataset.table(table), job_config=load_config, rewind=True
             )
             logger.info("loading job {}".format(load_job.job_id))
             logger.info(load_job.result())
