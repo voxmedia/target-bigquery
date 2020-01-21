@@ -30,14 +30,6 @@ from target_bigquery.job import persist_lines_job
 from target_bigquery.stream import persist_lines_stream
 from target_bigquery.utils import emit_state, collect
 
-try:
-    parser = argparse.ArgumentParser(parents=[tools.argparser])
-    parser.add_argument("-c", "--config", help="Config file", required=True)
-    flags = parser.parse_args()
-
-except ImportError:
-    flags = None
-
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 logger = singer.get_logger()
 
@@ -54,6 +46,10 @@ StreamMeta = collections.namedtuple(
 
 
 def main():
+    parser = argparse.ArgumentParser(parents=[tools.argparser])
+    parser.add_argument("-c", "--config", help="Config file", required=True)
+    flags = parser.parse_args()
+
     with open(flags.config) as input:
         config = json.load(input)
 
