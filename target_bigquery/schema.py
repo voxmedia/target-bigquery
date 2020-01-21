@@ -80,30 +80,28 @@ def filter(schema, record):
         raise ValueError(f"type {field_type} is unknown")
 
 
-def define_schema(field, name):
-    schema_name = name
-    schema_type = None
-    schema_description = None
-    schema_fields = ()
-
-    field_type, nullable = get_type(field)
-    schema_mode = "NULLABLE" if nullable else "required"
+def define_schema(field, name, required_fields=None):
+    field_type, _ = get_type(field)
+    nullable = True
+    if required_fields and name in required_fields:
+        nullable = False
 
     if field_type == "anyOf":
-        nullable = False
         props = field["anyOf"]
         # select first non-null property
         for prop in props:
-            prop_type, prop_null = get_type(prop)
-            # if any of the properties are nullable
-            # they all are
-            if prop_null:
-                nullable = True
+            prop_type, _ = get_type(prop)
+            if not prop_type:
+                continue
 
             # take the first property that is not None
             # of the possible types
             if field_type == "anyOf" and prop_type:
                 field_type = prop_type
+
+    schema_description = None
+    schema_name = name
+    schema_mode = "NULLABLE" if nullable else "required"
 
     if field_type == "object":
         schema_type = "RECORD"
@@ -145,14 +143,23 @@ def bigquery_transformed_key(key):
     return re.sub(r"^\d+", "_", nodash)
 
 
-def build_schema(schema):
+def build_schema(schema, key_properties=None):
     SCHEMA = []
+
+    required_fields = set(key_properties) if key_properties else set()
+    if "required" in schema:
+        required_fields.update(schema["required"])
+
     for key, props in schema["properties"].items():
 
         if not props:
             # if we endup with an empty record.
             continue
 
-        SCHEMA.append(define_schema(props, bigquery_transformed_key(key)))
+        SCHEMA.append(
+            define_schema(
+                props, bigquery_transformed_key(key), required_fields=required_fields
+            )
+        )
 
     return SCHEMA

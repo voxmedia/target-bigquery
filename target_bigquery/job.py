@@ -87,7 +87,8 @@ def persist_lines_job(
             raise Exception("Unrecognized message {}".format(msg))
 
     for table in rows.keys():
-        SCHEMA = build_schema(schemas[table])
+        key_props = key_properties[table]
+        SCHEMA = build_schema(schemas[table], key_properties=key_props)
         load_config = LoadJobConfig()
         load_config.schema = SCHEMA
         load_config.source_format = SourceFormat.NEWLINE_DELIMITED_JSON
