@@ -106,13 +106,18 @@ def define_schema(field, name, required_fields=None):
     if field_type == "object":
         schema_type = "RECORD"
         schema_fields = tuple(build_schema(field))
+        return SchemaField(
+            schema_name, schema_type, schema_mode, schema_description, schema_fields,
+        )
     elif field_type == "array":
+        # objects in arrays cannot be nullable
+        # - but nested fields in RECORDS can be nullable
         props = field.get("items")
         props_type, _ = get_type(props)
 
         if props_type == "object":
             schema_type = "RECORD"
-            schema_fields = build_schema(props)
+            schema_fields = tuple(build_schema(props))
         else:
             schema_type = props_type
             schema_fields = ()
@@ -121,7 +126,11 @@ def define_schema(field, name, required_fields=None):
         return SchemaField(
             schema_name, schema_type, schema_mode, schema_description, schema_fields,
         )
-    elif field_type == "string" and "format" in field:
+
+    if field_type not in JSON_SCHEMA_LITERALS:
+        raise ValueError(f"unknown type: {field_type}")
+
+    if field_type == "string" and "format" in field:
         format = field["format"]
         if format == "date-time":
             schema_type = "timestamp"
@@ -129,13 +138,11 @@ def define_schema(field, name, required_fields=None):
             schema_type = "date"
     elif field_type == "number":
         schema_type = "FLOAT"
-
-    if not schema_type:
+    else:
         schema_type = field_type
 
-    return SchemaField(
-        schema_name, schema_type, schema_mode, schema_description, schema_fields
-    )
+        # always make a field nullable
+    return SchemaField(schema_name, schema_type, schema_mode, schema_description, ())
 
 
 def bigquery_transformed_key(key):
