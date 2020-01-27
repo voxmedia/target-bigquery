@@ -80,104 +80,92 @@ def filter(schema, record):
         raise ValueError(f"type {field_type} is unknown")
 
 
-def defineArrayType(field, name):
-    schema_type = field.get("items").get("type")
-    schema_mode = "REPEATED"
+def define_schema(field, name, required_fields=None):
+    field_type, _ = get_type(field)
+    nullable = True
+    if required_fields and name in required_fields:
+        nullable = False
+
+    if field_type == "anyOf":
+        props = field["anyOf"]
+        # select first non-null property
+        for prop in props:
+            prop_type, _ = get_type(prop)
+            if not prop_type:
+                continue
+
+            # take the first property that is not None
+            # of the possible types
+            if field_type == "anyOf" and prop_type:
+                field_type = prop_type
+
     schema_description = None
-    schema_fields = ()
-    if schema_type == "array":
-        return defineArrayType(field["items"], name)
-    if isinstance(schema_type, list):
-        if "array" in schema_type:
-            return defineArrayType(field["items"], name)
-
-        if "null" in schema_type and schema_type.index("null") != 0:
-            schema_type.remove("null")
-            schema_type.insert(0, "null")
-            schema_type = schema_type[-1]
-        else:
-            schema_type = schema_type[-1]
-
-    if schema_type == "object":
-        schema_type = "RECORD"
-        schema_fields = tuple(build_schema(field.get("items")))
-
-    return (name, schema_type, schema_mode, schema_description, schema_fields)
-
-
-def define_schema(field, name):
     schema_name = name
-    schema_type = "STRING"
-    schema_mode = "NULLABLE"
-    schema_description = None
-    schema_fields = ()
+    schema_mode = "NULLABLE" if nullable else "required"
 
-    if "type" not in field and "anyOf" in field:
-        for types in field["anyOf"]:
-            if types["type"] == "null":
-                schema_mode = "NULLABLE"
-            else:
-                field = types
-
-    if isinstance(field["type"], list):
-        types = set(field["type"])
-        if "null" in types:
-            schema_mode = "NULLABLE"
-            types.remove("null")
-        else:
-            schema_mode = "required"
-        single_type = list(types)
-        schema_type = single_type[-1]
-    else:
-        schema_type = field["type"]
-
-    if schema_type == "object":
+    if field_type == "object":
         schema_type = "RECORD"
         schema_fields = tuple(build_schema(field))
+        return SchemaField(
+            schema_name, schema_type, schema_mode, schema_description, schema_fields,
+        )
+    elif field_type == "array":
+        # objects in arrays cannot be nullable
+        # - but nested fields in RECORDS can be nullable
+        props = field.get("items")
+        props_type, _ = get_type(props)
 
-    if schema_type == "string":
-        if "format" in field:
-            if field["format"] == "date-time":
-                schema_type = "timestamp"
-            if field["format"] == "date":
-                schema_type = "date"
+        if props_type == "object":
+            schema_type = "RECORD"
+            schema_fields = tuple(build_schema(props))
+        else:
+            schema_type = props_type
+            schema_fields = ()
 
-    if schema_type == "number":
+        schema_mode = "REPEATED"
+        return SchemaField(
+            schema_name, schema_type, schema_mode, schema_description, schema_fields,
+        )
+
+    if field_type not in JSON_SCHEMA_LITERALS:
+        raise ValueError(f"unknown type: {field_type}")
+
+    if field_type == "string" and "format" in field:
+        format = field["format"]
+        if format == "date-time":
+            schema_type = "timestamp"
+        elif format == "date":
+            schema_type = "date"
+    elif field_type == "number":
         schema_type = "FLOAT"
+    else:
+        schema_type = field_type
 
-    if schema_type == "array":
-        return defineArrayType(field, name)
-
-    return (schema_name, schema_type, schema_mode, schema_description, schema_fields)
+        # always make a field nullable
+    return SchemaField(schema_name, schema_type, schema_mode, schema_description, ())
 
 
 def bigquery_transformed_key(key):
-    if re.search(r"\.|-", key):
-        return re.sub(r"\.|-", "_", key)
-    elif re.search(r"^\d", key):
-        return re.sub(r"^\d.+", f"_{key}", key)
-    else:
-        return key
+    nodash = re.sub(r"-", "_", key)
+    return re.sub(r"^\d+", "_", nodash)
 
 
-def build_schema(schema):
+def build_schema(schema, key_properties=None):
     SCHEMA = []
-    for key in schema["properties"].keys():
 
-        if not (bool(schema["properties"][key])):
+    required_fields = set(key_properties) if key_properties else set()
+    if "required" in schema:
+        required_fields.update(schema["required"])
+
+    for key, props in schema["properties"].items():
+
+        if not props:
             # if we endup with an empty record.
             continue
 
-        (
-            schema_name,
-            schema_type,
-            schema_mode,
-            schema_description,
-            schema_fields,
-        ) = define_schema(schema["properties"][key], bigquery_transformed_key(key))
         SCHEMA.append(
-            SchemaField(
-                schema_name, schema_type, schema_mode, schema_description, schema_fields
+            define_schema(
+                props, bigquery_transformed_key(key), required_fields=required_fields
             )
         )
 
