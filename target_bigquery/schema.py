@@ -98,6 +98,7 @@ def define_schema(field, name, required_fields=None):
             # of the possible types
             if field_type == "anyOf" and prop_type:
                 field_type = prop_type
+                field = prop
 
     schema_description = None
     schema_name = name
