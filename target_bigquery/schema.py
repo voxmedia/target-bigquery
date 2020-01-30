@@ -137,6 +137,10 @@ def define_schema(field, name, required_fields=None):
             schema_type = "timestamp"
         elif format == "date":
             schema_type = "date"
+        elif format == "time":
+            schema_type = "time"
+        else:
+            schema_type = field_type
     elif field_type == "number":
         schema_type = "FLOAT"
     else:
