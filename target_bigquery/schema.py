@@ -153,7 +153,7 @@ def define_schema(field, name, required_fields=None):
 
 
 def bigquery_transformed_key(key):
-    for pattern, repl in [(r"-", "_"), (r"^\d+", "_")]:
+    for pattern, repl in [(r"-", "_"), (r"^\d+", "_"), (r".", "_")]:
         key = re.sub(pattern, repl, key)
 
     return key
