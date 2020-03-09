@@ -34,6 +34,8 @@ def get_type(property):
 
 
 def filter(schema, record):
+    if not record:
+        return record
     field_type, _ = get_type(schema)
 
     # return literals without checking
