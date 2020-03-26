@@ -65,7 +65,7 @@ def main():
         truncate = True
     else:
         truncate = False
-
+    forced_fulltables = config.get("forced_fulltables", [])
     table_suffix = config.get("table_suffix")
 
     location = config.get("location", "EU")
@@ -89,6 +89,7 @@ def main():
             dataset,
             input,
             truncate=truncate,
+            forced_fulltables=forced_fulltables,
             validate_records=validate_records,
             table_suffix=table_suffix,
         )

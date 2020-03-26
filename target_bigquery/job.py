@@ -23,6 +23,7 @@ def persist_lines_job(
     dataset,
     lines=None,
     truncate=False,
+    forced_fulltables=[],
     validate_records=True,
     table_suffix=None,
 ):
@@ -93,7 +94,8 @@ def persist_lines_job(
         load_config.schema = SCHEMA
         load_config.source_format = SourceFormat.NEWLINE_DELIMITED_JSON
 
-        if truncate:
+        if truncate or (table in forced_fulltables):
+            logger.info(f"Load {table} by FULL_TABLE")
             load_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
 
         logger.info("loading {} to Bigquery.\n".format(table))
