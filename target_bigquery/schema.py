@@ -1,5 +1,5 @@
 import re
-
+import logging
 from google.cloud.bigquery import SchemaField
 
 JSON_SCHEMA_LITERALS = {"boolean", "number", "integer", "string"}
@@ -40,7 +40,9 @@ def filter(schema, record):
 
     # return literals without checking
     if field_type in JSON_SCHEMA_LITERALS:
+        # logging.error(f"JSON_SCHEMA_LETERALS record: {record}")
         return record
+
     elif field_type == "anyOf":
         for prop in schema["anyOf"]:
             prop_type, _ = get_type(prop)
@@ -51,32 +53,40 @@ def filter(schema, record):
             # anyOf can be an array of properties, the choice here
             # is to ignore the case where anyOf is two types (not including "null")
             # and simply choose the first one. This might bite us.
+            # adswerve recommendation: implement prioritization of string, then float, then int
+            # logging.error(f"anyof prop: {prop}, anyof record: record")
             return filter(prop, record)
 
     elif field_type == "object":
         props = schema.get("properties", {})
         obj_results = {}
+        # logging.error(f"object props: {props}")
         for key, prop_schema in props.items():
             if key not in record:
+                # logging.error(f"KEY ({key}) NOT IN OBJECT RECORD ({record})!!!!")
                 continue
 
-            obj_results[key] = filter(prop_schema, record[key])
-
+            obj_results[bigquery_transformed_key(key)] = filter(prop_schema, record[key])  # adswerve fix to match schema field name
+        #     logging.error(f"object record key {key} appended")
+        # logging.error(f"filtered object: {obj_results}")
         return obj_results
+
     elif field_type == "array":
         props = schema.get("items", {})
+        # logging.error(f"array props: {props}")
 
         prop_type, _ = get_type(props)
 
         # array can contain either an object or literals
         # - if it contains literals, simply return those
         if prop_type != "object":
+            # logging.error(f"prop type is not object, returning record {record}")
             return record
 
         arr_result = []
         for obj in record:
             arr_result.append(filter(props, obj))
-
+        # logging.error(f"filtered array: {arr_result}")
         return arr_result
     else:
         raise ValueError(f"type {field_type} is unknown")
@@ -109,8 +119,10 @@ def define_schema(field, name, required_fields=None):
     if field_type == "object":
         schema_type = "RECORD"
         schema_fields = tuple(build_schema(field))
+
+        # logging.info(f"schema name: {bigquery_transformed_key(schema_name)}, type: {schema_type}, mode: {schema_mode},  fields: {schema_fields}")
         return SchemaField(
-            schema_name, schema_type, schema_mode, schema_description, schema_fields,
+            bigquery_transformed_key(schema_name), schema_type, schema_mode, schema_description, schema_fields, # adswerve fix
         )
     elif field_type == "array":
         # objects in arrays cannot be nullable
@@ -122,12 +134,14 @@ def define_schema(field, name, required_fields=None):
             schema_type = "RECORD"
             schema_fields = tuple(build_schema(props))
         else:
-            schema_type = props_type
+            schema_type = props_type if props_type.lower() != 'array' else get_type(props.get('items'))[0] # adswerve fix
             schema_fields = ()
 
         schema_mode = "REPEATED"
+
+        # logging.info(f"schema name: {bigquery_transformed_key(schema_name)}, type: {schema_type}, mode: {schema_mode},  fields: {schema_fields}")
         return SchemaField(
-            schema_name, schema_type, schema_mode, schema_description, schema_fields,
+            bigquery_transformed_key(schema_name), schema_type, schema_mode, schema_description, schema_fields, # adswerve fix
         )
 
     if field_type not in JSON_SCHEMA_LITERALS:
@@ -149,13 +163,14 @@ def define_schema(field, name, required_fields=None):
         schema_type = field_type
 
         # always make a field nullable
-    return SchemaField(schema_name, schema_type, schema_mode, schema_description, ())
+    # logging.info(f"schema name: {bigquery_transformed_key(schema_name)}, type: {schema_type}, mode: {schema_mode}")
+    return SchemaField(bigquery_transformed_key(schema_name), schema_type, schema_mode, schema_description, ()) # adswerve fix
 
 
 def bigquery_transformed_key(key):
-    for pattern, repl in [(r"-", "_"), (r"^\d", "_"), (r"\.", "_")]:
+    for pattern, repl in [(r"-", "_"), (r"\.", "_")]:
         key = re.sub(pattern, repl, key)
-
+    if re.match(r"^\d", key): key = "_" + key # adswerve fix
     return key
 
 

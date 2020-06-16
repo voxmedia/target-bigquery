@@ -7,7 +7,8 @@ from google.api_core import exceptions
 from jsonschema import validate
 import singer
 
-from target_bigquery.schema import build_schema
+from target_bigquery.encoders import DecimalEncoder
+from target_bigquery.schema import build_schema, filter
 from target_bigquery.utils import emit_state
 
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
@@ -44,12 +45,21 @@ def persist_lines_stream(client, dataset, lines=None, validate_records=True):
             if validate_records:
                 validate(msg.record, schema)
 
+
+            new_rec = filter(schema, msg.record) # adswerve fix
+
+            new_rec = json.loads(json.dumps(new_rec, cls=DecimalEncoder))  # adswerve fix
+
+
             err = None
             try:
-                err = client.insert_rows_json(tables[msg.stream], [msg.record])
+                err = client.insert_rows_json(tables[msg.stream], [new_rec])
+                if err != []:  # adswerve fix
+                    logging.error(f"failed to insert rows for {tables[msg.stream]}: {str(err)}\n{msg.record}\nnew_rec: {new_rec}")  # adswerve fix
+                    raise Exception(err)  # adswerve fix
             except Exception as exc:
                 logger.error(
-                    f"failed to insert rows for {tables[msg.stream]}: {str(exc)}\n{msg.record}"
+                    f"failed to insert rows for {tables[msg.stream]}: {str(exc)}\n{msg.record}\nnew_rec: {new_rec}"
                 )
                 raise
 
@@ -69,6 +79,7 @@ def persist_lines_stream(client, dataset, lines=None, validate_records=True):
             tables[table] = bigquery.Table(
                 dataset.table(table), schema=build_schema(schemas[table])
             )
+            # logging.info(f"Creating table {table} with schema: {build_schema(schemas[table])}")
             rows[table] = 0
             errors[table] = None
             try:
@@ -92,4 +103,4 @@ def persist_lines_stream(client, dataset, lines=None, validate_records=True):
             )
             yield state
         else:
-            logging.error("Errors: %s", errors[table])
+            logging.error("Errors (%s): %s", table, errors[table])

@@ -112,7 +112,7 @@ def persist_lines_job(
             )
             if load_job.errors:
                 messages = [
-                    f"reason: {err['reason']}, message: {err['message']}"
+                    f"reason: {err['reason']}, message: {err['message']}, job: {str(load_job)}"
                     for err in load_job.errors
                 ]
                 logger.error("errors:\n{}".format("\n".join(messages)))
