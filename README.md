@@ -21,8 +21,22 @@ A [Singer](https://singer.io) target that writes data to Google BigQuery.
 
 ### Step 2: Configure
 
-Create a file called `config.json` in your working directory, following [config.sample.json](config.sample.json). The required parameters are the project name `project_id`, the dataset name `dataset_id`, and table name `table_id`. 
+Create a file called `config.json` in your working directory, following [config.sample.json](config.sample.json). 
+Required parameters are the project name `project_id`, the dataset name `dataset_id`, and the location of the data `location` (if different from 'EU'). 
+Optional parameters are `validate records`, `stream_data` (recommended), and `disable_collection`
 
+Sample Config File:
+```
+{
+    "project_id": "as-dev-jake",
+    "dataset_id": "fb_connect",
+    "validate_records": true,
+    "stream_data": true,
+    "disable_collection": true,
+    "add_metadata_columns": true,
+    "location": "US"
+}
+```
 ### Step 3: Install and Run
 
 First, make sure Python 3 is installed on your system or follow these installation instructions for [Mac](python-mac) or [Ubuntu](python-ubuntu).
@@ -32,7 +46,7 @@ First, make sure Python 3 is installed on your system or follow these installati
 These commands will install `tap-fixerio` and `target-bigquery` with pip and then run them together, piping the output of `tap-fixerio` to `target-bigquery`:
 
 ```bash
-› pip install target-bigquery tap-fixerio
+› pip install tap-fixerio git+git://github.com/adswerve/target-bigquery
 › tap-fixerio | target-bigquery -c config.json
   INFO Replicating the latest exchange rate data from fixer.io
   INFO Tap exiting normally
@@ -43,7 +57,7 @@ If you're using a different Tap, substitute `tap-fixerio` in the final command a
 ### Authentication
 
 It is recommended to use `target-bigquery` with a service account.
-* Download the client_secrets.json file for your service account, and place it on the machine where `target-bigquery` will be executed.
+* Download the client_secrets.json file for your service account. You can place the file where `target-bigquery` will be executed or provide a path to the sercvice account json file.
 * Set a `GOOGLE_APPLICATION_CREDENTIALS` environment variable on the machine, where the value is the fully qualified path to client_secrets.json
 
 It should be possible to use the oAuth flow to authenticate to GCP as well:
@@ -56,8 +70,6 @@ It should be possible to use the oAuth flow to authenticate to GCP as well:
 The data will be written to the table specified in your `config.json`.
 
 ---
-
-Copyright &copy; 2018 RealSelf, Inc.
 
 [Singer Tap]: https://singer.io
 [Braintree]: https://github.com/singer-io/tap-braintree
