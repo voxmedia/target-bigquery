@@ -3,6 +3,7 @@ import logging
 from google.cloud.bigquery import SchemaField
 
 JSON_SCHEMA_LITERALS = {"boolean", "number", "integer", "string"}
+METADATA_FIELDS = {"_time_extracted": {'type': ['null', 'string'], 'format': 'date-time'} } #date-time
 
 
 def get_type(property):
@@ -58,7 +59,7 @@ def filter(schema, record):
             return filter(prop, record)
 
     elif field_type == "object":
-        props = schema.get("properties", {})
+        props = {**schema.get("properties", {}), **METADATA_FIELDS}
         obj_results = {}
         # logging.error(f"object props: {props}")
         for key, prop_schema in props.items():
@@ -118,7 +119,7 @@ def define_schema(field, name, required_fields=None):
 
     if field_type == "object":
         schema_type = "RECORD"
-        schema_fields = tuple(build_schema(field))
+        schema_fields = tuple(build_schema(field, add_metadata=False))
 
         # logging.info(f"schema name: {bigquery_transformed_key(schema_name)}, type: {schema_type}, mode: {schema_mode},  fields: {schema_fields}")
         return SchemaField(
@@ -132,7 +133,7 @@ def define_schema(field, name, required_fields=None):
 
         if props_type == "object":
             schema_type = "RECORD"
-            schema_fields = tuple(build_schema(props))
+            schema_fields = tuple(build_schema(props, add_metadata=False))
         else:
             schema_type = props_type if props_type.lower() != 'array' else get_type(props.get('items'))[0] # adswerve fix
             schema_fields = ()
@@ -170,11 +171,11 @@ def define_schema(field, name, required_fields=None):
 def bigquery_transformed_key(key):
     for pattern, repl in [(r"-", "_"), (r"\.", "_")]:
         key = re.sub(pattern, repl, key)
-    if re.match(r"^\d", key): key = "_" + key # adswerve fix
+    if re.match(r"^\d", key): key = "_" + key  # adswerve fix
     return key
 
 
-def build_schema(schema, key_properties=None):
+def build_schema(schema, key_properties=None, add_metadata=True):
     SCHEMA = []
 
     required_fields = set(key_properties) if key_properties else set()
@@ -184,7 +185,7 @@ def build_schema(schema, key_properties=None):
     for key, props in schema["properties"].items():
 
         if not props:
-            # if we endup with an empty record.
+            # if we end up with an empty record.
             continue
 
         SCHEMA.append(
@@ -192,5 +193,11 @@ def build_schema(schema, key_properties=None):
                 props, bigquery_transformed_key(key), required_fields=required_fields
             )
         )
+
+    if add_metadata:
+        SCHEMA.append(
+            SchemaField("_time_extracted", "timestamp", "nullable", None, ())
+        )
+
 
     return SCHEMA

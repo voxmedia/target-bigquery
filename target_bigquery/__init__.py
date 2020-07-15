@@ -3,6 +3,7 @@
 import argparse
 import io
 import sys
+import traceback
 import json
 import logging
 import collections
@@ -76,27 +77,37 @@ def main():
 
     project_id, dataset_id = config["project_id"], config["dataset_id"]
 
+    table_configs = config.get("table_configs", {})
+
     client, dataset = ensure_dataset(project_id, dataset_id, location)
 
-    if config.get("stream_data", True):
-        state_iterator = persist_lines_stream(
-            client, dataset, input, validate_records=validate_records,
-        )
+    try:
+        if config.get("stream_data", True):
+            state_iterator = persist_lines_stream(
+                client, dataset, input, validate_records=validate_records,
+            )
 
-    else:
-        state_iterator = persist_lines_job(
-            client,
-            dataset,
-            input,
-            truncate=truncate,
-            forced_fulltables=forced_fulltables,
-            validate_records=validate_records,
-            table_suffix=table_suffix,
-        )
+        else:
+            state_iterator = persist_lines_job(
+                client,
+                dataset,
+                input,
+                truncate=truncate,
+                forced_fulltables=forced_fulltables,
+                validate_records=validate_records,
+                table_suffix=table_suffix,
+                table_configs=table_configs
+            )
+    except Exception as e:
+        logger.error(e)
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        logger.error(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
 
-    for state in state_iterator:
-        emit_state(state)
-
+    try:
+        for state in state_iterator:
+            emit_state(state)
+    except:
+        pass # load errors surface here
 
 def ensure_dataset(project_id, dataset_id, location):
     client = bigquery.Client(project=project_id, location=location)

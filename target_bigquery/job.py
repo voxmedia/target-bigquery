@@ -26,6 +26,7 @@ def persist_lines_job(
     forced_fulltables=[],
     validate_records=True,
     table_suffix=None,
+    table_configs={}
 ):
     state = None
     schemas = {}
@@ -54,7 +55,10 @@ def persist_lines_job(
             schema = schemas[table_name]
 
             if validate_records:
-                validate(msg.record, schema)
+                validate(msg.record, schema)  # I'm not sure if this is actually implemented
+
+            if table_configs.get(table_name, {}).get("add_metadata_columns", True):
+                msg.record["_time_extracted"] = msg.time_extracted.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
 
             new_rec = filter(schema, msg.record)
 
@@ -88,15 +92,27 @@ def persist_lines_job(
             raise Exception("Unrecognized message {}".format(msg))
 
     for table in rows.keys():
-        key_props = key_properties[table]
-        SCHEMA = build_schema(schemas[table], key_properties=key_props)
-        load_config = LoadJobConfig()
-        load_config.schema = SCHEMA
-        load_config.source_format = SourceFormat.NEWLINE_DELIMITED_JSON
+        table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
+        partition_field = table_config.get("partition_field", False)
+        cluster_fields = table_config.get("cluster_fields", False)
 
+        key_props = key_properties[table]
+        schema = build_schema(schemas[table], key_properties=key_props, add_metadata=table_config.get("add_metadata_columns", True))
+        load_config = LoadJobConfig()
+        load_config.schema = schema
+        if partition_field:
+            load_config.time_partitioning = bigquery.table.TimePartitioning(
+                type_=bigquery.table.TimePartitioningType.DAY,
+                field=partition_field,
+            )
+        if cluster_fields:
+            load_config.clustering_fields = cluster_fields
+        load_config.source_format = SourceFormat.NEWLINE_DELIMITED_JSON
         if truncate or (table in forced_fulltables):
             logger.info(f"Load {table} by FULL_TABLE")
             load_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
+        else:
+            load_config.write_disposition = WriteDisposition.WRITE_APPEND
 
         logger.info("loading {} to Bigquery.\n".format(table))
 
@@ -118,4 +134,4 @@ def persist_lines_job(
                 logger.error("errors:\n{}".format("\n".join(messages)))
             raise
 
-    yield state
+    yield state # this needs to happen as data is loaded, not only after all of the data is loaded
