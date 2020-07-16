@@ -19,6 +19,56 @@ from target_bigquery.schema import build_schema, filter
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 logger = singer.get_logger()
 
+def load_to_bq(client,
+               dataset,
+               table_name,
+               table_schema,
+               table_config,
+               key_props,
+               metadata_columns,
+               truncate,
+               forced_fulltables,
+               rows):
+    partition_field = table_config.get("partition_field", False)
+    cluster_fields = table_config.get("cluster_fields", False)
+
+    schema = build_schema(table_schema, key_properties=key_props, add_metadata=metadata_columns)
+    load_config = LoadJobConfig()
+    load_config.schema = schema
+    if partition_field:
+        load_config.time_partitioning = bigquery.table.TimePartitioning(
+            type_=bigquery.table.TimePartitioningType.DAY,
+            field=partition_field,
+        )
+    if cluster_fields:
+        load_config.clustering_fields = cluster_fields
+    load_config.source_format = SourceFormat.NEWLINE_DELIMITED_JSON
+    if truncate or (table_name in forced_fulltables):
+        logger.info(f"Load {table_name} by FULL_TABLE")
+        load_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
+    else:
+        load_config.write_disposition = WriteDisposition.WRITE_APPEND
+
+    logger.info("loading {} to Bigquery.\n".format(table_name))
+
+    try:
+        load_job = client.load_table_from_file(
+            rows, dataset.table(table_name), job_config=load_config, rewind=True
+        )
+        logger.info("loading job {}".format(load_job.job_id))
+        logger.info(load_job.result())
+    except google_exceptions.BadRequest as err:
+        logger.error(
+            "failed to load table {} from file: {}".format(table_name, str(err))
+        )
+        error = False
+        if load_job.errors:
+            reason = err.errors[0]["reason"]
+            messages = [f"{err['message']}" for err in load_job.errors]
+            logger.error("reason: {reason}, errors:\n{e}".format(reason=reason, e="\n".join(messages)))
+            error = f"reason: {reason}, errors: {';'.join(messages)}"
+        raise(error if error else err)
+
 
 def persist_lines_job(
     client,
@@ -82,49 +132,16 @@ def persist_lines_job(
         elif isinstance(msg, singer.SchemaMessage):
             schema_table_name = msg.stream + table_suffix
 
-            if schema_table_name not in schemas and table_name in rows :
+            if schema_table_name not in schemas and table_name in rows:
                 table_config = table_configs.get(table_name.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table_name, {})
-                partition_field = table_config.get("partition_field", False)
-                cluster_fields = table_config.get("cluster_fields", False)
-
                 key_props = key_properties[table_name]
-                schema = build_schema(schemas[table_name], key_properties=key_props, add_metadata=add_metadata_columns)
-                load_config = LoadJobConfig()
-                load_config.schema = schema
-                if partition_field:
-                    load_config.time_partitioning = bigquery.table.TimePartitioning(
-                        type_=bigquery.table.TimePartitioningType.DAY,
-                        field=partition_field,
-                    )
-                if cluster_fields:
-                    load_config.clustering_fields = cluster_fields
-                load_config.source_format = SourceFormat.NEWLINE_DELIMITED_JSON
-                if truncate or (table_name in forced_fulltables):
-                    logger.info(f"Load {table_name} by FULL_TABLE")
-                    load_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
-                else:
-                    load_config.write_disposition = WriteDisposition.WRITE_APPEND
-
-                logger.info("loading {} to Bigquery.\n".format(table_name))
-
-                try:
-                    load_job = client.load_table_from_file(
-                        rows[table_name], dataset.table(table_name), job_config=load_config, rewind=True
-                    )
-                    logger.info("loading job {}".format(load_job.job_id))
-                    logger.info(load_job.result())
-                    rows[table_name] = TemporaryFile(mode="w+b")  # erase the file
-                except google_exceptions.BadRequest as err:
-                    logger.error(
-                        "failed to load table {} from file: {}".format(table_name, str(err))
-                    )
-                    if load_job.errors:
-                        messages = [
-                            f"reason: {err['reason']}, message: {err['message']}, job: {str(load_job)}"
-                            for err in load_job.errors
-                        ]
-                        logger.error("errors:\n{}".format("\n".join(messages)))
-                    raise
+                table_schema = schemas[table_name]
+                load_rows = rows[table_name]
+                load_to_bq(client=client, dataset=dataset, table_name=table_name,
+                           table_schema=table_schema, table_config=table_config,
+                           key_props=key_props, metadata_columns=add_metadata_columns,
+                           truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
+                rows[table_name] = TemporaryFile(mode="w+b")  # erase the file
 
                 if len(state["bookmarks"]) > 0:
                     yield state
@@ -149,45 +166,12 @@ def persist_lines_job(
     # get the last table loaded, and any stragglers.
     for table in rows.keys():
         table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
-        partition_field = table_config.get("partition_field", False)
-        cluster_fields = table_config.get("cluster_fields", False)
-
         key_props = key_properties[table]
-        schema = build_schema(schemas[table], key_properties=key_props, add_metadata=add_metadata_columns)
-        load_config = LoadJobConfig()
-        load_config.schema = schema
-        if partition_field:
-            load_config.time_partitioning = bigquery.table.TimePartitioning(
-                type_=bigquery.table.TimePartitioningType.DAY,
-                field=partition_field,
-            )
-        if cluster_fields:
-            load_config.clustering_fields = cluster_fields
-        load_config.source_format = SourceFormat.NEWLINE_DELIMITED_JSON
-        if truncate or (table in forced_fulltables):
-            logger.info(f"Load {table} by FULL_TABLE")
-            load_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
-        else:
-            load_config.write_disposition = WriteDisposition.WRITE_APPEND
-
-        logger.info("loading {} to Bigquery.\n".format(table))
-
-        try:
-            load_job = client.load_table_from_file(
-                rows[table], dataset.table(table), job_config=load_config, rewind=True
-            )
-            logger.info("loading job {}".format(load_job.job_id))
-            logger.info(load_job.result())
-        except google_exceptions.BadRequest as err:
-            logger.error(
-                "failed to load table {} from file: {}".format(table, str(err))
-            )
-            if load_job.errors:
-                messages = [
-                    f"reason: {err['reason']}, message: {err['message']}, job: {str(load_job)}"
-                    for err in load_job.errors
-                ]
-                logger.error("errors:\n{}".format("\n".join(messages)))
-            raise
-
+        table_schema = schemas[table]
+        load_rows = rows[table]
+        load_to_bq(client=client, dataset=dataset, table_name=table,
+                   table_schema=table_schema, table_config=table_config,
+                   key_props=key_props, metadata_columns=add_metadata_columns,
+                   truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
+        rows[table] = TemporaryFile(mode="w+b")  # erase the file
     yield state
