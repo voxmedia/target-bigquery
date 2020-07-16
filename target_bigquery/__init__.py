@@ -49,10 +49,14 @@ StreamMeta = collections.namedtuple(
 def main():
     parser = argparse.ArgumentParser(parents=[tools.argparser])
     parser.add_argument("-c", "--config", help="Config file", required=True)
+    parser.add_argument("-t", "--tables", help="Table configs file", required=False)
     flags = parser.parse_args()
 
     with open(flags.config) as input:
         config = json.load(input)
+
+    with open(flags.tables) as input:
+        tables = json.load(input)
 
     if not config.get("disable_collection", False):
         logger.info(
@@ -66,18 +70,22 @@ def main():
         truncate = True
     else:
         truncate = False
+
     forced_fulltables = config.get("forced_fulltables", [])
+
     table_suffix = config.get("table_suffix")
 
     location = config.get("location", "EU")
 
     validate_records = config.get("validate_records", True)
 
+    add_metadata_columns = config.get("add_metadata_columns", True)
+
     input = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
 
     project_id, dataset_id = config["project_id"], config["dataset_id"]
 
-    table_configs = config.get("table_configs", {})  # TODO: create a new file for table_configs, pull them from there
+    table_configs = tables.get("streams", {})
 
     client, dataset = ensure_dataset(project_id, dataset_id, location)
 
@@ -94,6 +102,7 @@ def main():
                 forced_fulltables=forced_fulltables,
                 validate_records=validate_records,
                 table_suffix=table_suffix,
+                add_metadata_columns=add_metadata_columns,
                 table_configs=table_configs
             )
     except Exception as e:

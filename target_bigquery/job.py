@@ -28,6 +28,7 @@ def persist_lines_job(
     forced_fulltables=[],
     validate_records=True,
     table_suffix=None,
+    add_metadata_columns=True,
     table_configs={}
 ):
     state = {}
@@ -58,9 +59,9 @@ def persist_lines_job(
             schema = schemas[table_name]
 
             if validate_records:
-                validate(msg.record, schema)  # I'm not sure if this is actually implemented
+                validate(msg.record, schema)
 
-            if table_configs.get(table_name, {}).get("add_metadata_columns", True):
+            if add_metadata_columns:
                 msg.record["_time_extracted"] = msg.time_extracted.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
                 msg.record["_time_loaded"] = datetime.now(pytz.utc).strftime("%Y-%m-%d %H:%M:%S.%f %Z")
 
@@ -71,30 +72,23 @@ def persist_lines_job(
 
             rows[table_name].write(data)
 
-            # state = None  # why would you do this?!?!
-
         elif isinstance(msg, singer.StateMessage):
-            logger.debug("Setting state to {}".format(msg.value))
-            try:
-                if "bookmarks" in msg.value:
-                    state["bookmarks"] = {**state.get("bookmarks", {}), **msg.value["bookmarks"]}
-                else:
-                    state = {**state, **msg.value}
-            except Exception as e:
-                pass
+            logger.debug("updating state with {}".format(msg.value))
+            if "bookmarks" in msg.value:
+                state["bookmarks"] = {**state.get("bookmarks", {}), **msg.value["bookmarks"]}
+            else:
+                state = {**state, **msg.value}
 
         elif isinstance(msg, singer.SchemaMessage):
-            # if we got a schema message, we're either on the first stream or moving onto the next stream
             schema_table_name = msg.stream + table_suffix
 
             if schema_table_name not in schemas and table_name in rows :
-                # we've already grabbed this schema so we must be moving on, so do the data transfer here
                 table_config = table_configs.get(table_name.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table_name, {})
                 partition_field = table_config.get("partition_field", False)
                 cluster_fields = table_config.get("cluster_fields", False)
 
                 key_props = key_properties[table_name]
-                schema = build_schema(schemas[table_name], key_properties=key_props, add_metadata=table_config.get("add_metadata_columns", True))
+                schema = build_schema(schemas[table_name], key_properties=key_props, add_metadata=add_metadata_columns)
                 load_config = LoadJobConfig()
                 load_config.schema = schema
                 if partition_field:
@@ -159,7 +153,7 @@ def persist_lines_job(
         cluster_fields = table_config.get("cluster_fields", False)
 
         key_props = key_properties[table]
-        schema = build_schema(schemas[table], key_properties=key_props, add_metadata=table_config.get("add_metadata_columns", True))
+        schema = build_schema(schemas[table], key_properties=key_props, add_metadata=add_metadata_columns)
         load_config = LoadJobConfig()
         load_config.schema = schema
         if partition_field:

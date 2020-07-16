@@ -1,10 +1,7 @@
 {
     "project_id": "bigquery-public-data",
     "dataset_id": "samples",
-    "table_id": "github_timeline",
     "table_suffix": "_dev",
-    "partition_field": "date",
-    "cluster_fields": ["field_1", "field_2", "field_3", "field_4"],
     "replication_method": "append",
     "validate_records": true,
     "stream_data": false,
@@ -12,3 +9,4 @@
     "add_metadata_columns": true,
     "location": "US"
 }
+
