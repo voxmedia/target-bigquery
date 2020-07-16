@@ -61,13 +61,12 @@ def load_to_bq(client,
         logger.error(
             "failed to load table {} from file: {}".format(table_name, str(err))
         )
-        error = False
         if load_job.errors:
             reason = err.errors[0]["reason"]
             messages = [f"{err['message']}" for err in load_job.errors]
             logger.error("reason: {reason}, errors:\n{e}".format(reason=reason, e="\n".join(messages)))
-            error = f"reason: {reason}, errors: {';'.join(messages)}"
-        raise(error if error else err)
+            err.message = f"reason: {reason}, errors: {';'.join(messages)}"
+        raise(err)
 
 
 def persist_lines_job(
@@ -132,7 +131,7 @@ def persist_lines_job(
         elif isinstance(msg, singer.SchemaMessage):
             schema_table_name = msg.stream + table_suffix
 
-            if schema_table_name not in schemas and table_name in rows:
+            if schema_table_name not in schemas and table_name in rows:  # maybe do this based on bytes in files
                 table_config = table_configs.get(table_name.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table_name, {})
                 key_props = key_properties[table_name]
                 table_schema = schemas[table_name]
@@ -143,7 +142,7 @@ def persist_lines_job(
                            truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
                 rows[table_name] = TemporaryFile(mode="w+b")  # erase the file
 
-                if len(state["bookmarks"]) > 0:
+                if len(state.get("bookmarks", state)) > 0:
                     yield state
 
             table_name = schema_table_name

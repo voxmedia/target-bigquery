@@ -55,8 +55,11 @@ def main():
     with open(flags.config) as input:
         config = json.load(input)
 
-    with open(flags.tables) as input:
-        tables = json.load(input)
+    if flags.tables is not None:
+        with open(flags.tables) as input:
+            tables = json.load(input)
+    else:
+        tables = {}
 
     if not config.get("disable_collection", False):
         logger.info(
@@ -105,18 +108,17 @@ def main():
                 add_metadata_columns=add_metadata_columns,
                 table_configs=table_configs
             )
-    except Exception as e:
-        logger.error(e)
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        logger.error(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
 
-    try:
         for state in state_iterator:
             emit_state(state)
-    except Exception as e:  # load errors surface here
-        logger.error(f"CRITICAL: {e}")
+    except Exception as e:
+        # load errors surface here
+        logger.critical(e)
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        logger.error(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+        logger.critical(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+        sys.exit(2)
+
+    sys.exit(0)
 
 def ensure_dataset(project_id, dataset_id, location):
     client = bigquery.Client(project=project_id, location=location)
@@ -125,8 +127,11 @@ def ensure_dataset(project_id, dataset_id, location):
     try:
         client.create_dataset(dataset_ref)
     except Exception as e:
-        # attempt to run even if creation fails due to permissions etc.
-        pass
+        if e.response.status_code == 409:  # dataset exists
+            pass
+        else:
+            logger.critical(f"unable to create dataset {dataset_id} in project {project_id}; Exception {e}")
+            sys.exit(2)
 
     return client, Dataset(dataset_ref)
 
