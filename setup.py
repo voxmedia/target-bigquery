@@ -6,8 +6,8 @@ setup(
     name="target-bigquery",
     version="1.5.0",
     description="Singer.io target for writing data to Google BigQuery",
-    author="RealSelf Business Intelligence",
-    url="https://github.com/dreamdata-io/target-bigquery",
+    author="RealSelf Business Intelligence", # is it legal to change this to AdSwerve
+    url="https://github.com/adswerve/target-bigquery",
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     packages=["target_bigquery"],
     install_requires=[

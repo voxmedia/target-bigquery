@@ -3,7 +3,10 @@ import logging
 from google.cloud.bigquery import SchemaField
 
 JSON_SCHEMA_LITERALS = {"boolean", "number", "integer", "string"}
-METADATA_FIELDS = {"_time_extracted": {'type': ['null', 'string'], 'format': 'date-time'} } #date-time
+METADATA_FIELDS = {
+    "_time_extracted": {"type": ["null", "string"], "format": "date-time", "bq_type": "timestamp"},
+    "_time_loaded": {"type": ["null", "string"], "format": "date-time", "bq_type": "timestamp"}
+}
 
 
 def get_type(property):
@@ -195,9 +198,10 @@ def build_schema(schema, key_properties=None, add_metadata=True):
         )
 
     if add_metadata:
-        SCHEMA.append(
-            SchemaField("_time_extracted", "timestamp", "nullable", None, ())
-        )
+        for field in METADATA_FIELDS:
+            SCHEMA.append(
+                SchemaField(field, METADATA_FIELDS[field]["bq_type"], "nullable", None, ())
+            )
 
 
     return SCHEMA

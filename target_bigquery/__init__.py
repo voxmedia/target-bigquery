@@ -77,7 +77,7 @@ def main():
 
     project_id, dataset_id = config["project_id"], config["dataset_id"]
 
-    table_configs = config.get("table_configs", {})
+    table_configs = config.get("table_configs", {})  # TODO: create a new file for table_configs, pull them from there
 
     client, dataset = ensure_dataset(project_id, dataset_id, location)
 
@@ -89,9 +89,7 @@ def main():
 
         else:
             state_iterator = persist_lines_job(
-                client,
-                dataset,
-                input,
+                client, dataset, input,
                 truncate=truncate,
                 forced_fulltables=forced_fulltables,
                 validate_records=validate_records,
@@ -106,16 +104,18 @@ def main():
     try:
         for state in state_iterator:
             emit_state(state)
-    except:
-        pass # load errors surface here
+    except Exception as e:  # load errors surface here
+        logger.error(f"CRITICAL: {e}")
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        logger.error(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
 
 def ensure_dataset(project_id, dataset_id, location):
     client = bigquery.Client(project=project_id, location=location)
 
     dataset_ref = client.dataset(dataset_id)
     try:
-        client.create_dataset(dataset_ref, exists_ok=True)
-    except Exception:
+        client.create_dataset(dataset_ref)
+    except Exception as e:
         # attempt to run even if creation fails due to permissions etc.
         pass
 
