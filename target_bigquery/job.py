@@ -1,3 +1,4 @@
+import sys
 import logging
 import json
 import pytz
@@ -51,6 +52,7 @@ def load_to_bq(client,
 
     logger.info("loading {} to Bigquery.\n".format(table_name))
 
+    load_job = False
     try:
         load_job = client.load_table_from_file(
             rows, dataset.table(table_name), job_config=load_config, rewind=True
@@ -61,12 +63,12 @@ def load_to_bq(client,
         logger.error(
             "failed to load table {} from file: {}".format(table_name, str(err))
         )
-        if load_job.errors:
+        if load_job and load_job.errors:
             reason = err.errors[0]["reason"]
             messages = [f"{err['message']}" for err in load_job.errors]
             logger.error("reason: {reason}, errors:\n{e}".format(reason=reason, e="\n".join(messages)))
             err.message = f"reason: {reason}, errors: {';'.join(messages)}"
-        raise(err)
+        raise err
 
 
 def persist_lines_job(
@@ -86,7 +88,7 @@ def persist_lines_job(
     rows = {}
     errors = {}
     table_suffix = table_suffix or ""
-    table_name = ""
+    current_stream = False
 
     for line in lines:
         try:
@@ -95,15 +97,15 @@ def persist_lines_job(
             logger.error("Unable to parse:\n{}".format(line))
             raise
 
+        if not current_stream and msg.stream and current_stream != msg.stream:
+            current_stream = msg.stream
+            logger.info(f"collecting data from stream: {current_stream}")
+
         if isinstance(msg, singer.RecordMessage):
             table_name = msg.stream + table_suffix
 
             if table_name not in schemas:
-                raise Exception(
-                    "A record for stream {} was encountered before a corresponding schema".format(
-                        table_name
-                    )
-                )
+                raise Exception(f"A record for stream {msg.stream} was encountered before a corresponding schema")
 
             schema = schemas[table_name]
 
@@ -128,24 +130,25 @@ def persist_lines_job(
             else:
                 state = {**state, **msg.value}
 
+            for table in rows.keys():  # TODO: ensure that state and bq data are in sync while handling the case when
+                                        # (a) we iterate through all the records of a stream first
+                                        # or (b) records are not collected in sequence and streamed one by one
+                load_rows = rows[table]
+                if load_rows.tell() > 1024*1024*50:  # load every 50MB
+                    table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
+                    key_props = key_properties[table]
+                    table_schema = schemas[table]
+                    load_to_bq(client=client, dataset=dataset, table_name=table,
+                               table_schema=table_schema, table_config=table_config,
+                               key_props=key_props, metadata_columns=add_metadata_columns,
+                               truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
+                    rows[table] = TemporaryFile(mode="w+b")  # erase the file
+
+                    if len(state.get("bookmarks", state)) > 0:
+                        yield state
+
         elif isinstance(msg, singer.SchemaMessage):
-            schema_table_name = msg.stream + table_suffix
-
-            if schema_table_name not in schemas and table_name in rows:  # maybe do this based on bytes in files
-                table_config = table_configs.get(table_name.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table_name, {})
-                key_props = key_properties[table_name]
-                table_schema = schemas[table_name]
-                load_rows = rows[table_name]
-                load_to_bq(client=client, dataset=dataset, table_name=table_name,
-                           table_schema=table_schema, table_config=table_config,
-                           key_props=key_props, metadata_columns=add_metadata_columns,
-                           truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
-                rows[table_name] = TemporaryFile(mode="w+b")  # erase the file
-
-                if len(state.get("bookmarks", state)) > 0:
-                    yield state
-
-            table_name = schema_table_name
+            table_name = msg.stream + table_suffix
 
             if table_name in rows:
                 continue
