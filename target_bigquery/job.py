@@ -104,7 +104,6 @@ def persist_lines_job(
     table_suffix = table_suffix or ""
     current_stream = False
     first_run = True
-    table_name = ""
 
     for line in lines:
         try:
@@ -148,9 +147,29 @@ def persist_lines_job(
             else:
                 state = {**state, **msg.value}
 
+            if first_run and len(rows) > 0: #ensure we start off with state matching the exported data
+                for table in rows.keys():
+                    load_rows = rows[table]
+                    table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
+                    key_props = key_properties[table]
+                    table_schema = schemas[table]
+                    last_table_state = last_emitted_state.get("bookmarks", last_emitted_state).get(table)
+                    logger.info(f"first run, exporting data from stream: {table.replace(table_suffix, '')}; table state: {last_table_state}")
+                    load_to_bq(client=client, dataset=dataset, table_name=table,
+                               table_schema=table_schema, table_config=table_config,
+                               key_props=key_props, metadata_columns=add_metadata_columns,
+                               truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
+                    rows[table] = TemporaryFile(mode="w+b")  # erase the file
+
+                    last_emitted_state = update_state(last_emitted_state, state, table.replace(table_suffix, ""))
+
+                first_run = False
+
+                yield last_emitted_state
+
             for table in rows.keys():
                 load_rows = rows[table]
-                if load_rows.tell() > MAX_TABLE_CACHE or first_run:
+                if load_rows.tell() > MAX_TABLE_CACHE:
                     table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
                     key_props = key_properties[table]
                     table_schema = schemas[table]
@@ -162,7 +181,6 @@ def persist_lines_job(
                     rows[table] = TemporaryFile(mode="w+b")  # erase the file
 
                     last_emitted_state = update_state(last_emitted_state, state, table.replace(table_suffix, ""))
-                    first_run = False
 
                     yield last_emitted_state
 
