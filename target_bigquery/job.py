@@ -63,7 +63,7 @@ def load_to_bq(client,
     else:
         load_config.write_disposition = WriteDisposition.WRITE_APPEND
 
-    logger.info("loading {} to Bigquery.\n".format(table_name))
+    logger.info("loading {} to BigQuery".format(table_name))
 
     load_job = False
     try:
