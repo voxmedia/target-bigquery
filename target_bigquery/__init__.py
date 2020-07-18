@@ -2,52 +2,26 @@
 
 import argparse
 import io
+import json
 import sys
 import traceback
-import json
-import logging
-import collections
-import threading
-import http.client
-import urllib
-import pkg_resources
-import decimal
 
-from jsonschema import validate
 import singer
-
-from oauth2client import tools
-from tempfile import TemporaryFile
-
-from google.cloud import bigquery
-from google.cloud.bigquery.job import SourceFormat
-from google.cloud.bigquery import Dataset, WriteDisposition
-from google.cloud.bigquery import LoadJobConfig
 from google.api_core import exceptions
+from google.cloud import bigquery
+from google.cloud.bigquery import Dataset
 
-from target_bigquery.schema import build_schema, filter
 from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.job import persist_lines_job
+from target_bigquery.schema import build_schema, filter
 from target_bigquery.stream import persist_lines_stream
-from target_bigquery.utils import emit_state, collect
+from target_bigquery.utils import emit_state
 
-logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 logger = singer.get_logger()
-
-SCOPES = [
-    "https://www.googleapis.com/auth/bigquery",
-    "https://www.googleapis.com/auth/bigquery.insertdata",
-]
-CLIENT_SECRET_FILE = "client_secret.json"
-APPLICATION_NAME = "Singer BigQuery Target"
-
-StreamMeta = collections.namedtuple(
-    "StreamMeta", ["schema", "key_properties", "bookmark_properties"]
-)
 
 
 def main():
-    parser = argparse.ArgumentParser(parents=[tools.argparser])
+    parser = argparse.ArgumentParser()  # argparse.ArgumentParser(parents=[tools.argparser])
     parser.add_argument("-c", "--config", help="Config file", required=True)
     parser.add_argument("-t", "--tables", help="Table configs file", required=False)
     flags = parser.parse_args()
@@ -61,14 +35,6 @@ def main():
     else:
         tables = {}
 
-    if not config.get("disable_collection", False):
-        logger.info(
-            "Sending version information to stitchdata.com. "
-            "To disable sending anonymous usage data, set "
-            "the config parameter 'disable_collection' to true"
-        )
-        threading.Thread(target=collect).start()
-
     if config.get("replication_method") == "FULL_TABLE":
         truncate = True
     else:
@@ -78,7 +44,7 @@ def main():
 
     table_suffix = config.get("table_suffix")
 
-    location = config.get("location", "EU")
+    location = config.get("location", "US")
 
     validate_records = config.get("validate_records", True)
 
@@ -111,30 +77,34 @@ def main():
 
         for state in state_iterator:
             emit_state(state)
+
     except Exception as e:
         # load errors surface here
         logger.critical(e)
         exc_type, exc_value, exc_traceback = sys.exc_info()
         logger.critical(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
-        sys.exit(2)
+        return 2  # sys.exit(2)
 
-    sys.exit(0)
+    return 0  # sys.exit(0)
+
 
 def ensure_dataset(project_id, dataset_id, location):
+    from google.cloud.bigquery import DatasetReference
     client = bigquery.Client(project=project_id, location=location)
 
-    dataset_ref = client.dataset(dataset_id)
+    dataset_ref = DatasetReference(project_id, dataset_id)
     try:
         client.create_dataset(dataset_ref)
-    except Exception as e:
+    except exceptions.GoogleAPICallError as e:
         if e.response.status_code == 409:  # dataset exists
             pass
         else:
             logger.critical(f"unable to create dataset {dataset_id} in project {project_id}; Exception {e}")
-            sys.exit(2)
+            return 2  # sys.exit(2)
 
     return client, Dataset(dataset_ref)
 
 
 if __name__ == "__main__":
-    main()
+    ret = main()
+    sys.exit(ret)

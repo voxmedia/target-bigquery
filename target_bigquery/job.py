@@ -1,23 +1,21 @@
-import logging
 import json
-import pytz
 from datetime import datetime
 from tempfile import TemporaryFile
 
-from google.cloud import bigquery
-from google.cloud.bigquery.job import SourceFormat
-from google.cloud.bigquery import WriteDisposition
-from google.cloud.bigquery import LoadJobConfig
-from google.api_core import exceptions as google_exceptions
-
+import pytz
 import singer
+from google.api_core import exceptions as google_exceptions
+from google.cloud import bigquery
+from google.cloud.bigquery import LoadJobConfig
+from google.cloud.bigquery import WriteDisposition
+from google.cloud.bigquery.job import SourceFormat
 from jsonschema import validate
 
 from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.schema import build_schema, filter
 
-logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 logger = singer.get_logger()
+
 
 def load_to_bq(client,
                dataset,
@@ -29,8 +27,8 @@ def load_to_bq(client,
                truncate,
                forced_fulltables,
                rows):
-    partition_field = table_config.get("partition_field", False)
-    cluster_fields = table_config.get("cluster_fields", False)
+    partition_field = table_config.get("partition_field", None)
+    cluster_fields = table_config.get("cluster_fields", None)
 
     schema = build_schema(table_schema, key_properties=key_props, add_metadata=metadata_columns)
     load_config = LoadJobConfig()
@@ -51,6 +49,7 @@ def load_to_bq(client,
 
     logger.info("loading {} to Bigquery.\n".format(table_name))
 
+    load_job = None
     try:
         load_job = client.load_table_from_file(
             rows, dataset.table(table_name), job_config=load_config, rewind=True
@@ -61,24 +60,25 @@ def load_to_bq(client,
         logger.error(
             "failed to load table {} from file: {}".format(table_name, str(err))
         )
-        if load_job.errors:
+        if load_job and load_job.errors:
             reason = err.errors[0]["reason"]
             messages = [f"{err['message']}" for err in load_job.errors]
             logger.error("reason: {reason}, errors:\n{e}".format(reason=reason, e="\n".join(messages)))
             err.message = f"reason: {reason}, errors: {';'.join(messages)}"
-        raise(err)
+
+        raise err
 
 
 def persist_lines_job(
-    client,
-    dataset,
-    lines=None,
-    truncate=False,
-    forced_fulltables=[],
-    validate_records=True,
-    table_suffix=None,
-    add_metadata_columns=True,
-    table_configs={}
+        client,
+        dataset,
+        lines=None,
+        truncate=False,
+        forced_fulltables=[],
+        validate_records=True,
+        table_suffix=None,
+        add_metadata_columns=True,
+        table_configs={}
 ):
     state = {}
     schemas = {}
@@ -111,8 +111,8 @@ def persist_lines_job(
                 validate(msg.record, schema)
 
             if add_metadata_columns:
-                msg.record["_time_extracted"] = msg.time_extracted.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
-                msg.record["_time_loaded"] = datetime.now(pytz.utc).strftime("%Y-%m-%d %H:%M:%S.%f %Z")
+                msg.record["_time_extracted"] = msg.time_extracted.isoformat()
+                msg.record["_time_loaded"] = datetime.utcnow().isoformat()
 
             new_rec = filter(schema, msg.record)
 
@@ -132,7 +132,8 @@ def persist_lines_job(
             schema_table_name = msg.stream + table_suffix
 
             if schema_table_name not in schemas and table_name in rows:  # maybe do this based on bytes in files
-                table_config = table_configs.get(table_name.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table_name, {})
+                table_config = table_configs.get(table_name.replace(table_suffix, ""),
+                                                 {}) if table_suffix else table_configs.get(table_name, {})
                 key_props = key_properties[table_name]
                 table_schema = schemas[table_name]
                 load_rows = rows[table_name]
@@ -164,7 +165,8 @@ def persist_lines_job(
 
     # get the last table loaded, and any stragglers.
     for table in rows.keys():
-        table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
+        table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(
+            table, {})
         key_props = key_properties[table]
         table_schema = schemas[table]
         load_rows = rows[table]
