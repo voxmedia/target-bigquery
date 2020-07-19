@@ -1,4 +1,6 @@
 import json
+import copy
+import logging
 from datetime import datetime
 from tempfile import TemporaryFile
 
@@ -15,6 +17,19 @@ from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.schema import build_schema, filter
 
 logger = singer.get_logger()
+
+
+MAX_TABLE_CACHE = 1024*1024*50  # load every 50MB TODO: add this as an option to the config file
+
+def update_state(last_emitted_state, new_state, updated_table):
+    last_table_state = last_emitted_state.get("bookmarks", last_emitted_state).get(updated_table)
+    new_table_state = new_state.get("bookmarks", new_state).get(updated_table)
+    if 'bookmarks' in last_emitted_state:
+        last_emitted_state['bookmarks'][updated_table] = new_table_state
+    else:
+        last_emitted_state[updated_table] = new_table_state
+
+    return last_emitted_state
 
 
 def load_to_bq(client,
@@ -47,7 +62,7 @@ def load_to_bq(client,
     else:
         load_config.write_disposition = WriteDisposition.WRITE_APPEND
 
-    logger.info("loading {} to Bigquery.\n".format(table_name))
+    logger.info("loading {} to BigQuery".format(table_name))
 
     load_job = None
     try:
@@ -82,12 +97,14 @@ def persist_lines_job(
         table_configs={}
 ):
     state = {}
+    last_emitted_state = {}
     schemas = {}
     key_properties = {}
     rows = {}
     errors = {}
     table_suffix = table_suffix or ""
-    table_name = ""
+    current_stream = False
+    first_run = True
 
     for line in lines:
         try:
@@ -98,13 +115,12 @@ def persist_lines_job(
 
         if isinstance(msg, singer.RecordMessage):
             table_name = msg.stream + table_suffix
+            if not current_stream or current_stream != msg.stream:
+                current_stream = msg.stream
+                logger.info(f"collecting data from stream: {current_stream}")
 
             if table_name not in schemas:
-                raise Exception(
-                    "A record for stream {} was encountered before a corresponding schema".format(
-                        table_name
-                    )
-                )
+                raise Exception(f"A record for stream {msg.stream} was encountered before a corresponding schema")
 
             schema = schemas[table_name]
 
@@ -124,30 +140,53 @@ def persist_lines_job(
 
         elif isinstance(msg, singer.StateMessage):
             logger.debug("updating state with {}".format(msg.value))
-            if "bookmarks" in msg.value:
+            if len(last_emitted_state) == 0:
+                state = {**state, **msg.value}
+                last_emitted_state = copy.deepcopy(state)
+            elif "bookmarks" in msg.value:
                 state["bookmarks"] = {**state.get("bookmarks", {}), **msg.value["bookmarks"]}
             else:
                 state = {**state, **msg.value}
 
+            if first_run and len(rows) > 0: #ensure we start off with state matching the exported data
+                for table in rows.keys():
+                    load_rows = rows[table]
+                    table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
+                    key_props = key_properties[table]
+                    table_schema = schemas[table]
+                    last_table_state = last_emitted_state.get("bookmarks", last_emitted_state).get(table)
+                    logger.info(f"first run, exporting data from stream: {table.replace(table_suffix, '')}; table state: {last_table_state}")
+                    load_to_bq(client=client, dataset=dataset, table_name=table,
+                               table_schema=table_schema, table_config=table_config,
+                               key_props=key_props, metadata_columns=add_metadata_columns,
+                               truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
+                    rows[table] = TemporaryFile(mode="w+b")  # erase the file
+
+                    last_emitted_state = update_state(last_emitted_state, state, table.replace(table_suffix, ""))
+
+                first_run = False
+
+                yield last_emitted_state
+
+            for table in rows.keys():
+                load_rows = rows[table]
+                if load_rows.tell() > MAX_TABLE_CACHE:
+                    table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
+                    key_props = key_properties[table]
+                    table_schema = schemas[table]
+                    logger.info(f"exporting data from stream: {table.replace(table_suffix, '')}")
+                    load_to_bq(client=client, dataset=dataset, table_name=table,
+                               table_schema=table_schema, table_config=table_config,
+                               key_props=key_props, metadata_columns=add_metadata_columns,
+                               truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
+                    rows[table] = TemporaryFile(mode="w+b")  # erase the file
+
+                    last_emitted_state = update_state(last_emitted_state, state, table.replace(table_suffix, ""))
+
+                    yield last_emitted_state
+
         elif isinstance(msg, singer.SchemaMessage):
-            schema_table_name = msg.stream + table_suffix
-
-            if schema_table_name not in schemas and table_name in rows:  # maybe do this based on bytes in files
-                table_config = table_configs.get(table_name.replace(table_suffix, ""),
-                                                 {}) if table_suffix else table_configs.get(table_name, {})
-                key_props = key_properties[table_name]
-                table_schema = schemas[table_name]
-                load_rows = rows[table_name]
-                load_to_bq(client=client, dataset=dataset, table_name=table_name,
-                           table_schema=table_schema, table_config=table_config,
-                           key_props=key_props, metadata_columns=add_metadata_columns,
-                           truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
-                rows[table_name] = TemporaryFile(mode="w+b")  # erase the file
-
-                if len(state.get("bookmarks", state)) > 0:
-                    yield state
-
-            table_name = schema_table_name
+            table_name = msg.stream + table_suffix
 
             if table_name in rows:
                 continue
@@ -171,9 +210,14 @@ def persist_lines_job(
         key_props = key_properties[table]
         table_schema = schemas[table]
         load_rows = rows[table]
+        logger.info(f"exporting data from stream: {table.replace(table_suffix, '')}")
         load_to_bq(client=client, dataset=dataset, table_name=table,
                    table_schema=table_schema, table_config=table_config,
                    key_props=key_props, metadata_columns=add_metadata_columns,
                    truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
         rows[table] = TemporaryFile(mode="w+b")  # erase the file
-    yield state
+
+        last_emitted_state = update_state(last_emitted_state, state, table.replace(table_suffix, ""))
+
+        yield last_emitted_state
+
