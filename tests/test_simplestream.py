@@ -30,3 +30,5 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
         self.delete_dataset()
+        print(self.get_state())
+
