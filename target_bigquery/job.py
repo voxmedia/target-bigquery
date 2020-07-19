@@ -55,7 +55,8 @@ def load_to_bq(client,
             rows, dataset.table(table_name), job_config=load_config, rewind=True
         )
         logger.info("loading job {}".format(load_job.job_id))
-        logger.info(load_job.result())
+        job = load_job.result()
+        logger.info(job._properties)
     except google_exceptions.BadRequest as err:
         logger.error(
             "failed to load table {} from file: {}".format(table_name, str(err))
