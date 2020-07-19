@@ -1,4 +1,4 @@
-import logging
+import os
 import json
 import sys
 
@@ -13,3 +13,8 @@ def emit_state(state):
         logger.debug("Emitting state {}".format(line))
         sys.stdout.write("{}\n".format(line))
         sys.stdout.flush()
+
+        if os.environ.get("TARGET_BIGQUERY_STATE_FILE", None):
+            fn = os.environ.get("TARGET_BIGQUERY_STATE_FILE", None)
+            with open(fn, "a") as f:
+                f.write("{}\n".format(line))

@@ -1,20 +1,15 @@
-import logging
 import json
+import logging
 
-from google.cloud import bigquery
-from google.api_core import exceptions
-
-from jsonschema import validate
 import singer
+from google.api_core import exceptions
+from google.cloud import bigquery
+from jsonschema import validate
 
 from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.schema import build_schema, filter
-from target_bigquery.utils import emit_state
 
-logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 logger = singer.get_logger()
-
-from google.cloud.bigquery import Dataset, WriteDisposition
 
 
 def persist_lines_stream(client, dataset, lines=None, validate_records=True):
@@ -45,17 +40,16 @@ def persist_lines_stream(client, dataset, lines=None, validate_records=True):
             if validate_records:
                 validate(msg.record, schema)
 
-
-            new_rec = filter(schema, msg.record) # adswerve fix
+            new_rec = filter(schema, msg.record)  # adswerve fix
 
             new_rec = json.loads(json.dumps(new_rec, cls=DecimalEncoder))  # adswerve fix
-
 
             err = None
             try:
                 err = client.insert_rows_json(tables[msg.stream], [new_rec])
                 if err != []:  # adswerve fix
-                    logging.error(f"failed to insert rows for {tables[msg.stream]}: {str(err)}\n{msg.record}\nnew_rec: {new_rec}")  # adswerve fix
+                    logging.error(
+                        f"failed to insert rows for {tables[msg.stream]}: {str(err)}\n{msg.record}\nnew_rec: {new_rec}")  # adswerve fix
                     raise Exception(err)  # adswerve fix
             except Exception as exc:
                 logger.error(

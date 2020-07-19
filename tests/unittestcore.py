@@ -1,15 +1,17 @@
+import json
 import os
 import sys
 import unittest
-import json
-import io
-from google.cloud import bigquery
 
+from google.cloud import bigquery
 
 
 class BaseUnitTest(unittest.TestCase):
 
     def setUp(self):
+        os.environ["TARGET_BIGQUERY_STATE_FILE"] = "state.json.tmp"
+        self.delete_temp_state()
+
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
             os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
 
@@ -17,11 +19,8 @@ class BaseUnitTest(unittest.TestCase):
         self.project_id = None
         self.dataset_id = None
 
-        sys.stdout = open("stdout.env", "wb")
-
     def tearDown(self):
-        sys.stdout.close()
-        os.remove("stdout.env")
+        self.delete_temp_state()
 
     def set_cli_args(self, *args, **kwargs):
         arg = [arg for arg in args]
@@ -44,16 +43,27 @@ class BaseUnitTest(unittest.TestCase):
             self.dataset_id = c["dataset_id"]
             self.client = bigquery.Client(project=self.project_id)
 
+            self.delete_dataset()
+
+    def delete_temp_state(self):
+        try:
+            os.remove(os.environ["TARGET_BIGQUERY_STATE_FILE"])
+        except:
+            pass
+
     def delete_dataset(self):
-        self.client.delete_dataset(
-            dataset=self.dataset_id,
-            delete_contents=True
-        )
+        try:
+            self.client.delete_dataset(
+                dataset=self.dataset_id,
+                delete_contents=True
+            )
+        except:
+            pass
 
     def get_state(self):
         state = []
-        with open("stdout.env", "rb") as f:
+        with open(os.environ["TARGET_BIGQUERY_STATE_FILE"], "rb") as f:
             for line in f:
-                state.append(json.load(line))
+                state.append(json.loads(line))
 
         return state
