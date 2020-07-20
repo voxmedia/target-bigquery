@@ -1,5 +1,6 @@
 import re
-import logging
+
+# import logging
 from google.cloud.bigquery import SchemaField
 
 JSON_SCHEMA_LITERALS = {"boolean", "number", "integer", "string"}
@@ -70,7 +71,8 @@ def filter(schema, record):
                 # logging.error(f"KEY ({key}) NOT IN OBJECT RECORD ({record})!!!!")
                 continue
 
-            obj_results[bigquery_transformed_key(key)] = filter(prop_schema, record[key])  # adswerve fix to match schema field name
+            obj_results[bigquery_transformed_key(key)] = filter(prop_schema,
+                                                                record[key])  # adswerve fix to match schema field name
         #     logging.error(f"object record key {key} appended")
         # logging.error(f"filtered object: {obj_results}")
         return obj_results
@@ -126,7 +128,8 @@ def define_schema(field, name, required_fields=None):
 
         # logging.info(f"schema name: {bigquery_transformed_key(schema_name)}, type: {schema_type}, mode: {schema_mode},  fields: {schema_fields}")
         return SchemaField(
-            bigquery_transformed_key(schema_name), schema_type, schema_mode, schema_description, schema_fields, # adswerve fix
+            bigquery_transformed_key(schema_name), schema_type, schema_mode, schema_description, schema_fields,
+            # adswerve fix
         )
     elif field_type == "array":
         # objects in arrays cannot be nullable
@@ -138,14 +141,15 @@ def define_schema(field, name, required_fields=None):
             schema_type = "RECORD"
             schema_fields = tuple(build_schema(props, add_metadata=False))
         else:
-            schema_type = props_type if props_type.lower() != 'array' else get_type(props.get('items'))[0] # adswerve fix
+            schema_type = props_type if props_type.lower() != 'array' else get_type(props.get('items'))[0]  # adswerve fix
             schema_fields = ()
 
         schema_mode = "REPEATED"
 
         # logging.info(f"schema name: {bigquery_transformed_key(schema_name)}, type: {schema_type}, mode: {schema_mode},  fields: {schema_fields}")
         return SchemaField(
-            bigquery_transformed_key(schema_name), schema_type, schema_mode, schema_description, schema_fields, # adswerve fix
+            bigquery_transformed_key(schema_name), schema_type, schema_mode, schema_description, schema_fields,
+            # adswerve fix
         )
 
     if field_type not in JSON_SCHEMA_LITERALS:
@@ -168,7 +172,8 @@ def define_schema(field, name, required_fields=None):
 
         # always make a field nullable
     # logging.info(f"schema name: {bigquery_transformed_key(schema_name)}, type: {schema_type}, mode: {schema_mode}")
-    return SchemaField(bigquery_transformed_key(schema_name), schema_type, schema_mode, schema_description, ()) # adswerve fix
+    return SchemaField(bigquery_transformed_key(schema_name), schema_type, schema_mode, schema_description,
+                       ())  # adswerve fix
 
 
 def bigquery_transformed_key(key):
@@ -202,6 +207,5 @@ def build_schema(schema, key_properties=None, add_metadata=True):
             SCHEMA.append(
                 SchemaField(field, METADATA_FIELDS[field]["bq_type"], "nullable", None, ())
             )
-
 
     return SCHEMA

@@ -1,4 +1,4 @@
-import logging
+import os
 import json
 import sys
 
@@ -14,21 +14,7 @@ def emit_state(state):
         sys.stdout.write("{}\n".format(line))
         sys.stdout.flush()
 
-
-def collect():
-    try:
-        version = pkg_resources.get_distribution("target-bigquery").version
-        conn = http.client.HTTPConnection("collector.singer.io", timeout=10)
-        conn.connect()
-        params = {
-            "e": "se",
-            "aid": "singer",
-            "se_ca": "target-bigquery",
-            "se_ac": "open",
-            "se_la": version,
-        }
-        conn.request("GET", "/i?" + urllib.parse.urlencode(params))
-        conn.getresponse()
-        conn.close()
-    except:
-        logger.debug("Collection request failed")
+        if os.environ.get("TARGET_BIGQUERY_STATE_FILE", None):
+            fn = os.environ.get("TARGET_BIGQUERY_STATE_FILE", None)
+            with open(fn, "a") as f:
+                f.write("{}\n".format(line))
