@@ -1,6 +1,7 @@
 import copy
 import logging
 import json
+import re
 import pytz
 from datetime import datetime
 from tempfile import TemporaryFile
@@ -66,6 +67,7 @@ def load_to_bq(client,
     logger.info("loading {} to BigQuery".format(table_name))
 
     load_job = False
+    res = False
     try:
         load_job = client.load_table_from_file(
             rows, dataset.table(table_name), job_config=load_config, rewind=True
@@ -82,6 +84,7 @@ def load_to_bq(client,
             logger.error("reason: {reason}, errors:\n{e}".format(reason=reason, e="\n".join(messages)))
             err.message = f"reason: {reason}, errors: {';'.join(messages)}"
         raise err
+    return res
 
 
 def persist_lines_job(
@@ -103,7 +106,9 @@ def persist_lines_job(
     errors = {}
     table_suffix = table_suffix or ""
     current_stream = False
-    first_run = True
+    first_run_time = datetime.now(pytz.utc).strftime("%Y-%m-%d %H:%M:%S.%f %Z")
+    first_run = True  # False once rows are loaded to bq
+    emit_first_state = False  # True if rows are successfully loaded to bq
 
     for line in lines:
         try:
@@ -128,7 +133,7 @@ def persist_lines_job(
 
             if add_metadata_columns:
                 msg.record["_time_extracted"] = msg.time_extracted.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
-                msg.record["_time_loaded"] = datetime.now(pytz.utc).strftime("%Y-%m-%d %H:%M:%S.%f %Z")
+                msg.record["_time_loaded"] = first_run_time if first_run else datetime.now(pytz.utc).strftime("%Y-%m-%d %H:%M:%S.%f %Z")
 
             new_rec = filter(schema, msg.record)
 
@@ -147,42 +152,31 @@ def persist_lines_job(
             else:
                 state = {**state, **msg.value}
 
-            if first_run and len(rows) > 0: #ensure we start off with state matching the exported data
-                for table in rows.keys():
-                    load_rows = rows[table]
-                    table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
-                    key_props = key_properties[table]
-                    table_schema = schemas[table]
-                    last_table_state = last_emitted_state.get("bookmarks", last_emitted_state).get(table)
-                    logger.info(f"first run, exporting data from stream: {table.replace(table_suffix, '')}; table state: {last_table_state}")
-                    load_to_bq(client=client, dataset=dataset, table_name=table,
-                               table_schema=table_schema, table_config=table_config,
-                               key_props=key_props, metadata_columns=add_metadata_columns,
-                               truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
-                    rows[table] = TemporaryFile(mode="w+b")  # erase the file
-
-                    last_emitted_state = update_state(last_emitted_state, state, table.replace(table_suffix, ""))
-
-                first_run = False
-
-                yield last_emitted_state
-
             for table in rows.keys():
+                stream = re.sub(f'{table_suffix}$', '', table)
                 load_rows = rows[table]
-                if load_rows.tell() > MAX_TABLE_CACHE:
-                    table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
+                if (load_rows.tell() > MAX_TABLE_CACHE) or (first_run and load_rows.tell() > 0):
+                    if first_run:
+                        logger.info(f"first run, exporting data from stream: {table}; _time_loaded: {first_run_time}; table state: {last_emitted_state.get('bookmarks', last_emitted_state).get(stream)}")
+                    table_config = table_configs.get(stream, {}) if table_suffix else table_configs.get(table, {})
                     key_props = key_properties[table]
                     table_schema = schemas[table]
-                    logger.info(f"exporting data from stream: {table.replace(table_suffix, '')}")
+                    logger.info(f"exporting data from stream: {stream}")
                     load_to_bq(client=client, dataset=dataset, table_name=table,
                                table_schema=table_schema, table_config=table_config,
                                key_props=key_props, metadata_columns=add_metadata_columns,
                                truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
                     rows[table] = TemporaryFile(mode="w+b")  # erase the file
 
-                    last_emitted_state = update_state(last_emitted_state, state, table.replace(table_suffix, ""))
+                    last_emitted_state = update_state(last_emitted_state, state, stream)
+                    emit_first_state = True
 
-                    yield last_emitted_state
+                    if not first_run:
+                        yield last_emitted_state
+
+            if emit_first_state and first_run:
+                first_run = emit_first_state = False
+                yield last_emitted_state
 
         elif isinstance(msg, singer.SchemaMessage):
             table_name = msg.stream + table_suffix
@@ -204,18 +198,19 @@ def persist_lines_job(
 
     # get the last table loaded, and any stragglers.
     for table in rows.keys():
-        table_config = table_configs.get(table.replace(table_suffix, ""), {}) if table_suffix else table_configs.get(table, {})
+        stream = re.sub(f'{table_suffix}$', '', table)
+        table_config = table_configs.get(stream, {}) if table_suffix else table_configs.get(table, {})
         key_props = key_properties[table]
         table_schema = schemas[table]
         load_rows = rows[table]
-        logger.info(f"exporting data from stream: {table.replace(table_suffix, '')}")
+        logger.info(f"exporting data from stream: {stream}")
         load_to_bq(client=client, dataset=dataset, table_name=table,
                    table_schema=table_schema, table_config=table_config,
                    key_props=key_props, metadata_columns=add_metadata_columns,
                    truncate=truncate, forced_fulltables=forced_fulltables, rows=load_rows)
         rows[table] = TemporaryFile(mode="w+b")  # erase the file
 
-        last_emitted_state = update_state(last_emitted_state, state, table.replace(table_suffix, ""))
+        last_emitted_state = update_state(last_emitted_state, state, stream)
 
         yield last_emitted_state
 
