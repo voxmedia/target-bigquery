@@ -120,15 +120,16 @@ def persist_lines_job(
             raise
 
         if isinstance(msg, singer.RecordMessage):
+            stream = msg.stream
             table_name = msg.stream + table_suffix
             if current_stream is not None or current_stream != msg.stream:  # TODO: Is this needed?
                 current_stream = msg.stream
                 logger.info(f"collecting data from stream: {current_stream}")
 
-            if table_name not in schemas:
+            if stream not in schemas:
                 raise Exception(f"A record for stream {msg.stream} was encountered before a corresponding schema")
 
-            schema = schemas[table_name]
+            schema = schemas[stream]
 
             if validate_records:
                 validate(msg.record, schema)
@@ -143,10 +144,11 @@ def persist_lines_job(
             # NEWLINE_DELIMITED_JSON expects literal JSON formatted data, with a newline character splitting each row.
             data = bytes(json.dumps(new_rec, cls=DecimalEncoder) + "\n", "UTF-8")
 
-            rows[table_name].write(data)
+            rows[stream].write(data)
 
         elif isinstance(msg, singer.StateMessage):
             logger.debug("updating state with {}".format(msg.value))
+
             if len(last_emitted_state) == 0:
                 state = {**state, **msg.value}
                 last_emitted_state = copy.deepcopy(state)
@@ -161,7 +163,7 @@ def persist_lines_job(
                 load_rows = rows[stream]
                 if (load_rows.tell() > MAX_TABLE_CACHE) or (first_run and load_rows.tell() > 0):
                     if first_run:
-                        logger.info(f"first run, exporting data from stream: {table}; _time_loaded: {first_run_time}; table state: {last_emitted_state.get('bookmarks', last_emitted_state).get(stream)}")
+                        logger.info(f"first run, exporting data from stream: {stream}; _time_loaded: {first_run_time}; table state: {last_emitted_state.get('bookmarks', last_emitted_state).get(stream)}")
                     else:
                         logger.info(f"exporting data from stream: {stream}")
 
