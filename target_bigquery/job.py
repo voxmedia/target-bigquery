@@ -122,9 +122,6 @@ def persist_lines_job(
         if isinstance(msg, singer.RecordMessage):
             stream = msg.stream
             table_name = msg.stream + table_suffix
-            if current_stream is not None or current_stream != msg.stream:  # TODO: Is this needed?
-                current_stream = msg.stream
-                logger.info(f"collecting data from stream: {current_stream}")
 
             if stream not in schemas:
                 raise Exception(f"A record for stream {msg.stream} was encountered before a corresponding schema")
@@ -137,7 +134,7 @@ def persist_lines_job(
             if add_metadata_columns:
                 msg.record["_time_extracted"] = msg.time_extracted.isoformat()
                 msg.record["_time_loaded"] = first_run_time if first_run else datetime.utcnow().isoformat()
-                # TODO: Would it be useful to set _time_loaded when the load happens so that all rows have the same timestamp which could also be load id
+                # TODO: Would be useful to set _time_loaded when the load happens so that all rows have the same timestamp which could also be load id
 
             new_rec = filter(schema, msg.record)
 
