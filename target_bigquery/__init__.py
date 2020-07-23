@@ -42,7 +42,9 @@ def main():
 
     forced_fulltables = config.get("forced_fulltables", [])
 
-    table_suffix = config.get("table_suffix")
+    table_prefix = config.get("table_prefix", "")
+
+    table_suffix = config.get("table_suffix", "")
 
     location = config.get("location", "US")
 
@@ -70,6 +72,7 @@ def main():
                 truncate=truncate,
                 forced_fulltables=forced_fulltables,
                 validate_records=validate_records,
+                table_prefix=table_prefix,
                 table_suffix=table_suffix,
                 add_metadata_columns=add_metadata_columns,
                 table_configs=table_configs
