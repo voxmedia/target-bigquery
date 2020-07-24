@@ -18,7 +18,7 @@ from target_bigquery.schema import build_schema, filter
 
 logger = singer.get_logger()
 
-MAX_TABLE_CACHE = 1024 * 1024 * 50  # load every 50MB TODO: add this as an option to the config file
+MAX_TABLE_CACHE = 1024 #* 1024 * 50  # load every 50MB TODO: add this as an option to the config file
 
 
 def update_state(last_emitted_state, new_state, updated_table):
@@ -57,9 +57,10 @@ def load_to_bq(client,
         load_config.clustering_fields = cluster_fields
     load_config.source_format = SourceFormat.NEWLINE_DELIMITED_JSON
     if truncate or (table_name in forced_fulltables):
-        logger.info(f"Load {table_name} by FULL_TABLE")
+        logger.info(f"Load {table_name} by FULL_TABLE (truncate)")
         load_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
     else:
+        logger.info(f"Appending to {table_name}")
         load_config.write_disposition = WriteDisposition.WRITE_APPEND
 
     logger.info("loading {} to BigQuery".format(table_name))
@@ -111,6 +112,7 @@ def persist_lines_job(
     first_run_time = datetime.utcnow().isoformat()
     first_run = True  # False once rows are loaded to bq
     emit_first_state = False  # True if rows are successfully loaded to bq
+    truncate_tables = set()
 
     for line in lines:
         try:
@@ -163,7 +165,6 @@ def persist_lines_job(
                         logger.info(f"first run, exporting data from stream: {stream}; _time_loaded: {first_run_time}; table state: {last_emitted_state.get('bookmarks', last_emitted_state).get(stream)}")
                     else:
                         logger.info(f"exporting data from stream: {stream}")
-
                     load_to_bq(
                         client=client,
                         dataset=dataset,
@@ -172,10 +173,11 @@ def persist_lines_job(
                         table_config=table_configs.get(stream, {}),
                         key_props=key_properties[stream],
                         metadata_columns=add_metadata_columns,
-                        truncate=truncate,
+                        truncate=truncate if first_run or stream not in truncate_tables else False,
                         forced_fulltables=forced_fulltables,
                         rows=load_rows
                     )
+                    truncate_tables.add(stream)
                     rows[stream] = TemporaryFile(mode="w+b")  # erase the file
 
                     last_emitted_state = update_state(last_emitted_state, state, stream)

@@ -35,7 +35,7 @@ def main():
     else:
         tables = {}
 
-    if config.get("replication_method") == "FULL_TABLE":
+    if config.get("replication_method").lower() == "full_table" or config.get("replication_method").lower() == "truncate":
         truncate = True
     else:
         truncate = False
