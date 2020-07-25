@@ -96,6 +96,7 @@ def persist_lines_job(
         truncate=False,
         forced_fulltables=[],
         validate_records=True,
+        table_prefix=None,
         table_suffix=None,
         add_metadata_columns=True,
         table_configs={}
@@ -107,8 +108,8 @@ def persist_lines_job(
     tables = {}
     rows = {}
     errors = {}
+    table_prefix = table_prefix or ""
     table_suffix = table_suffix or ""
-    current_stream = None
     first_run_time = datetime.utcnow().isoformat()
     first_run = True  # False once rows are loaded to bq
     emit_first_state = False  # True if rows are successfully loaded to bq
@@ -123,7 +124,6 @@ def persist_lines_job(
 
         if isinstance(msg, singer.RecordMessage):
             stream = msg.stream
-            table_name = msg.stream + table_suffix
 
             if stream not in schemas:
                 raise Exception(f"A record for stream {msg.stream} was encountered before a corresponding schema")
@@ -192,7 +192,7 @@ def persist_lines_job(
 
         elif isinstance(msg, singer.SchemaMessage):
             stream = msg.stream
-            table_name = msg.stream + table_suffix
+            table_name = table_prefix + msg.stream + table_suffix
 
             if stream in rows:
                 continue
