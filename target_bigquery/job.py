@@ -173,7 +173,7 @@ def persist_lines_job(
                         table_config=table_configs.get(stream, {}),
                         key_props=key_properties[stream],
                         metadata_columns=add_metadata_columns,
-                        truncate=truncate if first_run or stream not in truncate_tables else False,
+                        truncate=truncate if stream not in truncate_tables else False,
                         forced_fulltables=forced_fulltables,
                         rows=load_rows
                     )
@@ -221,7 +221,7 @@ def persist_lines_job(
             table_config=table_configs.get(stream, {}),
             key_props=key_properties[stream],
             metadata_columns=add_metadata_columns,
-            truncate=truncate,
+            truncate=truncate if stream not in truncate_tables else False,
             forced_fulltables=forced_fulltables,
             rows=rows[stream]
         )
