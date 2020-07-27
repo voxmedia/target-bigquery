@@ -18,7 +18,7 @@ from target_bigquery.schema import build_schema, filter
 
 logger = singer.get_logger()
 
-MAX_TABLE_CACHE = 1024 #* 1024 * 50  # load every 50MB TODO: add this as an option to the config file
+MAX_TABLE_CACHE = 1024 * 1024 * 50  # load every 50MB TODO: add this as an option to the config file
 
 
 def update_state(last_emitted_state, new_state, updated_table):
