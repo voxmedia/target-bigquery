@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="target-bigquery",
-    version="0.9.1",
+    version="0.9.2",
     description="Singer.io target for writing data to Google BigQuery",
     author="RealSelf Business Intelligence", # is it legal to change this to AdSwerve
     url="https://github.com/adswerve/target-bigquery",
@@ -18,5 +18,5 @@ setup(
     entry_points="""
         [console_scripts]
         target-bigquery=target_bigquery:main
-      """,
+      """
 )

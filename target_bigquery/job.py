@@ -165,6 +165,7 @@ def persist_lines_job(
                         logger.info(f"first run, exporting data from stream: {stream}; _time_loaded: {first_run_time}; table state: {last_emitted_state.get('bookmarks', last_emitted_state).get(stream)}")
                     else:
                         logger.info(f"exporting data from stream: {stream}")
+
                     load_to_bq(
                         client=client,
                         dataset=dataset,
@@ -194,6 +195,8 @@ def persist_lines_job(
             stream = msg.stream
             table_name = table_prefix + msg.stream + table_suffix
 
+            logger.info(msg.stream)
+
             if stream in rows:
                 continue
 
@@ -202,9 +205,6 @@ def persist_lines_job(
             key_properties[stream] = msg.key_properties
             rows[stream] = TemporaryFile(mode="w+b")
             errors[stream] = None
-
-            # log schema
-            logger.info(msg.stream)
 
         elif isinstance(msg, singer.ActivateVersionMessage):
             # This is experimental and won't be used yet
