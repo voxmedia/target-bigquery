@@ -202,6 +202,9 @@ def persist_lines_job(
             key_properties[stream] = msg.key_properties
             rows[stream] = TemporaryFile(mode="w+b")
             errors[stream] = None
+            
+            # log schema
+            logger.info(msg.stream)
 
         elif isinstance(msg, singer.ActivateVersionMessage):
             # This is experimental and won't be used yet
