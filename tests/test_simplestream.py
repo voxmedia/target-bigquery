@@ -12,10 +12,11 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
         )
 
         ret = main()
+        print(self.get_state())
+
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
         self.delete_dataset()
-        print(self.get_state())
 
     def test_simple_stream_with_tables_config(self):
         from target_bigquery import main
@@ -27,8 +28,9 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
         )
 
         ret = main()
+        print(self.get_state())
+
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
         self.delete_dataset()
-        print(self.get_state())
 

@@ -9,9 +9,8 @@ import traceback
 import singer
 
 from target_bigquery.encoders import DecimalEncoder
-from target_bigquery.job import persist_lines_job
+from target_bigquery.process import process
 from target_bigquery.schema import build_schema, filter
-from target_bigquery.stream import persist_lines_stream
 from target_bigquery.utils import emit_state, ensure_dataset
 
 logger = singer.get_logger()
@@ -21,6 +20,12 @@ def main():
     parser = argparse.ArgumentParser()  # argparse.ArgumentParser(parents=[tools.argparser])
     parser.add_argument("-c", "--config", help="Config file", required=True)
     parser.add_argument("-t", "--tables", help="Table configs file", required=False)
+    parser.add_argument("-ph", "--processhandler",
+                        help="Defines the loading process. Partial loads by default.",
+                        required=False,
+                        choices=["load-job", "partial-load-job", "bookmarks-partial-load-job"],
+                        default="partial-load-job"
+                        )
     flags = parser.parse_args()
 
     with open(flags.config) as f:
@@ -46,26 +51,37 @@ def main():
     max_cache = config.get("max_cache", 50)
     client, dataset = ensure_dataset(project_id, dataset_id, location)
 
-    input = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
+    tap_stream = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
 
     try:
-        if config.get("stream_data", True):
-            raise NotImplementedError("Not yet fully implemented!")
-            # state_iterator = persist_lines_stream(
-            #     client, dataset, input, validate_records=validate_records,
-            # )
+        from target_bigquery.processhandler import LoadJobProcessHandler, PartialLoadJobProcessHandler, \
+            BookmarksStatePartialLoadJobProcessHandler
 
+        ph = None
+        if flags.processhandler == "load-job":
+            ph = LoadJobProcessHandler
+        elif flags.processhandler == "partial-load-job":
+            ph = PartialLoadJobProcessHandler
+        elif flags.processhandler == "bookmarks-partial-load-job":
+            ph = BookmarksStatePartialLoadJobProcessHandler
         else:
-            state_iterator = persist_lines_job(
-                client, dataset, input,
-                truncate=truncate,
-                validate_records=validate_records,
-                table_prefix=table_prefix,
-                table_suffix=table_suffix,
-                add_metadata_columns=add_metadata_columns,
-                table_configs=table_configs,
-                max_cache=max_cache
-            )
+            raise Exception("Unknown process handler.")
+
+        state_iterator = process(
+            ph,
+            tap_stream,
+            initial_state={},
+            project_id=project_id,
+            dataset=dataset,
+            location=location,
+            truncate=truncate,
+            validate_records=validate_records,
+            table_prefix=table_prefix,
+            table_suffix=table_suffix,
+            add_metadata_columns=add_metadata_columns,
+            table_configs=table_configs,
+            max_cache=max_cache
+        )
 
         for state in state_iterator:
             emit_state(state)
@@ -78,6 +94,7 @@ def main():
         return 2  # sys.exit(2)
 
     return 0  # sys.exit(0)
+
 
 if __name__ == "__main__":
     ret = main()
