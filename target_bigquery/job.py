@@ -18,7 +18,7 @@ from target_bigquery.schema import build_schema, filter
 
 logger = singer.get_logger()
 
-MAX_TABLE_CACHE = 1024 * 1024 * 50  # load every 50MB TODO: add this as an option to the config file
+MAX_TABLE_CACHE = 1024 * 1024 #* 50  # load every 50MB TODO: add this as an option to the config file
 
 
 def update_state(last_emitted_state, new_state, updated_table):
@@ -44,8 +44,9 @@ def load_to_bq(client,
                rows):
     partition_field = table_config.get("partition_field", None)
     cluster_fields = table_config.get("cluster_fields", None)
+    force_fields = table_config.get("force_fields", {})
 
-    schema = build_schema(table_schema, key_properties=key_props, add_metadata=metadata_columns)
+    schema = build_schema(table_schema, key_properties=key_props, add_metadata=metadata_columns, force_fields=force_fields)
     load_config = LoadJobConfig()
     load_config.schema = schema
     if partition_field:
