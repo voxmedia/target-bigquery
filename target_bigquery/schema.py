@@ -183,7 +183,7 @@ def bigquery_transformed_key(key):
     return key
 
 
-def build_schema(schema, key_properties=None, add_metadata=True):
+def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}):
     SCHEMA = []
 
     required_fields = set(key_properties) if key_properties else set()
@@ -192,11 +192,16 @@ def build_schema(schema, key_properties=None, add_metadata=True):
 
     for key, props in schema["properties"].items():
 
-        if not props:
+        if key in force_fields:
+            SCHEMA.append(
+                SchemaField(key, force_fields[key]["type"], force_fields[key].get("mode", "nullable"), force_fields[key].get("description", None), ())
+            )
+        elif not props:
             # if we end up with an empty record.
             continue
 
-        SCHEMA.append(
+        else:
+            SCHEMA.append(
             define_schema(
                 props, bigquery_transformed_key(key), required_fields=required_fields
             )
