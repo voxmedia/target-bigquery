@@ -24,7 +24,7 @@ class BaseProcessHandler(object):
         self.dataset = kwargs["dataset"]
 
         self.table_prefix = kwargs.get("table_prefix") or ""
-        self.table_postfix = kwargs.get("table_postfix") or ""
+        self.table_postfix = kwargs.get("table_suffix") or ""
 
         self.tables = {}
         self.schemas = {}
@@ -184,8 +184,9 @@ class LoadJobProcessHandler(BaseProcessHandler):
         logger = self.logger
         partition_field = table_config.get("partition_field", None)
         cluster_fields = table_config.get("cluster_fields", None)
+        force_fields = table_config.get("force_fields", {})
 
-        schema = build_schema(table_schema, key_properties=key_props, add_metadata=metadata_columns)
+        schema = build_schema(table_schema, key_properties=key_props, add_metadata=metadata_columns, force_fields=force_fields)
         load_config = LoadJobConfig()
         load_config.schema = schema
         if partition_field:

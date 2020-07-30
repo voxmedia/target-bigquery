@@ -55,9 +55,10 @@ def main():
 
     table_configs = tables.get("streams", {})
     max_cache = config.get("max_cache", 50)
-    client, dataset = ensure_dataset(project_id, dataset_id, location)
 
     tap_stream = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
+
+    client, dataset = ensure_dataset(project_id, dataset_id, location)
 
     try:
         from target_bigquery.processhandler import LoadJobProcessHandler, PartialLoadJobProcessHandler, \
