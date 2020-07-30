@@ -20,6 +20,7 @@ def main():
     parser = argparse.ArgumentParser()  # argparse.ArgumentParser(parents=[tools.argparser])
     parser.add_argument("-c", "--config", help="Config file", required=True)
     parser.add_argument("-t", "--tables", help="Table configs file", required=False)
+    parser.add_argument("-s", "--state", help="Initial state file", required=False)
     parser.add_argument("-ph", "--processhandler",
                         help="Defines the loading process. Partial loads by default.",
                         required=False,
@@ -35,6 +36,11 @@ def main():
     if flags.tables is not None:
         with open(flags.tables) as f:
             tables = json.load(f)
+
+    state = {}
+    if flags.state is not None:
+        with open(flags.state) as f:
+            state = json.load(f)
 
     truncate = False
     if config.get("replication_method", "append").lower() == "truncate":
@@ -70,7 +76,7 @@ def main():
         state_iterator = process(
             ph,
             tap_stream,
-            initial_state={},
+            initial_state=state,
             project_id=project_id,
             dataset=dataset,
             location=location,

@@ -70,7 +70,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
         self.table_configs = kwargs.get("table_configs", {}) or {}
 
         self.INIT_STATE = kwargs.get("init_state") or {}
-        self.STATE = {}
+        self.STATE = {**self.INIT_STATE}
 
         self.rows = {}
 
@@ -116,7 +116,8 @@ class LoadJobProcessHandler(BaseProcessHandler):
     def handle_state_message(self, msg):
         assert isinstance(msg, singer.StateMessage)
 
-        self.STATE = {**self.INIT_STATE, **self.STATE, **msg.value}
+        # TODO: Better state merging
+        self.STATE = {**self.STATE, **msg.value}
 
         yield from ()
 

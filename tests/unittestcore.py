@@ -21,6 +21,7 @@ class BaseUnitTest(unittest.TestCase):
 
     def tearDown(self):
         self.delete_temp_state()
+        self.delete_dataset()
 
     def set_cli_args(self, *args, **kwargs):
         arg = [arg for arg in args]
