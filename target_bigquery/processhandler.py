@@ -24,7 +24,7 @@ class BaseProcessHandler(object):
         self.dataset = kwargs["dataset"]
 
         self.table_prefix = kwargs.get("table_prefix") or ""
-        self.table_postfix = kwargs.get("table_suffix") or ""
+        self.table_suffix = kwargs.get("table_suffix") or ""
 
         self.tables = {}
         self.schemas = {}
@@ -47,7 +47,7 @@ class BaseProcessHandler(object):
             return iter([])
 
         self.tables[msg.stream] = "{}{}{}".format(
-            self.table_prefix, msg.stream, self.table_postfix
+            self.table_prefix, msg.stream, self.table_suffix
         )
         self.schemas[msg.stream] = msg.schema
         self.key_properties[msg.stream] = msg.key_properties
