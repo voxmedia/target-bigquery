@@ -238,7 +238,7 @@ class PartialLoadJobProcessHandler(LoadJobProcessHandler):
     def __init__(self, logger, **kwargs):
         super(PartialLoadJobProcessHandler, self).__init__(logger, **kwargs)
 
-        self.max_cache = kwargs.get("max_cache", 50)
+        self.max_cache = kwargs.get("max_cache", 1024 * 1024 * 50)
 
     def handle_state_message(self, msg):
         assert isinstance(msg, singer.StateMessage)

@@ -54,7 +54,7 @@ def main():
     project_id, dataset_id = config["project_id"], config["dataset_id"]
 
     table_configs = tables.get("streams", {})
-    max_cache = config.get("max_cache", 50)
+    max_cache = 1024 * 1024 * config.get("max_cache", 50)
 
     tap_stream = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
 
