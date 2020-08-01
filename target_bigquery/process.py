@@ -26,6 +26,7 @@ def process(
     if handler.emit_initial_state():
         s = kwargs.get("initial_state", {})
         assert isinstance(s, dict)
+        logger.info(f"Pushing state: {s}")
         yield s  # yield init state, so even if there is an exception right after we get proper state emitted
 
     for line in tap_stream:
@@ -37,16 +38,19 @@ def process(
 
         if isinstance(msg, singer.RecordMessage):
             for s in handler.handle_record_message(msg):
+                logger.info(f"Pushing state: {s}")
                 yield s
 
         elif isinstance(msg, singer.StateMessage):
             logger.info("Updating state with {}".format(msg.value))
             for s in handler.handle_state_message(msg):
+                logger.info(f"Pushing state: {s}")
                 yield s
 
         elif isinstance(msg, singer.SchemaMessage):
             logger.info("{} schema: {}".format(msg.stream, msg.schema))
             for s in handler.handle_schema_message(msg):
+                logger.info(f"Pushing state: {s}")
                 yield s
 
         elif isinstance(msg, singer.ActivateVersionMessage):
@@ -57,4 +61,5 @@ def process(
             raise Exception("Unrecognized message {}".format(msg))
 
     for s in handler.on_stream_end():
+        logger.info(f"Pushing state: {s}")
         yield s
