@@ -90,6 +90,28 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
         table = self.client.get_table("{}.stream_two".format(self.dataset_id))
         self.assertEqual(3, table.num_rows, msg="Number of rows mismatch")
 
+    def test_two_streams_not_full(self):
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin="./rsc/partial_load_streams/two_streams_not_full_state.json",
+            config="../sandbox/target_config_cache.json",
+            processhandler="partial-load-job"
+        )
+
+        ret = main()
+        state = self.get_state()
+        self.assertEqual(3, len(state))  # initial emit + 6 states
+
+        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+        self.assertDictEqual(state[-1], {"bookmarks": {"stream_one": {"timestamp": "2020-01-11T00:00:00.000000Z"}, "stream_two": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
+
+        table = self.client.get_table("{}.stream_one".format(self.dataset_id))
+        self.assertEqual(3, table.num_rows, msg="Number of rows mismatch")
+
+        table = self.client.get_table("{}.stream_two".format(self.dataset_id))
+        self.assertEqual(3, table.num_rows, msg="Number of rows mismatch")
+
     def test_interlaced_streams(self):
         from target_bigquery import main
 

@@ -13,6 +13,7 @@ from jsonschema import validate
 
 from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.schema import build_schema, filter as filter_by_schema
+from target_bigquery.state import State
 
 
 class BaseProcessHandler(object):
@@ -70,7 +71,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
         self.table_configs = kwargs.get("table_configs", {}) or {}
 
         self.INIT_STATE = kwargs.get("init_state") or {}
-        self.STATE = {**self.INIT_STATE}
+        self.STATE = State(**self.INIT_STATE)
 
         self.rows = {}
 
@@ -116,8 +117,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
     def handle_state_message(self, msg):
         assert isinstance(msg, singer.StateMessage)
 
-        # TODO: Better state merging
-        self.STATE = {**self.STATE, **msg.value}
+        self.STATE.merge(msg.value)
 
         yield from ()
 
@@ -265,7 +265,7 @@ class BookmarksStatePartialLoadJobProcessHandler(PartialLoadJobProcessHandler):
     def __init__(self, logger, **kwargs):
         super(BookmarksStatePartialLoadJobProcessHandler, self).__init__(logger, **kwargs)
 
-        self.EMITTED_STATE = {**{"bookmarks": {}}, **self.INIT_STATE}
+        self.EMITTED_STATE = State(**self.INIT_STATE)
 
     def handle_state_message(self, msg):
         assert isinstance(msg, singer.StateMessage)
