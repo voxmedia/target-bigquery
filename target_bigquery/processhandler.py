@@ -254,7 +254,7 @@ class PartialLoadJobProcessHandler(LoadJobProcessHandler):
     def on_stream_end(self):
         rows = {s: self.rows[s] for s in self.rows.keys() if self.rows[s].tell() > 0}
         if len(rows) == 0:
-            return iter([])
+            return self.STATE
 
         self._do_temp_table_based_load(rows)
         yield self.STATE
@@ -284,7 +284,7 @@ class BookmarksStatePartialLoadJobProcessHandler(PartialLoadJobProcessHandler):
     def on_stream_end(self):
         rows = {s: self.rows[s] for s in self.rows.keys() if self.rows[s].tell() > 0}
         if len(rows) == 0:
-            return iter([])
+            return self.STATE
 
         for stream in rows.keys():
             self._do_temp_table_based_load({stream: rows[stream]})
