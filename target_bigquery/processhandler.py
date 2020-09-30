@@ -70,7 +70,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
         self.validate_records = kwargs.get("validate_records", True)
         self.table_configs = kwargs.get("table_configs", {}) or {}
 
-        self.INIT_STATE = kwargs.get("init_state") or {}
+        self.INIT_STATE = kwargs.get("initial_state") or {}
         self.STATE = State(**self.INIT_STATE)
 
         self.rows = {}
