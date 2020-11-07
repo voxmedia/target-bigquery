@@ -107,9 +107,9 @@ class LoadJobProcessHandler(BaseProcessHandler):
                 if msg.time_extracted else datetime.utcnow().isoformat()
             msg.record["_time_loaded"] = datetime.utcnow().isoformat()
 
-        new_rec = filter_by_schema(schema, msg.record)
+        # new_rec = filter_by_schema(schema, msg.record)
 
-        data = bytes(json.dumps(new_rec, cls=DecimalEncoder) + "\n", "UTF-8")
+        data = bytes(json.dumps(msg.record, cls=DecimalEncoder) + "\n", "UTF-8")
         self.rows[stream].write(data)
 
         yield from ()
@@ -188,6 +188,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
 
         schema = build_schema(table_schema, key_properties=key_props, add_metadata=metadata_columns, force_fields=force_fields)
         load_config = LoadJobConfig()
+        load_config.ignore_unknown_values = True
         load_config.schema = schema
         if partition_field:
             load_config.time_partitioning = bigquery.table.TimePartitioning(
