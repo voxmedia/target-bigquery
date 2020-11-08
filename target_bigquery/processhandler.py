@@ -12,7 +12,7 @@ from google.cloud.bigquery.job import SourceFormat
 from jsonschema import validate
 
 from target_bigquery.encoders import DecimalEncoder
-from target_bigquery.schema import build_schema, filter as filter_by_schema
+from target_bigquery.schema import build_schema, cleanup_record
 from target_bigquery.state import State
 
 
@@ -107,9 +107,9 @@ class LoadJobProcessHandler(BaseProcessHandler):
                 if msg.time_extracted else datetime.utcnow().isoformat()
             msg.record["_time_loaded"] = datetime.utcnow().isoformat()
 
-        # new_rec = filter_by_schema(schema, msg.record)
+        nr = cleanup_record(schema, msg.record)
 
-        data = bytes(json.dumps(msg.record, cls=DecimalEncoder) + "\n", "UTF-8")
+        data = bytes(json.dumps(nr, cls=DecimalEncoder) + "\n", "UTF-8")
         self.rows[stream].write(data)
 
         yield from ()

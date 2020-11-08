@@ -38,7 +38,7 @@ def get_type(property):
     return field_type, nullable
 
 
-def filter(schema, record):
+def __filter(schema, record):
     if not record:
         return record
 
@@ -96,6 +96,29 @@ def filter(schema, record):
         return arr_result
     else:
         raise ValueError(f"type {field_type} is unknown")
+
+
+def cleanup_record(schema, record):
+    nr = {}
+
+    if not isinstance(record, dict) and not isinstance(record, list):
+        return record
+
+    for key, value in record.items():
+        nkey = bigquery_transformed_key(key)
+
+        if isinstance(value, dict):
+            nr[nkey] = cleanup_record(schema, value)
+
+        elif isinstance(value, list):
+            nr[nkey] = []
+            for o in value:
+                nr[nkey].append(cleanup_record(schema, o))
+
+        else:
+            nr[nkey] = value
+
+    return nr
 
 
 def merge_anyof(props):
