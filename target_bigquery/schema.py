@@ -1,6 +1,6 @@
 import re
 
-# import logging
+import logging
 from google.cloud.bigquery import SchemaField
 
 JSON_SCHEMA_LITERALS = {"boolean", "number", "integer", "string"}
@@ -18,6 +18,8 @@ def get_type(property):
         return "anyOf", nullable
     elif "type" in property:
         prop_type = property["type"]
+    elif "KeyValueOfstringbase" in property:
+        return "KeyValueOfstringbase", nullable
     else:
         raise ValueError(
             f"'type' or 'anyOf' are required fields in property: {property}"
@@ -139,14 +141,14 @@ def merge_anyof(props):
 
 def define_schema(field, name, required_fields=None):
 
-    if "KeyValueOfstringbase" in field.get('properties', {}):
-        return None
-
     field_type, _ = get_type(field)
 
     schema_description = None
     schema_name = name
     schema_mode = "REQUIRED" if required_fields and name in required_fields else "NULLABLE"
+
+    if field_type == "KeyValueOfstringbase":
+        return None
 
     if field_type == "anyOf":
         props = field["anyOf"]
@@ -158,6 +160,8 @@ def define_schema(field, name, required_fields=None):
         # select first non-null property
         for prop in props:
             prop_type, _ = get_type(prop)
+            if prop_type == "KeyValueOfstringbase":
+                return None
             if not prop_type:
                 continue
 
@@ -187,7 +191,10 @@ def define_schema(field, name, required_fields=None):
         props = field.get("items")
         props_type, _ = get_type(props)
 
-        if props_type == "object":
+        if props_type == "KeyValueOfstringbase":
+            return None
+
+        elif props_type == "object":
             schema_type = "RECORD"
             schema_fields = tuple(build_schema(props, add_metadata=False))
 
