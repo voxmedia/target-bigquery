@@ -18,7 +18,7 @@ def get_type(property):
         return "anyOf", nullable
     elif "type" in property:
         prop_type = property["type"]
-    elif "KeyValueOfstringbase" in property:
+    elif property == "KeyValueOfstringbase":
         return "KeyValueOfstringbase", nullable
     else:
         raise ValueError(
@@ -38,6 +38,7 @@ def get_type(property):
                 field_type = t
 
     return field_type, nullable
+
 
 
 def __filter(schema, record):
