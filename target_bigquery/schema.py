@@ -138,6 +138,10 @@ def merge_anyof(props):
 
 
 def define_schema(field, name, required_fields=None):
+
+    if "KeyValueOfstringbase" in field.get('properties', {}):
+        return None
+
     field_type, _ = get_type(field)
 
     schema_description = None
@@ -255,11 +259,11 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
             continue
 
         else:
-            SCHEMA.append(
-                define_schema(
-                    props, bigquery_transformed_key(key), required_fields=required_fields
-                )
+            s = define_schema(
+                props, bigquery_transformed_key(key), required_fields=required_fields
             )
+            if s:
+                SCHEMA.append(s)
 
     if add_metadata:
         for field in METADATA_FIELDS:
