@@ -18,7 +18,7 @@ def get_type(property):
         return "anyOf", nullable
     elif "type" in property:
         prop_type = property["type"]
-    elif property == "KeyValueOfstringbase":
+    elif "KeyValueOfstringbase" in property:
         return "KeyValueOfstringbase", nullable
     else:
         raise ValueError(
