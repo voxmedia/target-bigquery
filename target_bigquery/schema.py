@@ -18,8 +18,6 @@ def get_type(property):
         return "anyOf", nullable
     elif "type" in property:
         prop_type = property["type"]
-    elif "KeyValueOfstringbase" in property:
-        return "KeyValueOfstringbase", nullable
     else:
         raise ValueError(
             f"'type' or 'anyOf' are required fields in property: {property}"
@@ -38,7 +36,6 @@ def get_type(property):
                 field_type = t
 
     return field_type, nullable
-
 
 
 def __filter(schema, record):
@@ -141,15 +138,14 @@ def merge_anyof(props):
 
 
 def define_schema(field, name, required_fields=None):
+    if "KeyValueOfstringbase" in field.get('properties', {}):
+        return None
 
     field_type, _ = get_type(field)
 
     schema_description = None
     schema_name = name
     schema_mode = "REQUIRED" if required_fields and name in required_fields else "NULLABLE"
-
-    if field_type == "KeyValueOfstringbase":
-        return None
 
     if field_type == "anyOf":
         props = field["anyOf"]
@@ -161,8 +157,6 @@ def define_schema(field, name, required_fields=None):
         # select first non-null property
         for prop in props:
             prop_type, _ = get_type(prop)
-            if prop_type == "KeyValueOfstringbase":
-                return None
             if not prop_type:
                 continue
 
@@ -170,9 +164,12 @@ def define_schema(field, name, required_fields=None):
                 field_types.add(prop_type)
 
         schema_mode = None
-        if "array" in field_types: schema_mode = "REPEATED"
-        elif "object" in field_types: schema_mode = "NULLABLE"
-        elif any([lit in field_types for lit in JSON_SCHEMA_LITERALS]): schema_mode = "NULLABLE"
+        if "array" in field_types:
+            schema_mode = "REPEATED"
+        elif "object" in field_types:
+            schema_mode = "NULLABLE"
+        elif any([lit in field_types for lit in JSON_SCHEMA_LITERALS]):
+            schema_mode = "NULLABLE"
 
         return SchemaField(
             bigquery_transformed_key(schema_name), schema_type, schema_mode, schema_description, schema_fields
@@ -190,12 +187,12 @@ def define_schema(field, name, required_fields=None):
         # objects in arrays cannot be nullable
         # - but nested fields in RECORDS can be nullable
         props = field.get("items")
-        props_type, _ = get_type(props)
-
-        if props_type == "KeyValueOfstringbase":
+        if "KeyValueOfstringbase" in props:
             return None
 
-        elif props_type == "object":
+        props_type, _ = get_type(props)
+
+        if props_type == "object":
             schema_type = "RECORD"
             schema_fields = tuple(build_schema(props, add_metadata=False))
 
@@ -254,7 +251,7 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
 
     for key, props in schema.get("properties",
                                  schema.get("items", {}).get("properties")
-    ).items():  # schema["properties"].items():
+                                 ).items():  # schema["properties"].items():
 
         if key in force_fields:
             SCHEMA.append(
