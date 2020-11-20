@@ -138,7 +138,7 @@ def merge_anyof(props):
 
 
 def define_schema(field, name, required_fields=None):
-    if "KeyValueOfstringbase" in field.get('properties', {}):
+    if "KeyValueOfstringbase" in field.get('properties', {}) or "KeyValueOfstringbase" in field:
         return None
 
     field_type, _ = get_type(field)
