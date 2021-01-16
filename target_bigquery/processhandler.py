@@ -14,7 +14,7 @@ from jsonschema import validate
 from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.schema import build_schema, cleanup_record
 from target_bigquery.state import State
-
+from target_bigquery.simplify_json_schema import simplify
 
 class BaseProcessHandler(object):
 
@@ -186,7 +186,9 @@ class LoadJobProcessHandler(BaseProcessHandler):
         cluster_fields = table_config.get("cluster_fields", None)
         force_fields = table_config.get("force_fields", {})
 
-        schema = build_schema(table_schema, key_properties=key_props, add_metadata=metadata_columns, force_fields=force_fields)
+        schema_simplified = simplify(table_schema)
+        schema = build_schema(schema_simplified, key_properties=key_props, add_metadata=metadata_columns,
+                              force_fields=force_fields)
         load_config = LoadJobConfig()
         load_config.ignore_unknown_values = True
         load_config.schema = schema
@@ -232,7 +234,6 @@ class LoadJobProcessHandler(BaseProcessHandler):
                 err.message = f"reason: {reason}, errors: {';'.join(messages)}"
 
             raise err
-
 
 class PartialLoadJobProcessHandler(LoadJobProcessHandler):
 
