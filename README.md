@@ -16,17 +16,17 @@ Email: `analytics-help@adswerve.com`
 
 <!-- ![GCP web console -> API & Services -> Library](/readme_screenshots/1_API_and_Services_Library.png?raw=true) -->
 
-<img src="readme_screenshots/1_API_and_Services_Library.png" width="650" alt="GCP web console -> API & Services -> Library">
+<img src="readme_screenshots/01_API_and_Services_Library.png" width="650" alt="GCP web console -> API & Services -> Library">
 
 2. Search for **BigQuery API** -> click **Enable**
 
 <!-- ![Search for BigQuery API](/readme_screenshots/2_Search_for_BigQuery_API.png?raw=true) -->
 
-<img src="readme_screenshots/2_Search_for_BigQuery_API.png" width="650" alt="Search for BigQuery API">
+<img src="readme_screenshots/02_Search_for_BigQuery_API.png" width="650" alt="Search for BigQuery API">
 
 <!-- ![Enable BigQuery API](/readme_screenshots/3_Enable_BigQuery_API.png?raw=true) -->
 
-<img src="readme_screenshots/3_Enable_BigQuery_API.png" width="650" alt="Enable BigQuery API">
+<img src="readme_screenshots/03_Enable_BigQuery_API.png" width="650" alt="Enable BigQuery API">
 
 ### Step 2: Authenticate with a Service Account
 
@@ -38,7 +38,7 @@ Create a service account credential:
 
 <!-- ![API & Services -> Credentials -> Create Credentials -> Service account](/readme_screenshots/4_Create_Service_Account.png?raw=true) -->
 
-<img src="readme_screenshots/4_Create_Service_Account.png" width="650" alt="PI & Services -> Credentials -> Create Credentials -> Service account">
+<img src="readme_screenshots/04_Create_Service_Account.png" width="650" alt="PI & Services -> Credentials -> Create Credentials -> Service account">
 
 
 
@@ -46,7 +46,7 @@ Create a service account credential:
 
 <!-- ![Enter Service account name](/readme_screenshots/5_Service_Account_Name.png?raw=true) -->
 
-<img src="readme_screenshots/5_Service_Account_Name.png" width="650" alt="Enter Service account name">
+<img src="readme_screenshots/05_Service_Account_Name.png" width="650" alt="Enter Service account name">
 
 3. Under **Grant this service account access to the project**, select **BigQuery Data Editor** and **BigQuery Job User** as the minimal set of permissions. Click **Done**
 
@@ -55,25 +55,25 @@ Create a service account credential:
 
 <!-- ![Grant this service account access to the project](/readme_screenshots/6_Service_Account_Access.png?raw=true) -->
 
-<img src="readme_screenshots/6_Service_Account_Access.png" width="650" alt="Grant this service account access to the project">
+<img src="readme_screenshots/06_Service_Account_Access.png" width="650" alt="Grant this service account access to the project">
 
 
 4. On the **API & Services Credentials** screen, select the service account you just created.
 
 <!-- ![Select the service account](/readme_screenshots/7_Select_Service_Account.png?raw=true) -->
 
-<img src="readme_screenshots/7_Select_Service_Account.png" width="650" alt="Select the service account">
+<img src="readme_screenshots/07_Select_Service_Account.png" width="650" alt="Select the service account">
 
 
 5. Click **ADD KEY** -> **Create new key** -> **JSON key**. Download the service account credential JSON file.
 
 <!-- ![ADD KEY -> Create new key](/readme_screenshots/8_Add_Key.png?raw=true) -->
 
-<img src="readme_screenshots/8_Add_Key.png" width="650" alt="ADD KEY -> Create new key">
+<img src="readme_screenshots/08_Add_Key.png" width="650" alt="ADD KEY -> Create new key">
 
 <!-- ![JSON key](/readme_screenshots/9_JSON_Key.png?raw=true) -->
 
-<img src="readme_screenshots/9_JSON_Key.png" width="650" alt="JSON key">
+<img src="readme_screenshots/09_JSON_Key.png" width="650" alt="JSON key">
 
 <!-- ![Download the service account credential JSON file](/readme_screenshots/10_Download_Client_Secrets.png?raw=true) -->
 
@@ -122,8 +122,8 @@ Sample [tap-config.json file](/sample_config/target-tap-config.json) configures 
 }
 ```
 
-Sample [state.json file](/sample_config/state.json) is now just a empty JSON file `{}`, and it will be updated when the tap runs. 
-
+- Sample [state.json file](/sample_config/state.json) is now just a empty JSON file `{}`, and it will be written or updated when the tap runs. 
+- This is an optional file.
 - The tap will write the date into **state.json** file, indicating when the data loading stopped at. 
 - Next time you run the tap, it'll continue from this date in the state file. If **state.json** file is provided, then it takes presedence over the "start_date" in the tap config file.
 
