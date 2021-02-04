@@ -30,6 +30,7 @@ def cleanup_record(schema, record):
 
         else:
             nr[nkey] = value
+            # nr[nkey] = convert_python_type(schema, key, value)
 
     return nr
 
@@ -160,6 +161,31 @@ def convert_field_type(field_property):
 
     return field_type_BigQuery
 
+# def convert_python_type(schema, field, value):
+#     """
+#     :param schema: JSON schemna
+#     :param field: field name (key from record)
+#     :param schema: JSON schemna
+#     :return: value converted to proper python instance type
+#     """
+#     if field in ["_time_extracted", "_time_loaded"]:
+#         return value
+#     conversion_dict = {"string": str,
+#                        "number": float,
+#                        "integer": int,
+#                        "boolean": bool
+#                        }
+#     try:
+#         field_type = schema.get("properties", schema.get("items", {}).get("properties", {})).get(field, {}).get("type")
+#         if isinstance(field_type, list):
+#             if "null" in field_type: field_type.remove("null")
+#             p_type = conversion_dict[field_type[0]]
+#         else:
+#             p_type = conversion_dict[field_type]
+#         return p_type(value)
+#     except Exception as e:
+#         raise e
+
 
 def determine_field_mode(field_name, field_property):
 
@@ -237,17 +263,16 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
 
     required_fields = set(key_properties) if key_properties else set()
 
-    schema_BigQuery = []
+    schema_bigquery = []
 
-    for field_name, field_property in schema.get("properties", schema.get("items", {}).get(
-            "properties")).items():
+    for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties")).items():
 
-        schema_BigQuery.append(build_field(field_name, field_property))
+        schema_bigquery.append(build_field(field_name, field_property))
 
     if add_metadata:
 
         for field_name in METADATA_FIELDS:
-            schema_BigQuery.append(SchemaField(name=field_name,
+            schema_bigquery.append(SchemaField(name=field_name,
                                                field_type=METADATA_FIELDS[field_name]["bq_type"],
                                                mode='NULLABLE',
                                                description=None,
@@ -255,6 +280,6 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
                                                policy_tags=None)
                                    )
 
-    return schema_BigQuery
+    return schema_bigquery
 
 

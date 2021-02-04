@@ -27,9 +27,20 @@ class BaseProcessHandler(object):
         self.table_prefix = kwargs.get("table_prefix") or ""
         self.table_suffix = kwargs.get("table_suffix") or ""
 
+        # LoadJobProcessHandler kwargs
+        self.truncate = kwargs.get("truncate", False)
+        self.add_metadata_columns = kwargs.get("add_metadata_columns", True)
+        self.validate_records = kwargs.get("validate_records", True)
+        self.table_configs = kwargs.get("table_configs", {}) or {}
+        self.INIT_STATE = kwargs.get("initial_state") or {}
+        # PartialLoadJobProcessHandler kwargs
+        self.max_cache = kwargs.get("max_cache", 1024 * 1024 * 50)
+
         self.tables = {}
         self.schemas = {}
         self.key_properties = {}
+        self.bq_schemas = {}
+        self.bq_schema_dicts = {}
 
     def emit_initial_state(self):
         return True
@@ -53,26 +64,45 @@ class BaseProcessHandler(object):
         self.schemas[msg.stream] = msg.schema
         self.key_properties[msg.stream] = msg.key_properties
 
+        schema_simplified = simplify(self.schemas[msg.stream])
+        schema = build_schema(schema=schema_simplified,
+                              key_properties=msg.key_properties,
+                              add_metadata=self.add_metadata_columns,
+                              force_fields=self.table_configs.get(msg.stream, {}).get("force_fields", {}))
+        self.bq_schema_dicts[msg.stream] = self._build_bq_schema_dict(schema)
+        self.bq_schemas[msg.stream] = schema
+
         yield from ()
 
     def on_stream_end(self):
         yield from ()
 
+    def _build_bq_schema_dict(self, schema):  # could move this to derived class but seems right to handle in base
+        schema_dict = {}
+        for field in schema:
+            f = field if isinstance(field, dict) else field.to_api_repr()
+            schema_dict[f["name"]] = f
+            if f.get("fields"):
+                schema_dict[f["name"]]["fields"] = self._build_bq_schema_dict(f["fields"])
+            schema_dict[f["name"]].pop("description")
+            schema_dict[f["name"]].pop("name")
+        return schema_dict
 
 class LoadJobProcessHandler(BaseProcessHandler):
 
     def __init__(self, logger, **kwargs):
         super(LoadJobProcessHandler, self).__init__(logger, **kwargs)
 
-        self.truncate = kwargs.get("truncate", False)
+        # self.truncate = kwargs.get("truncate", False)
         self.partially_loaded_streams = set()
-        self.add_metadata_columns = kwargs.get("add_metadata_columns", True)
-        self.validate_records = kwargs.get("validate_records", True)
-        self.table_configs = kwargs.get("table_configs", {}) or {}
-
-        self.INIT_STATE = kwargs.get("initial_state") or {}
+        # self.add_metadata_columns = kwargs.get("add_metadata_columns", True)
+        # self.validate_records = kwargs.get("validate_records", True)
+        # self.table_configs = kwargs.get("table_configs", {}) or {}
+        #
+        # self.INIT_STATE = kwargs.get("initial_state") or {}
         self.STATE = State(**self.INIT_STATE)
 
+        self.bq_schema_dicts = {}
         self.rows = {}
 
         self.client = bigquery.Client(
@@ -108,6 +138,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
             msg.record["_time_loaded"] = datetime.utcnow().isoformat()
 
         nr = cleanup_record(schema, msg.record)
+        nr = self._format_record_to_schema(nr, self.bq_schema_dicts[stream])
 
         data = bytes(json.dumps(nr, cls=DecimalEncoder) + "\n", "UTF-8")
         self.rows[stream].write(data)
@@ -137,10 +168,10 @@ class LoadJobProcessHandler(BaseProcessHandler):
                     client=self.client,
                     dataset=self.dataset,
                     table_name=tmp_table_name,
-                    table_schema=self.schemas[stream],
+                    table_schema=self.bq_schemas[stream],
                     table_config=self.table_configs.get(stream, {}),
-                    key_props=self.key_properties[stream],
-                    metadata_columns=self.add_metadata_columns,
+                    # key_props=self.key_properties[stream],
+                    # metadata_columns=self.add_metadata_columns,
                     truncate=self.truncate if stream not in self.partially_loaded_streams else False,
                     rows=self.rows[stream]
                 )
@@ -177,8 +208,8 @@ class LoadJobProcessHandler(BaseProcessHandler):
                     table_name,
                     table_schema,
                     table_config,
-                    key_props,
-                    metadata_columns,
+                    # key_props,
+                    # metadata_columns,
                     truncate,
                     rows):
         logger = self.logger
@@ -186,12 +217,12 @@ class LoadJobProcessHandler(BaseProcessHandler):
         cluster_fields = table_config.get("cluster_fields", None)
         force_fields = table_config.get("force_fields", {})
 
-        schema_simplified = simplify(table_schema)
-        schema = build_schema(schema_simplified, key_properties=key_props, add_metadata=metadata_columns,
-                              force_fields=force_fields)
+        # schema_simplified = simplify(table_schema)
+        # schema = build_schema(schema_simplified, key_properties=key_props, add_metadata=metadata_columns,
+        #                       force_fields=force_fields)
         load_config = LoadJobConfig()
         load_config.ignore_unknown_values = True
-        load_config.schema = schema
+        load_config.schema = table_schema
         if partition_field:
             load_config.time_partitioning = bigquery.table.TimePartitioning(
                 type_=bigquery.table.TimePartitioningType.DAY,
@@ -235,12 +266,48 @@ class LoadJobProcessHandler(BaseProcessHandler):
 
             raise err
 
+    def _format_record_to_schema(self, record, bq_schema):
+        conversion_dict = {"BYTES": bytes,
+                           "STRING": str,
+                           "TIME": str,
+                           "TIMESTAMP": str,
+                           "DATE": str,
+                           "DATETIME": str,
+                           "FLOAT": float,
+                           "NUMERIC": float,
+                           "BIGNUMERIC": float,
+                           "INTEGER": int,
+                           "BOOLEAN": bool,
+                           "GEOGRAPHY": tuple # not sure about this one
+                           }
+        try:
+            if isinstance(record, list):
+                new_record = []
+                for r in record:
+                    if isinstance(r, dict):
+                        r = self._format_record_to_schema(r, bq_schema)
+                        new_record.append(r)
+                    else:
+                        raise Exception(f"unhandled instance of list object in record: {r}")
+                return new_record
+            elif isinstance(record, dict):
+                for k,v in record.items():
+                    if bq_schema[k].get("fields"):
+                        record[k] = self._format_record_to_schema(record[k], bq_schema[k]["fields"])
+                    elif bq_schema[k].get("mode") == "REPEATED":
+                        record[k] = [conversion_dict[bq_schema[k]["type"]](vi) for vi in v]
+                    else:
+                        record[k] = conversion_dict[bq_schema[k]["type"]](v)
+        except Exception as e:
+            raise e
+        return record
+
 class PartialLoadJobProcessHandler(LoadJobProcessHandler):
 
     def __init__(self, logger, **kwargs):
         super(PartialLoadJobProcessHandler, self).__init__(logger, **kwargs)
 
-        self.max_cache = kwargs.get("max_cache", 1024 * 1024 * 50)
+        # self.max_cache = kwargs.get("max_cache", 1024 * 1024 * 50)
 
     def handle_state_message(self, msg):
         assert isinstance(msg, singer.StateMessage)
