@@ -12,7 +12,7 @@ from google.cloud.bigquery.job import SourceFormat
 from jsonschema import validate
 
 from target_bigquery.encoders import DecimalEncoder
-from target_bigquery.schema import build_schema, cleanup_record
+from target_bigquery.schema import build_schema, cleanup_record, format_record_to_schema
 from target_bigquery.state import State
 from target_bigquery.simplify_json_schema import simplify
 
@@ -88,6 +88,7 @@ class BaseProcessHandler(object):
             schema_dict[f["name"]].pop("name")
         return schema_dict
 
+
 class LoadJobProcessHandler(BaseProcessHandler):
 
     def __init__(self, logger, **kwargs):
@@ -138,7 +139,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
             msg.record["_time_loaded"] = datetime.utcnow().isoformat()
 
         nr = cleanup_record(schema, msg.record)
-        nr = self._format_record_to_schema(nr, self.bq_schema_dicts[stream])
+        nr = format_record_to_schema(nr, self.bq_schema_dicts[stream])
 
         data = bytes(json.dumps(nr, cls=DecimalEncoder) + "\n", "UTF-8")
         self.rows[stream].write(data)
@@ -266,41 +267,6 @@ class LoadJobProcessHandler(BaseProcessHandler):
 
             raise err
 
-    def _format_record_to_schema(self, record, bq_schema):
-        conversion_dict = {"BYTES": bytes,
-                           "STRING": str,
-                           "TIME": str,
-                           "TIMESTAMP": str,
-                           "DATE": str,
-                           "DATETIME": str,
-                           "FLOAT": float,
-                           "NUMERIC": float,
-                           "BIGNUMERIC": float,
-                           "INTEGER": int,
-                           "BOOLEAN": bool,
-                           "GEOGRAPHY": tuple # not sure about this one
-                           }
-        try:
-            if isinstance(record, list):
-                new_record = []
-                for r in record:
-                    if isinstance(r, dict):
-                        r = self._format_record_to_schema(r, bq_schema)
-                        new_record.append(r)
-                    else:
-                        raise Exception(f"unhandled instance of list object in record: {r}")
-                return new_record
-            elif isinstance(record, dict):
-                for k,v in record.items():
-                    if bq_schema[k].get("fields"):
-                        record[k] = self._format_record_to_schema(record[k], bq_schema[k]["fields"])
-                    elif bq_schema[k].get("mode") == "REPEATED":
-                        record[k] = [conversion_dict[bq_schema[k]["type"]](vi) for vi in v]
-                    else:
-                        record[k] = conversion_dict[bq_schema[k]["type"]](v)
-        except Exception as e:
-            raise e
-        return record
 
 class PartialLoadJobProcessHandler(LoadJobProcessHandler):
 

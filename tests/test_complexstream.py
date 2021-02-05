@@ -30,7 +30,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         self.set_cli_args(
             stdin="./rsc/facebook_stream.json",
             config="../sandbox/target_config.json",
-            tables="./rsc/simple_stream_table_config.json",
+            tables="./rsc/facebook_stream_tables_config.json",
             processhandler="load-job"
         )
 

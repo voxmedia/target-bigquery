@@ -30,7 +30,6 @@ def cleanup_record(schema, record):
 
         else:
             nr[nkey] = value
-            # nr[nkey] = convert_python_type(schema, key, value)
 
     return nr
 
@@ -161,31 +160,6 @@ def convert_field_type(field_property):
 
     return field_type_BigQuery
 
-# def convert_python_type(schema, field, value):
-#     """
-#     :param schema: JSON schemna
-#     :param field: field name (key from record)
-#     :param schema: JSON schemna
-#     :return: value converted to proper python instance type
-#     """
-#     if field in ["_time_extracted", "_time_loaded"]:
-#         return value
-#     conversion_dict = {"string": str,
-#                        "number": float,
-#                        "integer": int,
-#                        "boolean": bool
-#                        }
-#     try:
-#         field_type = schema.get("properties", schema.get("items", {}).get("properties", {})).get(field, {}).get("type")
-#         if isinstance(field_type, list):
-#             if "null" in field_type: field_type.remove("null")
-#             p_type = conversion_dict[field_type[0]]
-#         else:
-#             p_type = conversion_dict[field_type]
-#         return p_type(value)
-#     except Exception as e:
-#         raise e
-
 
 def determine_field_mode(field_name, field_property):
 
@@ -283,3 +257,40 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
     return schema_bigquery
 
 
+
+def format_record_to_schema(record, bq_schema):
+    conversion_dict = {"BYTES": bytes,
+                       "STRING": str,
+                       "TIME": str,
+                       "TIMESTAMP": str,
+                       "DATE": str,
+                       "DATETIME": str,
+                       "FLOAT": float,
+                       "NUMERIC": float,
+                       "BIGNUMERIC": float,
+                       "INTEGER": int,
+                       "BOOLEAN": bool,
+                       "GEOGRAPHY": tuple  # not sure about this one
+                       }
+    if isinstance(record, list):
+        new_record = []
+        for r in record:
+            if isinstance(r, dict):
+                r = format_record_to_schema(r, bq_schema)
+                new_record.append(r)
+            else:
+                raise Exception(f"unhandled instance of list object in record: {r}")
+        return new_record
+    elif isinstance(record, dict):
+        for k, v in record.items():
+            if k not in bq_schema:
+                record.pop(k)
+            elif bq_schema[k].get("fields"):
+                # mode: REPEATED, type: NULLABLE || mode: REPEATED: type: REPEATED
+                record[k] = format_record_to_schema(record[k], bq_schema[k]["fields"])
+            elif bq_schema[k].get("mode") == "REPEATED":
+                # mode: REPEATED, type: [any]
+                record[k] = [conversion_dict[bq_schema[k]["type"]](vi) for vi in v]
+            else:
+                record[k] = conversion_dict[bq_schema[k]["type"]](v)
+    return record
