@@ -250,8 +250,8 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
         required_fields.update(schema["required"])
 
     for key, props in schema.get("properties",
-                                 schema.get("items", {}).get("properties")
-                                 ).items():  # schema["properties"].items():
+                                 schema.get("items", {}).get("properties", {})
+                                 ).items():
 
         if key in force_fields:
             SCHEMA.append(
