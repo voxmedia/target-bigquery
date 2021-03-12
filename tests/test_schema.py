@@ -542,6 +542,8 @@ E                                    AttributeError: 'NoneType' object has no at
 
     def test_shopify_products_new_conversion(self):
 
+        """success"""
+
         list_of_schema_inputs = [shopify_products
                                  ]
         for next_schema_input in list_of_schema_inputs:
@@ -658,6 +660,41 @@ E           KeyError: 'object'
         """
 
         list_of_schema_inputs = [shopify_metafields_fixed
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                     add_metadata=True)
+            assert schema_2_built_new_method
+
+    def test_shopify_order_refunds_new_conversion(self):
+
+        """success"""
+
+        list_of_schema_inputs = [shopify_order_refunds
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                     add_metadata=True)
+            assert schema_2_built_new_method
+
+
+    def test_shopify_collects_new_conversion(self):
+
+        """success"""
+
+        list_of_schema_inputs = [shopify_collects
                                  ]
         for next_schema_input in list_of_schema_inputs:
             schema_0_input = next_schema_input

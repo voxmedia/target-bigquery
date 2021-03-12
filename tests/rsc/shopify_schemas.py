@@ -17229,6 +17229,999 @@ shopify_metafields_fixed = """{"type":"SCHEMA",
     "replication_method": "INCREMENTAL"
 }"""
 
-# shopify_order_refunds = """{"type":"SCHEMA",
-#
-# shopify_collects = """{"type":"SCHEMA",
+
+shopify_order_refunds = """{"type":"SCHEMA",
+    "stream": "order_refunds",
+    "tap_stream_id": "order_refunds",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "order_id": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "restock": {
+                "type": [
+                    "null",
+                    "boolean"
+                ]
+            },
+            "order_adjustments": {
+                "items": {
+                    "properties": {
+                        "order_id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "tax_amount": {
+                            "type": [
+                                "null",
+                                "number"
+                            ],
+                            "multipleOf": 1e-10
+                        },
+                        "refund_id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "amount": {
+                            "type": [
+                                "null",
+                                "number"
+                            ],
+                            "multipleOf": 1e-10
+                        },
+                        "kind": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "reason": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    },
+                    "type": [
+                        "null",
+                        "object"
+                    ]
+                },
+                "type": [
+                    "null",
+                    "array"
+                ]
+            },
+            "processed_at": {
+                "type": [
+                    "null",
+                    "string"
+                ],
+                "format": "date-time"
+            },
+            "user_id": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "note": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "id": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "created_at": {
+                "type": [
+                    "null",
+                    "string"
+                ],
+                "format": "date-time"
+            },
+            "admin_graphql_api_id": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "refund_line_items": {
+                "type": [
+                    "null",
+                    "array"
+                ],
+                "items": {
+                    "properties": {
+                        "location_id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "subtotal_set": {
+                            "properties": {
+                                "shop_money": {
+                                    "properties": {
+                                        "currency_code": {
+                                            "type": [
+                                                "null",
+                                                "string"
+                                            ]
+                                        },
+                                        "amount": {
+                                            "type": [
+                                                "null",
+                                                "number"
+                                            ]
+                                        }
+                                    },
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
+                                },
+                                "presentment_money": {
+                                    "properties": {
+                                        "currency_code": {
+                                            "type": [
+                                                "null",
+                                                "string"
+                                            ]
+                                        },
+                                        "amount": {
+                                            "type": [
+                                                "null",
+                                                "number"
+                                            ]
+                                        }
+                                    },
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
+                                }
+                            },
+                            "type": [
+                                "null",
+                                "object"
+                            ]
+                        },
+                        "total_tax_set": {
+                            "properties": {
+                                "shop_money": {
+                                    "properties": {
+                                        "currency_code": {
+                                            "type": [
+                                                "null",
+                                                "string"
+                                            ]
+                                        },
+                                        "amount": {
+                                            "type": [
+                                                "null",
+                                                "number"
+                                            ]
+                                        }
+                                    },
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
+                                },
+                                "presentment_money": {
+                                    "properties": {
+                                        "currency_code": {
+                                            "type": [
+                                                "null",
+                                                "string"
+                                            ]
+                                        },
+                                        "amount": {
+                                            "type": [
+                                                "null",
+                                                "number"
+                                            ]
+                                        }
+                                    },
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
+                                }
+                            },
+                            "type": [
+                                "null",
+                                "object"
+                            ]
+                        },
+                        "line_item_id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "total_tax": {
+                            "type": [
+                                "null",
+                                "number"
+                            ]
+                        },
+                        "quantity": {
+                            "type": [
+                                "null",
+                                "integer"
+                            ]
+                        },
+                        "id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "line_item": {
+                            "properties": {
+                                "gift_card": {
+                                    "type": [
+                                        "null",
+                                        "boolean"
+                                    ]
+                                },
+                                "price": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "tax_lines": {
+                                    "type": [
+                                        "null",
+                                        "array"
+                                    ],
+                                    "items": {
+                                        "properties": {
+                                            "price_set": {
+                                                "properties": {
+                                                    "shop_money": {
+                                                        "properties": {
+                                                            "currency_code": {
+                                                                "type": [
+                                                                    "null",
+                                                                    "string"
+                                                                ]
+                                                            },
+                                                            "amount": {
+                                                                "type": [
+                                                                    "null",
+                                                                    "number"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "type": [
+                                                            "null",
+                                                            "object"
+                                                        ]
+                                                    },
+                                                    "presentment_money": {
+                                                        "properties": {
+                                                            "currency_code": {
+                                                                "type": [
+                                                                    "null",
+                                                                    "string"
+                                                                ]
+                                                            },
+                                                            "amount": {
+                                                                "type": [
+                                                                    "null",
+                                                                    "number"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "type": [
+                                                            "null",
+                                                            "object"
+                                                        ]
+                                                    }
+                                                },
+                                                "type": [
+                                                    "null",
+                                                    "object"
+                                                ]
+                                            },
+                                            "price": {
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
+                                            },
+                                            "title": {
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
+                                            },
+                                            "rate": {
+                                                "type": [
+                                                    "null",
+                                                    "number"
+                                                ]
+                                            }
+                                        },
+                                        "type": [
+                                            "null",
+                                            "object"
+                                        ]
+                                    }
+                                },
+                                "fulfillment_service": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "sku": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "fulfillment_status": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "properties": {
+                                    "type": [
+                                        "null",
+                                        "array"
+                                    ],
+                                    "items": {
+                                        "properties": {
+                                            "name": {
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
+                                            },
+                                            "value": {
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
+                                            }
+                                        },
+                                        "type": [
+                                            "null",
+                                            "object"
+                                        ]
+                                    }
+                                },
+                                "quantity": {
+                                    "type": [
+                                        "null",
+                                        "integer"
+                                    ]
+                                },
+                                "variant_id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "grams": {
+                                    "type": [
+                                        "null",
+                                        "integer"
+                                    ]
+                                },
+                                "requires_shipping": {
+                                    "type": [
+                                        "null",
+                                        "boolean"
+                                    ]
+                                },
+                                "vendor": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "price_set": {
+                                    "properties": {
+                                        "shop_money": {
+                                            "properties": {
+                                                "currency_code": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            },
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ]
+                                        },
+                                        "presentment_money": {
+                                            "properties": {
+                                                "currency_code": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            },
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ]
+                                        }
+                                    },
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
+                                },
+                                "variant_inventory_management": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "pre_tax_price": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "variant_title": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "total_discount_set": {
+                                    "properties": {
+                                        "shop_money": {
+                                            "properties": {
+                                                "currency_code": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            },
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ]
+                                        },
+                                        "presentment_money": {
+                                            "properties": {
+                                                "currency_code": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            },
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ]
+                                        }
+                                    },
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
+                                },
+                                "discount_allocations": {
+                                    "type": [
+                                        "null",
+                                        "array"
+                                    ],
+                                    "items": {
+                                        "properties": {
+                                            "amount": {
+                                                "type": [
+                                                    "null",
+                                                    "number"
+                                                ]
+                                            },
+                                            "amount_set": {
+                                                "properties": {
+                                                    "shop_money": {
+                                                        "properties": {
+                                                            "currency_code": {
+                                                                "type": [
+                                                                    "null",
+                                                                    "string"
+                                                                ]
+                                                            },
+                                                            "amount": {
+                                                                "type": [
+                                                                    "null",
+                                                                    "number"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "type": [
+                                                            "null",
+                                                            "object"
+                                                        ]
+                                                    },
+                                                    "presentment_money": {
+                                                        "properties": {
+                                                            "currency_code": {
+                                                                "type": [
+                                                                    "null",
+                                                                    "string"
+                                                                ]
+                                                            },
+                                                            "amount": {
+                                                                "type": [
+                                                                    "null",
+                                                                    "number"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "type": [
+                                                            "null",
+                                                            "object"
+                                                        ]
+                                                    }
+                                                },
+                                                "type": [
+                                                    "null",
+                                                    "object"
+                                                ]
+                                            },
+                                            "discount_application_index": {
+                                                "type": [
+                                                    "null",
+                                                    "integer"
+                                                ]
+                                            }
+                                        },
+                                        "type": [
+                                            "null",
+                                            "object"
+                                        ]
+                                    }
+                                },
+                                "pre_tax_price_set": {
+                                    "properties": {
+                                        "shop_money": {
+                                            "properties": {
+                                                "currency_code": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            },
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ]
+                                        },
+                                        "presentment_money": {
+                                            "properties": {
+                                                "currency_code": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            },
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ]
+                                        }
+                                    },
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ]
+                                },
+                                "fulfillable_quantity": {
+                                    "type": [
+                                        "null",
+                                        "integer"
+                                    ]
+                                },
+                                "id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "admin_graphql_api_id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "total_discount": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "name": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "product_exists": {
+                                    "type": [
+                                        "null",
+                                        "boolean"
+                                    ]
+                                },
+                                "taxable": {
+                                    "type": [
+                                        "null",
+                                        "boolean"
+                                    ]
+                                },
+                                "product_id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "title": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                }
+                            },
+                            "type": [
+                                "null",
+                                "object"
+                            ]
+                        },
+                        "subtotal": {
+                            "type": [
+                                "null",
+                                "number"
+                            ]
+                        },
+                        "restock_type": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    },
+                    "type": [
+                        "null",
+                        "object"
+                    ]
+                }
+            }
+        }
+    },
+    "metadata": [
+        {
+            "breadcrumb": [],
+            "metadata": {
+                "table-key-properties": [
+                    "id"
+                ],
+                "forced-replication-method": "INCREMENTAL",
+                "valid-replication-keys": [
+                    "created_at"
+                ],
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "order_id"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "restock"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "order_adjustments"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "processed_at"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "user_id"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "note"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "id"
+            ],
+            "metadata": {
+                "inclusion": "automatic"
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "created_at"
+            ],
+            "metadata": {
+                "inclusion": "automatic"
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "admin_graphql_api_id"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "refund_line_items"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        }
+    ],
+    "key_properties": [
+        "id"
+    ],
+    "replication_key": "created_at",
+    "replication_method": "INCREMENTAL"
+}"""
+
+
+
+shopify_collects = """{"type":"SCHEMA",
+    "stream": "collects",
+    "tap_stream_id": "collects",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "collection_id": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "created_at": {
+                "type": [
+                    "null",
+                    "string"
+                ],
+                "format": "date-time"
+            },
+            "position": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "product_id": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "sort_value": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "updated_at": {
+                "type": [
+                    "null",
+                    "string"
+                ],
+                "format": "date-time"
+            }
+        }
+    },
+    "metadata": [
+        {
+            "breadcrumb": [],
+            "metadata": {
+                "table-key-properties": [
+                    "id"
+                ],
+                "forced-replication-method": "INCREMENTAL",
+                "valid-replication-keys": [
+                    "updated_at"
+                ],
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "id"
+            ],
+            "metadata": {
+                "inclusion": "automatic"
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "collection_id"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "created_at"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "position"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "product_id"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "sort_value"
+            ],
+            "metadata": {
+                "inclusion": "available",
+                "selected": true
+            }
+        },
+        {
+            "breadcrumb": [
+                "properties",
+                "updated_at"
+            ],
+            "metadata": {
+                "inclusion": "automatic"
+            }
+        }
+    ],
+    "key_properties": [
+        "id"
+    ],
+    "replication_key": "updated_at",
+    "replication_method": "INCREMENTAL"
+}"""
