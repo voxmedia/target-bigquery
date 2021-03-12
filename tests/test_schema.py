@@ -284,7 +284,9 @@ class TestStream(unittestcore.BaseUnitTest):
 
 
 
-    def test_shopify_malformed_schema_old_conversion(self):
+    def test_shopify_orders_malformed_schema_old_conversion(self):
+
+        """Schema conversion succeeds. Desired behaviour: raise an exception, say that this is incomplete schema"""
 
         list_of_schema_inputs = [shopify_orders_malformed
                                  ]
@@ -300,7 +302,12 @@ class TestStream(unittestcore.BaseUnitTest):
 
 
 
-    def test_shopify_malformed_schema_new_conversion(self):
+    def test_shopify_orders_malformed_schema_new_conversion(self):
+
+        """Fails. This is malformed schema.
+        TODO: Desired behaviour: give a better error message. raise an exception, say that this is incomplete schema.
+        Do schema validation in the very beginning,
+        """
 
         list_of_schema_inputs = [shopify_orders_malformed
                                  ]
@@ -315,9 +322,9 @@ class TestStream(unittestcore.BaseUnitTest):
             schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
                                                          add_metadata=True)
 
+    def test_shopify_orders_fixed_schema_new_conversion(self):
 
-
-    def test_shopify_fixed_schema_new_conversion(self):
+        """succeeds"""
 
         list_of_schema_inputs = [shopify_orders_fixed
                                  ]
@@ -332,4 +339,333 @@ class TestStream(unittestcore.BaseUnitTest):
             schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
                                                          add_metadata=True)
 
+            assert schema_2_built_new_method
+
+    def test_shopify_customers_new_conversion(self):
+
+        "succeeds"
+
+        list_of_schema_inputs = [shopify_customers
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+            assert schema_2_built_new_method
+
+
+    def test_shopify_customers_old_conversion(self):
+
+        """strangely, this test fails, which is odd, the pipeline with this old schema conversion and with this schema should be running fine
+
+        Old conversion test appears to be failing at this anyOf column:
+
+             "accepts_marketing_updated_at": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+
+        """
+
+        list_of_schema_inputs = [shopify_customers
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+
+            assert schema_3_built_old_method
+
+
+
+    def test_shopify_custom_collection_new_conversion(self):
+
+        "succeeds"
+
+        list_of_schema_inputs = [shopify_custom_collections
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+            assert schema_2_built_new_method
+
+
+
+    def test_shopify_custom_collections_old_conversion(self):
+
+        """succeeds"""
+
+        list_of_schema_inputs = [shopify_custom_collections
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            assert schema_3_built_old_method
+
+
+    def test_shopify_abandoned_checkouts_malformed_new_conversion(self):
+
+        """fails
+
+        it also has empty properties
+,
+                    {
+                      "properties": {},
+                      "type": [
+                        "null",
+                        "object"
+                      ]
+                    }
+        schema invalid
+
+        """
+
+        list_of_schema_inputs = [shopify_abandoned_checkouts_malformed
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+            assert schema_2_built_new_method
+
+    def test_shopify_abandoned_checkouts_malformed_old_conversion(self):
+
+        """interestingly, it fails
+            for sf in build_schema_old(prop, add_metadata=False):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+schema = {'format': 'date-time', 'type': 'string'}, key_properties = None
+add_metadata = False, force_fields = {}
+
+    def build_schema_old(schema, key_properties=None, add_metadata=True, force_fields={}):
+        SCHEMA = []
+
+        required_fields = set(key_properties) if key_properties else set()
+        if "required" in schema:
+            required_fields.update(schema["required"])
+
+>       for key, props in schema.get("properties",
+                                     schema.get("items", {}).get("properties")
+                                     ).items():  # schema["properties"].items():
+E                                    AttributeError: 'NoneType' object has no attribute 'items'
+
+        """
+
+        list_of_schema_inputs = [shopify_abandoned_checkouts_malformed
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            assert schema_3_built_old_method
+
+    def test_shopify_abandoned_checkouts_fixed_new_conversion(self):
+
+        """
+        succeeds
+
+        removed this :
+
+        ,
+                    {
+                      "properties": {},
+                      "type": [
+                        "null",
+                        "object"
+                      ]
+                    }
+
+        """
+
+        list_of_schema_inputs = [shopify_abandoned_checkouts_fixed
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+            assert schema_2_built_new_method
+
+
+    def test_shopify_products_new_conversion(self):
+
+        list_of_schema_inputs = [shopify_products
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+            assert schema_2_built_new_method
+
+
+    def test_shopify_transactions_new_conversion(self):
+
+        list_of_schema_inputs = [shopify_transactions
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+            assert schema_2_built_new_method
+
+    def test_shopify_metafields_malformed_new_conversion(self):
+
+        """
+        this column causes it to break
+
+          "value": {
+                "type": [
+                    "null",
+                    "integer",
+                    "object",
+                    "string"
+                ],
+                "properties": {}
+            }
+
+        error:
+
+                prioritization_dict = {"string": 1,
+                               "number": 2,
+                               "integer": 3,
+                               "boolean": 4}
+
+        anyOf_data_types = {}
+
+        for i in range(0, len(field_property['anyOf'])):
+
+            data_type = field_property['anyOf'][i]['type'][0]
+
+>           anyOf_data_types.update({data_type: prioritization_dict[data_type]})
+E           KeyError: 'object'
+
+
+        2 things:
+
+        TODO: do I need to add "object" to prioritization??
+
+        TODO: this schema needs to trigger an "invalid/incomplete schema" exception
+        """
+
+        list_of_schema_inputs = [shopify_metafields_malformed
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+            assert schema_2_built_new_method
+
+    def test_shopify_metafields_fixed_new_conversion(self):
+
+        """
+        replaced this :
+            "value": {
+                "type": [
+                    "null",
+                    "integer",
+                    "object",
+                    "string"
+                ],
+                "properties": {}
+            }
+
+
+        with this:
+            "value": {
+                "type": [
+                    "null",
+                    "integer",
+                    "object",
+                    "string"
+                ]
+            }
+
+
+            removed "properties": {}
+
+            still fails with this same error as above
+        """
+
+        list_of_schema_inputs = [shopify_metafields_fixed
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                     add_metadata=True)
             assert schema_2_built_new_method
