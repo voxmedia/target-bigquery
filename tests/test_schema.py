@@ -9,6 +9,8 @@ from tests import unittestcore
 
 from tests.rsc.input_json_schemas import *
 
+from tests.rsc.shopify_schemas import *
+
 from tests.utils import convert_list_of_schema_fielts_to_list_of_lists
 
 
@@ -211,7 +213,7 @@ class TestStream(unittestcore.BaseUnitTest):
 
         # https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#schema.fields.type
 
-        schema_0_input = HubSpot_contact_lists_schema_fixed_test 
+        schema_0_input = HubSpot_contact_lists_schema_fixed_test
 
         msg = singer.parse_message(schema_0_input)
 
@@ -282,8 +284,52 @@ class TestStream(unittestcore.BaseUnitTest):
 
 
 
+    def test_shopify_malformed_schema_old_conversion(self):
+
+        list_of_schema_inputs = [shopify_orders_malformed
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
+
+            schema_3_built_old_method
 
 
 
+    def test_shopify_malformed_schema_new_conversion(self):
+
+        list_of_schema_inputs = [shopify_orders_malformed
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
 
 
+
+    def test_shopify_fixed_schema_new_conversion(self):
+
+        list_of_schema_inputs = [shopify_orders_fixed
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            assert schema_2_built_new_method
