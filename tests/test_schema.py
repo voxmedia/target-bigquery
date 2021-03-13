@@ -304,9 +304,9 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_shopify_orders_malformed_schema_new_conversion(self):
 
-        """Fails. This is malformed schema.
+        """Succeeds. This is malformed schema.
         TODO: Desired behaviour: give a better error message. raise an exception, say that this is incomplete schema.
-        Do schema validation in the very beginning,
+        Do schema validation in the very beginning
         """
 
         list_of_schema_inputs = [shopify_orders_malformed
@@ -575,6 +575,9 @@ E                                    AttributeError: 'NoneType' object has no at
                                                          add_metadata=True)
             assert schema_2_built_new_method
 
+
+
+
     def test_shopify_metafields_malformed_new_conversion(self):
 
         """
@@ -626,7 +629,49 @@ E           KeyError: 'object'
 
             schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
                                                          add_metadata=True)
+
             assert schema_2_built_new_method
+
+
+
+    def test_shopify_metafields_malformed_old_conversion(self):
+        list_of_schema_inputs = [shopify_metafields_malformed
+                                 ]
+        for next_schema_input in list_of_schema_inputs:
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            assert schema_3_built_old_method
+
+    def test_shopify_metafields_do_results_match_old_vs_new_schema_translation(self):
+        list_of_schema_inputs = [shopify_metafields_malformed, shopify_metafields_fixed
+                                 ]
+
+        for next_schema_input in list_of_schema_inputs:
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                     add_metadata=True)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            # are results of the two methods above identical? ignore order of columns and case
+            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+
+            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+
+            assert schema_built_new_method_sorted == schema_built_old_method_sorted
+
+            # TODO: check data types
 
     def test_shopify_metafields_fixed_new_conversion(self):
 
@@ -657,6 +702,34 @@ E           KeyError: 'object'
             removed "properties": {}
 
             still fails with this same error as above
+
+            error:
+
+            prioritization_dict = {"string": 1,
+                       "number": 2,
+                       "integer": 3,
+                       "boolean": 4}
+
+            anyOf_data_types = {}
+
+        for i in range(0, len(field_property['anyOf'])):
+
+            data_type = field_property['anyOf'][i]['type'][0]
+
+>           anyOf_data_types.update({data_type: prioritization_dict[data_type]})
+E           KeyError: 'object'
+
+
+            succeeds if I add object and array to prioritization dict
+                prioritization_dict = {"object": 0,
+                           "array": 1,
+                            "string": 2,
+                           "number": 3,
+                           "integer": 4,
+                           "boolean": 5,
+                           }
+
+
         """
 
         list_of_schema_inputs = [shopify_metafields_fixed

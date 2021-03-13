@@ -105,9 +105,12 @@ def prioritize_one_data_type_from_multiple_ones_in_anyOf(field_property):
     """
 
     prioritization_dict = {"string": 1,
-                           "number": 2,
+                            "number": 2,
                            "integer": 3,
-                           "boolean": 4}
+                           "boolean": 4,
+                           "object": 5,
+                           "array": 6,
+                           }
 
     anyOf_data_types = {}
 
