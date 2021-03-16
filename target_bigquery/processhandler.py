@@ -65,7 +65,7 @@ class BaseProcessHandler(object):
         self.schemas[msg.stream] = msg.schema
         self.key_properties[msg.stream] = msg.key_properties
 
-        validate_json_schema_completeness(self.schemas[msg.stream])
+        validate_json_schema_completeness(json.dumps(self.schemas[msg.stream]))
 
         schema_simplified = simplify(self.schemas[msg.stream])
         schema = build_schema(schema=schema_simplified,
