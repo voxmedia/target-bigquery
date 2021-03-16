@@ -1,3 +1,5 @@
+import pytest
+import simplejson
 import singer
 
 from target_bigquery.schema import build_schema, prioritize_one_data_type_from_multiple_ones_in_anyOf, convert_field_type
@@ -7,12 +9,46 @@ from tests.schema_old import build_schema_old
 from target_bigquery.simplify_json_schema import simplify
 from tests import unittestcore
 
+from tests.utils import convert_list_of_schema_fielts_to_list_of_lists
+
+from target_bigquery.validate_json_schema import validate_json_schema_completeness
+
 from tests.rsc.input_json_schemas import *
 
 from tests.rsc.shopify_schemas import *
 
-from tests.utils import convert_list_of_schema_fielts_to_list_of_lists
+from tests.rsc.input_json_schemas_invalid import *
 
+list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
+                         schema_nested_1,
+                         schema_nested_1_subset_items_problem,
+                         schema_nested_2,
+                         schema_nested_3_shopify,
+                         bing_ads_campaigns,
+                         bing_ads_ad_extension_detail_report,
+                         bing_ads_ad_group_performance_report,
+                         bing_ads_ad_performance_report,
+                         bing_ads_age_gender_audience_report,
+                         bing_ads_audience_performance_report,
+                         bing_ads_campaign_performance_report,
+                         bing_ads_geographic_performance_report,
+                         bing_ads_goals_and_funnels_report,
+                         bing_ads_keyword_performance_report,
+                         bing_ads_search_query_performance_report,
+                         recharge_addresses,
+                         recharge_charges,
+                         recharge_orders,
+                         shopify_orders_fixed,
+                         # shopify_customers, #old schema.py fails on this in my test. New one works
+                         shopify_custom_collections,
+                         # shopify_abandoned_checkouts_fixed, #old schema.py fails on this in my test. New one works
+                         shopify_products,
+                         shopify_transactions,
+                         # shopify_metafields_malformed, # not valid schema
+                         shopify_metafields_fixed,
+                         shopify_order_refunds,
+                         shopify_collects
+                         ]
 
 class TestStream(unittestcore.BaseUnitTest):
 
@@ -160,10 +196,6 @@ class TestStream(unittestcore.BaseUnitTest):
         assert converted_data_type == "INTEGER"
 
 
-
-
-
-
     def test_one_nested_schema_1(self):
 
         schema_0_input = schema_nested_1
@@ -238,36 +270,7 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas(self):
 
-        list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
-                                 schema_nested_1,
-                                 schema_nested_1_subset_items_problem,
-                                 schema_nested_2,
-                                 schema_nested_3_shopify,
-                                 bing_ads_campaigns,
-                                 bing_ads_ad_extension_detail_report,
-                                 bing_ads_ad_group_performance_report,
-                                 bing_ads_ad_performance_report,
-                                 bing_ads_age_gender_audience_report,
-                                 bing_ads_audience_performance_report,
-                                 bing_ads_campaign_performance_report,
-                                 bing_ads_geographic_performance_report,
-                                 bing_ads_goals_and_funnels_report,
-                                 bing_ads_keyword_performance_report,
-                                 bing_ads_search_query_performance_report,
-                                 recharge_addresses,
-                                 recharge_charges,
-                                 recharge_orders,
-                                 shopify_orders_fixed,
-                                # shopify_customers, #old schema.py fails on this in my test. New one works
-                                 shopify_custom_collections,
-                                  # shopify_abandoned_checkouts_fixed, #old schema.py fails on this in my test. New one works
-                                 shopify_products,
-                                 shopify_transactions,
-                                 shopify_metafields_malformed,
-                                 shopify_metafields_fixed,
-                                 shopify_order_refunds,
-                                 shopify_collects
-                                 ]
+
 
         for next_schema_input in list_of_schema_inputs:
 
@@ -881,3 +884,55 @@ E           KeyError: 'object'
             schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
                                                      add_metadata=True)
             assert schema_2_built_new_method
+
+
+    def test_schema_invalid_JSON(self):
+        """
+        supply invalid json file
+        raises JSONDecodeError
+        """
+        schema_0_input = schema_nested_2_invalid_JSON
+
+        # if you uncomment this line:
+        # schema_0_input = schema_nested_2
+        # this will fail the test: Failed: DID NOT RAISE <class 'simplejson.scanner.JSONDecodeError'>
+        # because this is a valid schema
+
+        with pytest.raises(simplejson.scanner.JSONDecodeError):
+            msg = singer.parse_message(schema_0_input)
+
+    def test_schema_completeness_validation_valid_input(self):
+
+        for complete_schema in list_of_schema_inputs:
+
+            validate_json_schema_completeness(complete_schema)
+
+        assert True
+
+    def test_schema_completeness_validation_empty_props(self):
+
+        invalid_schemas = [invalild_schema_top_field_empty_props,
+                           invalid_schema_subfield_empty_props,
+                           invalid_schema_under_anyOf_empty_props_example_1,
+                           invalid_schema_under_anyOf_deep_nested_empty_props,
+                           shopify_metafields_malformed]
+
+        for incomplete_schema in invalid_schemas:
+
+            with pytest.raises(ValueError, match="JSON schema has missing properties"):
+
+                validate_json_schema_completeness(incomplete_schema)
+
+    def test_schema_completeness_validation_empty_type(self):
+
+        invalid_schemas = [invalild_schema_top_field_empty_type,
+                           invalid_schema_subfield_empty_type,
+                           invalid_schema_under_anyOf_deep_nested_empty_type,
+                           invalid_schema_anyOf_discount_codes_empty_type
+                           ]
+
+        for incomplete_schema in invalid_schemas:
+
+            with pytest.raises(ValueError, match="JSON schema has missing type"):
+
+                validate_json_schema_completeness(incomplete_schema)
