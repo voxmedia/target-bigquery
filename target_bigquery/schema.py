@@ -171,10 +171,6 @@ def determine_field_mode(field_name, field_property):
     :param field_property: one nested JSON field property
     :return: BigQuery SchemaField mode
     """
-    # if field_name in required_fields:
-    #
-    #     field_mode = 'REQUIRED'
-
     if "items" in field_property:
 
         field_mode = 'REPEATED'
@@ -184,6 +180,18 @@ def determine_field_mode(field_name, field_property):
         field_mode = 'NULLABLE'
 
     return field_mode
+
+
+def replace_NULLABLE_mode_with_REQUIRED(schema_field_input):
+
+    schema_field_updated = SchemaField(name=schema_field_input.name,
+                                       field_type=schema_field_input.field_type,
+                                       mode='REQUIRED',
+                                       description=schema_field_input.description,
+                                       fields=schema_field_input.fields,
+                                       policy_tags=schema_field_input.policy_tags)
+
+    return schema_field_updated
 
 
 def build_field(field_name, field_property):
@@ -224,6 +232,8 @@ def build_field(field_name, field_property):
                 )
 
 
+
+
 def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}):
 
     """
@@ -245,16 +255,9 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
 
         next_field = build_field(field_name, field_property)
 
-
         if field_name in required_fields:
+            schema_bigquery.append(replace_NULLABLE_mode_with_REQUIRED(next_field))
 
-            next_field_updated = SchemaField(name=next_field.name,
-                                               field_type=next_field.field_type,
-                                               mode='REQUIRED',
-                                               description=next_field.description,
-                                               fields=next_field.fields,
-                                               policy_tags=next_field.policy_tags)
-            schema_bigquery.append(next_field_updated)
         else:
             schema_bigquery.append(next_field)
 

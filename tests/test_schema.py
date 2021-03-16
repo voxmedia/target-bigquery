@@ -261,7 +261,7 @@ class TestStream(unittestcore.BaseUnitTest):
                                  shopify_orders_fixed,
                                 # shopify_customers, #old schema.py fails on this in my test. New one works
                                  shopify_custom_collections,
-                                  shopify_abandoned_checkouts_fixed, #old schema.py fails on this in my test. New one works
+                                  # shopify_abandoned_checkouts_fixed, #old schema.py fails on this in my test. New one works
                                  shopify_products,
                                  shopify_transactions,
                                  shopify_metafields_malformed,
@@ -686,7 +686,7 @@ E           KeyError: 'object'
 
         2 things:
 
-        TODO: do I need to add "object" to prioritization??
+        # added "object" to prioritization?? - done
 
         TODO: this schema needs to trigger an "invalid/incomplete schema" exception
         """
