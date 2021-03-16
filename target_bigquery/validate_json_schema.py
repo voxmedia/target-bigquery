@@ -2,6 +2,10 @@ import re
 
 def validate_json_schema_completeness(schema_input_as_string):
     """
+    We already do have schema validation implemented with json schema library.
+    However, we had situations when Shopify schema had emppty properties, but existing json schema
+    validator didn't flag it as invalid/incomplete.
+    The purpose of this function is to flag schema as invalid if it is incomplete.
     :param schema_input_as_string: JSON schema formatted as string
     if schema has empty "properties", "type" or "items", fail schema completeness validation check
     """
