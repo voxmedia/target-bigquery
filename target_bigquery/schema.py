@@ -171,12 +171,11 @@ def determine_field_mode(field_name, field_property):
     :param field_property: one nested JSON field property
     :return: BigQuery SchemaField mode
     """
+    # if field_name in required_fields:
+    #
+    #     field_mode = 'REQUIRED'
 
-    if field_name in required_fields:
-
-        field_mode = 'REQUIRED'
-
-    elif "items" in field_property:
+    if "items" in field_property:
 
         field_mode = 'REPEATED'
 
@@ -244,7 +243,20 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
 
     for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties")).items():
 
-        schema_bigquery.append(build_field(field_name, field_property))
+        next_field = build_field(field_name, field_property)
+
+
+        if field_name in required_fields:
+
+            next_field_updated = SchemaField(name=next_field.name,
+                                               field_type=next_field.field_type,
+                                               mode='REQUIRED',
+                                               description=next_field.description,
+                                               fields=next_field.fields,
+                                               policy_tags=next_field.policy_tags)
+            schema_bigquery.append(next_field_updated)
+        else:
+            schema_bigquery.append(next_field)
 
     if add_metadata:
 

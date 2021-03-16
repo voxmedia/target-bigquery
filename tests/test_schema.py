@@ -256,7 +256,8 @@ class TestStream(unittestcore.BaseUnitTest):
                                  bing_ads_search_query_performance_report,
                                  recharge_addresses,
                                  recharge_charges,
-                                 recharge_orders
+                                 recharge_orders,
+                                 shopify_orders_fixed
                                  ]
 
         for next_schema_input in list_of_schema_inputs:
@@ -298,13 +299,74 @@ class TestStream(unittestcore.BaseUnitTest):
 
             schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
-            schema_3_built_old_method
+            assert schema_3_built_old_method
+
+
+    def test_shopify_orders_fixed_schema_old_and_new_conversion(self):
+
+        """Schema conversion succeeds. Desired behaviour: raise an exception, say that this is incomplete schema
+        this test compares:
+
+        Shopify orders table - fixed vs malformed
+
+        malformed schema converted using the old method
+
+        fixed schema converted with the new method
+
+        fixed schema converted with the new method
+
+        the purpose is to check 2 things:
+
+       1) it's okay to remove this from schema
+
+        ,
+                    {
+                      "properties": {},
+                      "type": [
+                        "null",
+                        "object"
+                      ]
+                    }
+
+
+        2) new schema conversion is returning the same result as the old schema conversion. Specifically, it handles mode
+        (REQUIRED vs NULL) correctly
+
+        """
+
+        schema_input_1 = shopify_orders_fixed
+
+        schema_input_2 = shopify_orders_malformed
+
+        msg_fixed = singer.parse_message(schema_input_1)
+
+        schema_3_fixed_simplified = simplify(msg_fixed.schema)
+
+        schema_4_fixed_built_new_method = build_schema(schema_3_fixed_simplified, key_properties=msg_fixed.key_properties,
+                                                     add_metadata=True)
+
+        schema_5_fixed_built_old_method = build_schema_old(msg_fixed.schema, key_properties=msg_fixed.key_properties, add_metadata=True)
+
+        # are results of the two methods above identical? ignore order of columns and case
+        schema_6_fixed_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_4_fixed_built_new_method)
+
+        schema_7_fixed_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_5_fixed_built_old_method)
+
+        msg_malformed = singer.parse_message(schema_input_2)
+
+        schema_8_malformed_built_old_method = build_schema_old(msg_malformed.schema, key_properties=msg_malformed.key_properties,
+                                                     add_metadata=True)
+
+        schema_9_malformed_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_8_malformed_built_old_method)
+
+        assert schema_6_fixed_built_new_method_sorted == schema_7_fixed_built_old_method_sorted == schema_9_malformed_built_old_method_sorted
 
 
 
     def test_shopify_orders_malformed_schema_new_conversion(self):
 
-        """Succeeds. This is malformed schema.
+        """Test succeeds. This is malformed schema.
+        subfields are not working correctly
         TODO: Desired behaviour: give a better error message. raise an exception, say that this is incomplete schema.
         Do schema validation in the very beginning
         """
@@ -321,6 +383,8 @@ class TestStream(unittestcore.BaseUnitTest):
 
             schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
                                                          add_metadata=True)
+
+            assert schema_2_built_new_method
 
     def test_shopify_orders_fixed_schema_new_conversion(self):
 
