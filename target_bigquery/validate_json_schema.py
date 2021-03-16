@@ -1,6 +1,6 @@
 import re
 
-def validate_json_schema_completeness(schema_input_as_string):
+def validate_json_schema_completeness(schema_input):
     """
     We already do have schema validation implemented with json schema library.
     However, we had situations when Shopify schema had emppty properties, but existing json schema
@@ -10,7 +10,21 @@ def validate_json_schema_completeness(schema_input_as_string):
     if schema has empty "properties", "type" or "items", fail schema completeness validation check
     """
     # strip spaces from schema file (which is treated as text)
+
+    # from json import JSONEncoder
+    #
+    # class MyEncoder(JSONEncoder):
+    #     def default(self, o):
+    #         return o.__dict__
+    #
+    # schema_input_as_string_1 = MyEncoder().encode(schema_input_as_string)
+
+    schema_input_as_string = str(schema_input)
+
     schema_input_no_spaces = re.sub(' |\n', '', schema_input_as_string)
+
+    # schema_input_no_spaces_1 = re.sub(' |\n', '', schema_input_as_string_1)
+    # schema_input_no_spaces_1 = re.sub(' |\\n', '', schema_input_no_spaces_1)
 
     completeness_validation_dict = {"properties": re.compile(r'\"properties\"\:\{\}'),
                                     "type": re.compile(r'\"type\"\:\[\]'),
