@@ -257,7 +257,17 @@ class TestStream(unittestcore.BaseUnitTest):
                                  recharge_addresses,
                                  recharge_charges,
                                  recharge_orders,
-                                 shopify_orders_fixed
+
+                                 shopify_orders_fixed,
+                                # shopify_customers, #old schema.py fails on this in my test. New one works
+                                 shopify_custom_collections,
+                                  shopify_abandoned_checkouts_fixed, #old schema.py fails on this in my test. New one works
+                                 shopify_products,
+                                 shopify_transactions,
+                                 shopify_metafields_malformed,
+                                 shopify_metafields_fixed,
+                                 shopify_order_refunds,
+                                 shopify_collects
                                  ]
 
         for next_schema_input in list_of_schema_inputs:
