@@ -257,7 +257,6 @@ class TestStream(unittestcore.BaseUnitTest):
                                  recharge_addresses,
                                  recharge_charges,
                                  recharge_orders,
-
                                  shopify_orders_fixed,
                                 # shopify_customers, #old schema.py fails on this in my test. New one works
                                  shopify_custom_collections,
@@ -311,6 +310,20 @@ class TestStream(unittestcore.BaseUnitTest):
 
             assert schema_3_built_old_method
 
+    def test_shopify_orders_do_results_match_fix_vs_malformed(self):
+
+        msg_malformed = singer.parse_message(shopify_orders_malformed)
+
+        schema_malformed_built_old_method = build_schema_old(msg_malformed.schema,
+                                                             key_properties=msg_malformed.key_properties,
+                                                             add_metadata=True)
+
+        msg_fixed = singer.parse_message(shopify_orders_fixed)
+
+        schema_malformed_built_old_method = build_schema_old(msg_fixed.schema, key_properties=msg_fixed.key_properties,
+                                                             add_metadata=True)
+
+        assert schema_malformed_built_old_method == schema_malformed_built_old_method
 
     def test_shopify_orders_fixed_schema_old_and_new_conversion(self):
 
@@ -720,6 +733,21 @@ E           KeyError: 'object'
                                                          add_metadata=True)
 
             assert schema_3_built_old_method
+
+    def test_shopify_metafields_do_results_match_fix_vs_malformed(self):
+
+        msg_malformed = singer.parse_message(shopify_metafields_malformed)
+
+        schema_malformed_built_old_method = build_schema_old(msg_malformed.schema, key_properties=msg_malformed.key_properties,
+                                                     add_metadata=True)
+
+        msg_fixed = singer.parse_message(shopify_metafields_fixed)
+
+        schema_malformed_built_old_method = build_schema_old(msg_fixed.schema, key_properties=msg_fixed.key_properties,
+                                                             add_metadata=True)
+
+        assert schema_malformed_built_old_method == schema_malformed_built_old_method
+
 
     def test_shopify_metafields_do_results_match_old_vs_new_schema_translation(self):
         list_of_schema_inputs = [shopify_metafields_malformed, shopify_metafields_fixed
