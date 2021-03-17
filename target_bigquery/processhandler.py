@@ -142,7 +142,11 @@ class LoadJobProcessHandler(BaseProcessHandler):
             msg.record["_time_loaded"] = datetime.utcnow().isoformat()
 
         nr = cleanup_record(schema, msg.record)
-        nr = format_record_to_schema(nr, self.bq_schema_dicts[stream]) if nr is not None else nr
+        # nr = format_record_to_schema(nr, self.bq_schema_dicts[stream]) if nr is not None else nr
+        try:
+            nr = format_record_to_schema(nr, self.bq_schema_dicts[stream])
+        except Exception as e:
+            print(e)
 
         data = bytes(json.dumps(nr, cls=DecimalEncoder) + "\n", "UTF-8")
         self.rows[stream].write(data)
