@@ -303,6 +303,8 @@ def format_record_to_schema(record, bq_schema):
         for k, v in record.items():
             if k not in bq_schema:
                 record.pop(k)
+            elif v is None:
+                pass
             elif bq_schema[k].get("fields"):
                 # mode: REPEATED, type: NULLABLE || mode: REPEATED: type: REPEATED
                 record[k] = format_record_to_schema(record[k], bq_schema[k]["fields"])

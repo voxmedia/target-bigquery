@@ -19,7 +19,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
         self.assertDictEqual(state, {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
 
-        table = self.client.get_table("{}.simple_stream_dev".format(self.dataset_id))
+        table = self.client.get_table("{}.simple_stream".format(self.dataset_id))
         self.assertEqual(3, table.num_rows, msg="Number of rows mismatch")
         self.assertIsNone(table.clustering_fields)
         self.assertIsNone(table.partitioning_type)
