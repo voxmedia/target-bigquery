@@ -300,7 +300,8 @@ def format_record_to_schema(record, bq_schema):
                 raise Exception(f"unhandled instance of list object in record: {r}")
         return new_record
     elif isinstance(record, dict):
-        for k, v in record.items():
+        rc = record.copy()
+        for k, v in rc.items():
             if k not in bq_schema:
                 record.pop(k)
             elif v is None:
