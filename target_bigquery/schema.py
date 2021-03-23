@@ -140,7 +140,8 @@ def convert_field_type(field_property):
                        "date": "DATE",
                        "time": "TIME",
                        "object": "RECORD",
-                       "array": "RECORD"
+                       "array": "RECORD",
+                       "bq-geography": "GEOGRAPHY",
                        }
 
     if "anyOf" in field_property:
@@ -288,8 +289,8 @@ def format_record_to_schema(record, bq_schema):
                        "BIGNUMERIC": float,
                        "INTEGER": int,
                        "BOOLEAN": bool,
-                       "GEOGRAPHY": tuple  # not sure about this one
-                       }
+                       "GEOGRAPHY": str}
+
     if isinstance(record, list):
         new_record = []
         for r in record:
