@@ -18,6 +18,21 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
+    def test_salesforce_stream(self):
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin="./rsc/salesforce_stream.json",
+            config="../sandbox/target_config.json",
+            processhandler="load-job"
+        )
+
+        ret = main()
+        state = self.get_state()[-1]
+        print(state)
+
+        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+
     def test_complex_stream(self):
         from target_bigquery import main
 
