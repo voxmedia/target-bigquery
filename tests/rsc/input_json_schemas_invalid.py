@@ -1977,3 +1977,6 @@ invalid_schema_anyOf_line_items_empty_type = """{
         "date_start"
     ]
 }"""
+
+
+invalid_salesforce_schema = """{"type": "SCHEMA", "stream": "Salesforce_CaseHistory", "schema": {"type": "object", "additionalProperties": false, "properties": {"Id": {"type": "string"}, "IsDeleted": {"type": ["null", "boolean"]}, "CaseId": {"type": ["null", "string"]}, "CreatedById": {"type": ["null", "string"]}, "CreatedDate": {"anyOf": [{"type": "string", "format": "date-time"}, {"type": ["string", "null"]}]}, "Field": {"type": ["null", "string"]}, "OldValue": {}, "NewValue": {}}}, "key_properties": ["Id"]}"""

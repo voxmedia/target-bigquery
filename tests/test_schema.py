@@ -919,7 +919,7 @@ E           KeyError: 'object'
 
         for incomplete_schema in invalid_schemas:
 
-            with pytest.raises(ValueError, match="JSON schema has missing properties"):
+            with pytest.raises(ValueError, match="JSON schema is invalid/incomplete. It has empty properties"):
 
                 validate_json_schema_completeness(incomplete_schema)
 
@@ -933,6 +933,17 @@ E           KeyError: 'object'
 
         for incomplete_schema in invalid_schemas:
 
-            with pytest.raises(ValueError, match="JSON schema has missing type"):
+            with pytest.raises(ValueError, match="JSON schema is invalid/incomplete. It has empty type"):
+
+                validate_json_schema_completeness(incomplete_schema)
+
+    def test_schema_completeness_validation_empty_dictionary_not_type_not_props_not_items(self):
+
+        invalid_schemas = [invalid_salesforce_schema
+                           ]
+
+        for incomplete_schema in invalid_schemas:
+
+            with pytest.raises(ValueError, match="JSON schema is invalid/incomplete. It has empty object/dictionary"):
 
                 validate_json_schema_completeness(incomplete_schema)
