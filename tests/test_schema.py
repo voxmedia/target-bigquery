@@ -2,6 +2,11 @@ import pytest
 import simplejson
 import singer
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+from testfixtures import log_capture
+
 from target_bigquery.schema import build_schema, prioritize_one_data_type_from_multiple_ones_in_anyOf, convert_field_type
 
 from tests.schema_old import build_schema_old
@@ -937,13 +942,15 @@ E           KeyError: 'object'
 
                 validate_json_schema_completeness(incomplete_schema)
 
-    def test_schema_completeness_validation_empty_dictionary_not_type_not_props_not_items(self):
+    @log_capture()
+    def test_schema_completeness_validation_empty_dictionary_not_pros_not_type_not_items(self, logcapture):
 
-        invalid_schemas = [invalid_salesforce_schema
-                           ]
+        invalid_schemas = [invalid_salesforce_schema]
 
         for incomplete_schema in invalid_schemas:
 
-            with pytest.raises(ValueError, match="JSON schema is invalid/incomplete. It has empty object/dictionary"):
+            validate_json_schema_completeness(incomplete_schema)
 
-                validate_json_schema_completeness(incomplete_schema)
+            expected_log = ('root', 'WARNING', "the pipeline might fail because of undefined fields: {}")
+
+            logcapture.check(expected_log,)
