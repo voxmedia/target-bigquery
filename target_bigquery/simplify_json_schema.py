@@ -22,6 +22,8 @@ STRING = 'string'
 DATE_TIME_FORMAT = 'date-time'
 DATE_FORMAT = 'date'
 BQ_GEOGRAPHY = 'bq-geography'
+BQ_DECIMAL = 'bq-decimal'
+BQ_BIGDECIMAL = 'bq-bigdecimal'
 
 _PYTHON_TYPE_TO_JSON_SCHEMA = {
     int: INTEGER,
@@ -232,6 +234,24 @@ def is_bq_geography(schema):
 
     return STRING in get_type(schema) and schema.get('format') == BQ_GEOGRAPHY
 
+def is_bq_decimal(schema):
+    """
+    Given a JSON Schema compatible dict, returns True when schema's type allows being a bq-decimal
+    :param schema: dict, JSON Schema
+    :return: Boolean
+    """
+
+    return STRING in get_type(schema) and schema.get('format') == BQ_DECIMAL
+
+def is_bq_bigdecimal(schema):
+    """
+    Given a JSON Schema compatible dict, returns True when schema's type allows being a bq-decimal
+    :param schema: dict, JSON Schema
+    :return: Boolean
+    """
+
+    return STRING in get_type(schema) and schema.get('format') == BQ_BIGDECIMAL
+
 def make_nullable(schema):
     """
     Given a JSON Schema dict, returns the dict but makes the `type` `null`able.
@@ -384,6 +404,22 @@ def _simplify__implicit_anyof(root_schema, schema):
         schemas.append(Cachable({
             'type': [STRING],
             'format': BQ_GEOGRAPHY
+        }))
+
+        types.remove(STRING)
+
+    if is_bq_decimal(schema):
+        schemas.append(Cachable({
+            'type': [STRING],
+            'format': BQ_DECIMAL
+        }))
+
+        types.remove(STRING)
+
+    if is_bq_bigdecimal(schema):
+        schemas.append(Cachable({
+            'type': [STRING],
+            'format': BQ_BIGDECIMAL
         }))
 
         types.remove(STRING)

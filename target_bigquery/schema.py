@@ -142,6 +142,8 @@ def convert_field_type(field_property):
                        "object": "RECORD",
                        "array": "RECORD",
                        "bq-geography": "GEOGRAPHY",
+                       "bq-decimal": "DECIMAL",
+                       "bq-bigdecimal": "BIGDECIMAL"
                        }
 
     if "anyOf" in field_property:
@@ -289,7 +291,10 @@ def format_record_to_schema(record, bq_schema):
                        "BIGNUMERIC": float,
                        "INTEGER": int,
                        "BOOLEAN": bool,
-                       "GEOGRAPHY": str}
+                       "GEOGRAPHY": str,
+                       "DECIMAL": str,
+                       "BIGDECIMAL": str
+                       }
 
     if isinstance(record, list):
         new_record = []
