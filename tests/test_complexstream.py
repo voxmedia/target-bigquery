@@ -40,7 +40,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         """
         This test succeeds
 
-        It gives you a warning
+        It tests if we overcame the following error in Tap Bing Ads
 
         JSON schema library validator flags a mismatch in data type between data and schema.
 
