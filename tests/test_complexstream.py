@@ -18,6 +18,37 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
+    def test_bing_ads_stream(self):
+        """
+        This test fails, which is expected.
+
+        JSON schema library validator flags a mismatch in data type between data and schema.
+
+        CRITICAL 123456 is not of type 'null', 'string'
+
+        Failed validating 'type' in schema['properties']['BillToCustomerId']:
+            {'type': ['null', 'string']}
+
+        On instance['BillToCustomerId']:
+            123456
+
+        """
+
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin="./rsc/bing_ads_stream_schema_vs_data_have_diff_data_types.json",
+            config="../sandbox/target_config.json",
+            processhandler="load-job"
+        )
+
+        ret = main()
+        state = self.get_state()[-1]
+        print(state)
+
+        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+
+
     def test_complex_stream(self):
         from target_bigquery import main
 
