@@ -38,7 +38,9 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
     def test_bing_ads_stream_data_vs_schema_dont_match(self):
         """
-        This test fails, which is expected.
+        This test succeeds
+
+        It gives you a warning
 
         JSON schema library validator flags a mismatch in data type between data and schema.
 
