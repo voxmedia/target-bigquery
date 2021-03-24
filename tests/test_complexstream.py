@@ -20,6 +20,24 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
     def test_bing_ads_stream(self):
         """
+        data vs schema match here
+        """
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin="./rsc/bing_ads_stream.json",
+            config="../sandbox/target_config.json",
+            processhandler="load-job"
+        )
+
+        ret = main()
+        state = self.get_state()[-1]
+        print(state)
+
+        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+
+    def test_bing_ads_stream_data_vs_schema_dont_match(self):
+        """
         This test fails, which is expected.
 
         JSON schema library validator flags a mismatch in data type between data and schema.

@@ -1,3 +1,4 @@
+import copy
 import json
 import uuid
 from datetime import datetime
@@ -134,15 +135,29 @@ class LoadJobProcessHandler(BaseProcessHandler):
         schema = self.schemas[stream]
 
         if self.validate_records:
-            validate(msg.record, schema)
+            try:
+                validate(msg.record, schema)
+                self.logger.info("Input schema validated")
+            except Exception as e:
+                self.logger.warning("Input schema validation failed. Your schema might not match the data.")
+                self.logger.warning(str(e))
 
         if self.add_metadata_columns:
             msg.record["_time_extracted"] = msg.time_extracted.isoformat() \
                 if msg.time_extracted else datetime.utcnow().isoformat()
             msg.record["_time_loaded"] = datetime.utcnow().isoformat()
 
+        self.logger.info("Converting data types to match schema")
         nr = cleanup_record(schema, msg.record)
         nr = format_record_to_schema(nr, self.bq_schema_dicts[stream])
+
+        nr_copy_for_validation_metadata_removed = copy.deepcopy(nr)
+        nr_copy_for_validation_metadata_removed.pop("_time_extracted")
+        nr_copy_for_validation_metadata_removed.pop("_time_loaded")
+
+        self.logger.info("Validating schema against data again")
+        if self.validate_records:
+            validate(nr_copy_for_validation_metadata_removed, schema)
 
         data = bytes(json.dumps(nr, cls=DecimalEncoder) + "\n", "UTF-8")
         self.rows[stream].write(data)
