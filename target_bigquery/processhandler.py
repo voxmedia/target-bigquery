@@ -137,6 +137,9 @@ class LoadJobProcessHandler(BaseProcessHandler):
         nr = cleanup_record(schema, msg.record)
         nr = format_record_to_schema(nr, self.bq_schema_dicts[stream])
 
+        # schema validation may fail if data doesn't match schema in terms of data types
+        # in this case, we validate schema again on data which has been forced to match schema
+        # nr is based on msg.record, but all data from msg.record has been forced to match schema
         if self.validate_records:
             try:
                 validate(msg.record, schema)
