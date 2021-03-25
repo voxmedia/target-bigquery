@@ -138,7 +138,10 @@ class LoadJobProcessHandler(BaseProcessHandler):
         nr = format_record_to_schema(nr, self.bq_schema_dicts[stream])
 
         if self.validate_records:
-            validate(nr, schema)
+            try:
+                validate(msg.record, schema)
+            except Exception as e:
+                validate(nr, schema)
 
         if self.add_metadata_columns:
             nr["_time_extracted"] = msg.time_extracted.isoformat() \
