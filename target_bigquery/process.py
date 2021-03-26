@@ -16,10 +16,10 @@ def process(
     assert isinstance(handler, BaseProcessHandler)
 
     if handler.emit_initial_state():
-        s = kwargs.get("initial_state", {})
-        assert isinstance(s, dict)
-        logger.info(f"Pushing state: {s}")
-        yield s  # yield init state, so even if there is an exception right after we get proper state emitted
+        s = kwargs.get("initial_state", None)
+        if isinstance(s, dict):
+            logger.info(f"Pushing state: {s}")
+            yield s  # yield init state, so even if there is an exception right after, we get proper state emitted
 
     for line in tap_stream:
         try:
