@@ -12,27 +12,24 @@ METADATA_FIELDS = {
 
 
 def cleanup_record(schema, record):
-    nr = {}
-
     if not isinstance(record, dict) and not isinstance(record, list):
         return record
 
-    for key, value in record.items():
-        nkey = bigquery_transformed_key(key)
+    elif isinstance(record, list):
+        nr = []
+        for item in record:
+            nr.append(cleanup_record(schema, item))
+        return nr
 
-        if isinstance(value, dict):
+    elif isinstance(record, dict):
+        nr = {}
+        for key, value in record.items():
+            nkey = bigquery_transformed_key(key)
             nr[nkey] = cleanup_record(schema, value)
+        return nr
 
-        elif isinstance(value, list):
-            nr[nkey] = []
-            for o in value:
-                nr[nkey].append(cleanup_record(schema, o))
-
-        else:
-            nr[nkey] = value
-
-    return nr
-
+    else:
+        raise Exception(f"unhandled instance of record: {record}")
 
 def bigquery_transformed_key(key):
 
