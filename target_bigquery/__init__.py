@@ -31,9 +31,10 @@ def main():
     with open(flags.config) as f:
         config = json.load(f)
 
+    table_config = flags.tables or config.get("table_config")
     tables = {}
-    if flags.tables is not None:
-        with open(flags.tables) as f:
+    if table_config:
+        with open(table_config) as f:
             tables = json.load(f)
 
     state = {}
