@@ -93,7 +93,7 @@ Create a service account credential:
 Create a file called **target-config.json** in your working directory, following [this sample target-config.json file](/sample_config/target-config.json) (or see the example below).
 
 - Required parameters are the project name `project_id` and `dataset_id`. 
-- Optional parameters are `table_suffix`, `validate records`, `add_metadata_columns` and `location`. 
+- Optional parameters are `table_suffix`, `validate records`, `add_metadata_columns`, `location` and `table_config`. 
 - Default data location is "US" (if your location is not the US, you can indicate a different location in your **target-config.json** file). 
 - The data will be written to the dataset specified in your **target-config.json**. 
 - If you do not have the dataset with this name yet, it will be created. 
@@ -107,7 +107,8 @@ Sample **target-config.json** file:
     "table_suffix": "_sample_table_suffix",
     "validate_records": true,
     "add_metadata_columns": true,
-    "location": "EU"
+    "location": "EU",
+    "table_config": "target-tables-config.json"
 }
 ```
 
