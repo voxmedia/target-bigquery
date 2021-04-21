@@ -260,14 +260,17 @@ You can only set up partitioning.
 
 4. Delete your BigQuery destination table **exchangeratesapi**, because we want to re-load it again from scratch. Skip this step, if you didn't previously load this data in **Step 4** above.
 
-3. Load data data into BigQuery, while also configuring target tables:
+3. Load data data into BigQuery, while configuring target tables. Pass **target-tables-config.json** as a command line argument. 
 ```bash
 › tap-exchangeratesapi --config sample_config/tap-exchange-rate-api.json | ^
 target-bigquery --config  sample_config/target-config.json ^
 -t sample_config/target-tables-config.json > sample_config/state.json
 ```
 - "^" on a Windows machine indicates a new line. On a Mac, use "\\".
-6. Verify in BigQuery web UI that partitioning worked:
+- If you don't want to pass **target-tables-config.json** file as a CLI argument, you can add ```"table_config": "target-tables-config.json"``` to your **target-config.json** file. See **Step 3: Configure** above.
+
+
+6. Verify in BigQuery web UI that partitioning and clustering worked (in our example below, we only set up partitioning):
 
 
 <img src="readme_screenshots/14_Partitioned_Table.png" width="650" alt="Download the service account credential JSON file">
