@@ -3,6 +3,21 @@ from tests import unittestcore
 
 class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
+    def test_klaviyo_stream(self):
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin="./rsc/klaviyo_stream.json",
+            config="../sandbox/target_config.json",
+            processhandler="load-job"
+        )
+
+        ret = main()
+        state = self.get_state()[-1]
+        print(state)
+
+        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+
     def test_recharge_stream(self):
         from target_bigquery import main
 
