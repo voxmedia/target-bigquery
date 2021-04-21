@@ -266,7 +266,7 @@ You can only set up partitioning.
 target-bigquery --config  sample_config/target-config.json ^
 -t sample_config/target-tables-config.json > sample_config/state.json
 ```
-- "^" on a Windows machine indicates a new line. On a Mac, use "\\".
+- "^" indicates a new line in  Windows Command Prompt. In Mac terminal, use "\\".
 - If you don't want to pass **target-tables-config.json** file as a CLI argument, you can add ```"table_config": "target-tables-config.json"``` to your **target-config.json** file. See **Step 3: Configure** above.
 
 
