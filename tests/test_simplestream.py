@@ -11,7 +11,9 @@ Configuring data load tests.
             "dataset_id": "{your_dataset_id}"
         }
 
-Job load tests create a dataset in BQ and load a table into it. When the test finishes, the dataset gets deleted.  
+Job load tests create a dataset in BQ and load a table into it. When the test finishes, the dataset gets deleted. 
+    At the end of the test, case.py file in the unittest library gets invoked. 
+    self._callTearDown() method runs, and it deletes the BQ dataset. 
     
 """
 
