@@ -11,9 +11,8 @@ Configuring data load tests.
             "dataset_id": "{your_dataset_id}"
         }
 
-    Manually create a dataset in BQ which has the same name as in your target-config file.
-
-    TODO: find out why these tests do not create BQ datasets.
+Job load tests create a dataset in BQ and load a table into it. When the test finishes, the dataset gets deleted.  
+    
 """
 
 class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
@@ -65,13 +64,14 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
     def test_simple_stream_with_tables_config_passed_inside_target_config_file(self):
 
         """
-        The purpose of this unit test is to test a feature discussed here:
-        https://github.com/adswerve/target-bigquery/issues/15
+        Purpose:
+            test a feature discussed here:
+                https://github.com/adswerve/target-bigquery/issues/15
 
         Feature:
-        Passing target tables config file (contains partitioning and clustering info) inside target config file.
+            Passing target tables config file (contains partitioning and clustering info) inside target config file.
 
-        Configuring this data load test.
+        Configuring this data load test:
 
             Inside your sandbox sub-directory (under t-bq project root dir), create a target-config file
 
@@ -81,10 +81,6 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
                     "dataset_id": "{your_dataset_id}",
                     "table_config": "rsc/simple_stream_table_config.json"
                 }
-
-            Manually create a dataset in BQ which has the same name as in your target-config file.
-            TODO: find out why these tests do not create BQ datasets.
-
         """
         from target_bigquery import main
 
