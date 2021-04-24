@@ -251,7 +251,7 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
 
     schema_bigquery = []
 
-    for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties")).items():
+    for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties", {})).items():
 
         next_field = build_field(field_name, field_property)
 
