@@ -25,7 +25,7 @@ def main():
                         required=False,
                         choices=["load-job", "partial-load-job", "bookmarks-partial-load-job"],
                         default="partial-load-job"
-                        )
+    )
     flags = parser.parse_args()
 
     with open(flags.config) as f:
@@ -37,7 +37,7 @@ def main():
         with open(table_config) as f:
             tables = json.load(f)
 
-    state = {}
+    state = None
     if flags.state is not None:
         with open(flags.state) as f:
             state = json.load(f)
