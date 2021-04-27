@@ -15,6 +15,9 @@ Job load tests create a dataset in BQ and load a table into it. When the test fi
     At the end of the test, case.py file in the unittest library gets invoked. 
     self._callTearDown() method runs, and it deletes the BQ dataset. 
     
+If you want test BQ dataset to persist after your unit test, then manually create a BQ dataset with the same name
+    as in your target-config file before running your unit test.    
+    
 """
 
 class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):

@@ -213,7 +213,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
     def test_simple_stream_load_twice_append(self):
         from target_bigquery import main
 
-        for i in range(2): # two truncate loops
+        for i in range(2): # two append loops
             self.set_cli_args(
                 stdin="./rsc/partial_load_streams/simple_stream.json",
                 config="../sandbox/target_config_cache_append.json",
