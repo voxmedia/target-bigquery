@@ -186,6 +186,54 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
             self.assertEqual(False, True)
         except: pass
 
+    def test_simple_stream_load_twice_truncate(self):
+        from target_bigquery import main
+
+        for i in range(2): # two truncate loops
+            self.set_cli_args(
+                stdin="./rsc/partial_load_streams/simple_stream.json",
+                config="../sandbox/target_config_cache.json",
+                processhandler="partial-load-job",
+                ds_delete=i == 0
+            )
+
+            ret = main()
+            state = self.get_state()
+            self.assertEqual(5, len(state))  # initial emit + 3 states
+
+            self.assertEqual(ret, 0, msg="Exit code is not 0!")
+            self.assertDictEqual(state[-1], {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
+
+            table = self.client.get_table("{}.simple_stream".format(self.dataset_id))
+            self.assertEqual(3, table.num_rows, msg="Number of rows mismatch")
+            self.assertIsNone(table.clustering_fields)
+            self.assertIsNone(table.partitioning_type)
+            self.delete_temp_state()
+
+    def test_simple_stream_load_twice_append(self):
+        from target_bigquery import main
+
+        for i in range(2): # two truncate loops
+            self.set_cli_args(
+                stdin="./rsc/partial_load_streams/simple_stream.json",
+                config="../sandbox/target_config_cache_append.json",
+                processhandler="partial-load-job",
+                ds_delete=i == 0
+            )
+
+            ret = main()
+            state = self.get_state()
+            self.assertEqual(5, len(state))  # initial emit + 3 states
+
+            self.assertEqual(ret, 0, msg="Exit code is not 0!")
+            self.assertDictEqual(state[-1], {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
+
+            table = self.client.get_table("{}.simple_stream".format(self.dataset_id))
+            self.assertEqual(3 * (i+1), table.num_rows, msg="Number of rows mismatch")
+            self.assertIsNone(table.clustering_fields)
+            self.assertIsNone(table.partitioning_type)
+            self.delete_temp_state()
+
 
 class TestPartialLoadsBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
 

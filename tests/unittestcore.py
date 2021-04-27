@@ -23,7 +23,7 @@ class BaseUnitTest(unittest.TestCase):
         self.delete_temp_state()
         self.delete_dataset()
 
-    def set_cli_args(self, *args, **kwargs):
+    def set_cli_args(self, ds_delete=True, *args, **kwargs):
         arg = [arg for arg in args]
         for k, v in kwargs.items():
             if k == "stdin":
@@ -35,7 +35,7 @@ class BaseUnitTest(unittest.TestCase):
 
         sys.argv[1:] = arg
 
-        if "config" in kwargs:
+        if "config" in kwargs and ds_delete:
             c = None
             with open(kwargs["config"], "r") as f:
                 c = json.load(f)
