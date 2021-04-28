@@ -20,6 +20,8 @@ from target_bigquery.validate_json_schema import validate_json_schema_completene
 
 from tests.rsc.input_json_schemas import *
 
+from tests.rsc.input_json_schemas_recharge import *
+
 from tests.rsc.shopify_schemas import *
 
 from tests.rsc.input_json_schemas_invalid import *
@@ -40,9 +42,6 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          bing_ads_goals_and_funnels_report,
                          bing_ads_keyword_performance_report,
                          bing_ads_search_query_performance_report,
-                         recharge_addresses,
-                         recharge_charges,
-                         recharge_orders,
                          shopify_orders_fixed,
                          # shopify_customers, #old schema.py fails on this in my test. New one works
                          shopify_custom_collections,
@@ -54,6 +53,10 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          shopify_order_refunds,
                          shopify_collects
                          ]
+
+list_of_schema_inputs_recharge = [recharge_addresses,
+                                 recharge_charges,
+                                 recharge_orders,]
 
 class TestStream(unittestcore.BaseUnitTest):
 
@@ -278,8 +281,6 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas(self):
 
-
-
         for next_schema_input in list_of_schema_inputs:
 
             schema_0_input = next_schema_input
@@ -302,6 +303,30 @@ class TestStream(unittestcore.BaseUnitTest):
 
             # TODO: check data types
 
+
+    def test_several_nested_schemas_recharge(self):
+
+        for next_schema_input in list_of_schema_inputs_recharge:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
+
+            # are results of the two methods above identical? ignore order of columns and case
+            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+
+            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+
+            assert schema_built_new_method_sorted == schema_built_old_method_sorted
+
+            # TODO: check data types
 
 
 
