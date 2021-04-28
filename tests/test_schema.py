@@ -54,9 +54,20 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          shopify_collects
                          ]
 
-list_of_schema_inputs_recharge = [recharge_addresses,
-                                 recharge_charges,
-                                 recharge_orders,]
+list_of_schema_inputs_recharge =    [recharge_addresses,
+                                    recharge_charges,
+                                    recharge_collections,
+                                    recharge_customers,
+                                    recharge_discounts,
+                                    recharge_metafields_store,
+                                    recharge_metafields_customer,
+                                    recharge_metafields_subscription,
+                                    recharge_onetimes,
+                                    recharge_orders,
+                                    # recharge_products, # for some reason recharge products fails on the old schema.py
+                                    recharge_shop,
+                                    recharge_subscriptions
+]
 
 class TestStream(unittestcore.BaseUnitTest):
 
@@ -305,6 +316,11 @@ class TestStream(unittestcore.BaseUnitTest):
 
 
     def test_several_nested_schemas_recharge(self):
+
+        """
+        for some reason recharge products fails on the old schema.py
+        works with the new schema conversion
+        """
 
         for next_schema_input in list_of_schema_inputs_recharge:
 
