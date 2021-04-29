@@ -64,7 +64,7 @@ list_of_schema_inputs_recharge =    [recharge_addresses,
                                     recharge_metafields_subscription,
                                     recharge_onetimes,
                                     recharge_orders,
-                                    # recharge_products, # for some reason recharge products fails on the old schema.py
+                                    # recharge_products, # for some reason recharge products conversion fails on the old schema.py
                                     recharge_shop,
                                     recharge_subscriptions
 ]
@@ -318,7 +318,7 @@ class TestStream(unittestcore.BaseUnitTest):
     def test_several_nested_schemas_recharge(self):
 
         """
-        for some reason recharge products fails on the old schema.py
+        for some reason recharge product stream schema conversion fails on the old schema.py
         works with the new schema conversion
         """
 
