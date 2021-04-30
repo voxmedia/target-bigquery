@@ -22,7 +22,9 @@ from tests.rsc.input_json_schemas import *
 
 from tests.rsc.input_json_schemas_recharge import *
 
-from tests.rsc.shopify_schemas import *
+from tests.rsc.input_json_schemas_amazon import *
+
+from tests.rsc.input_json_schemas_amazon_shopify import *
 
 from tests.rsc.input_json_schemas_invalid import *
 
@@ -54,20 +56,6 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          shopify_collects
                          ]
 
-list_of_schema_inputs_recharge =    [recharge_addresses,
-                                    recharge_charges,
-                                    recharge_collections,
-                                    recharge_customers,
-                                    recharge_discounts,
-                                    recharge_metafields_store,
-                                    recharge_metafields_customer,
-                                    recharge_metafields_subscription,
-                                    recharge_onetimes,
-                                    recharge_orders,
-                                    # recharge_products, # for some reason recharge products conversion fails on the old schema.py
-                                    recharge_shop,
-                                    recharge_subscriptions
-]
 
 class TestStream(unittestcore.BaseUnitTest):
 
@@ -314,6 +302,34 @@ class TestStream(unittestcore.BaseUnitTest):
 
             # TODO: check data types
 
+    def test_several_nested_schemas_amazon(self):
+
+        list_of_schema_inputs_amazon = [amazon_orders, amazon_inventory, amazon_products]
+
+        for next_schema_input in list_of_schema_inputs_amazon:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
+
+            # are results of the two methods above identical? ignore order of columns and case
+            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+
+            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+
+            assert schema_built_new_method_sorted == schema_built_old_method_sorted
+
+            # TODO: check data types
+
+
+
 
     def test_several_nested_schemas_recharge(self):
 
@@ -321,6 +337,21 @@ class TestStream(unittestcore.BaseUnitTest):
         for some reason recharge product stream schema conversion fails on the old schema.py
         works with the new schema conversion
         """
+
+        list_of_schema_inputs_recharge = [recharge_addresses,
+                                          recharge_charges,
+                                          recharge_collections,
+                                          recharge_customers,
+                                          recharge_discounts,
+                                          recharge_metafields_store,
+                                          recharge_metafields_customer,
+                                          recharge_metafields_subscription,
+                                          recharge_onetimes,
+                                          recharge_orders,
+                                          # recharge_products, # for some reason recharge products conversion fails on the old schema.py
+                                          recharge_shop,
+                                          recharge_subscriptions
+                                          ]
 
         for next_schema_input in list_of_schema_inputs_recharge:
 
