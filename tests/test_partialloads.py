@@ -187,6 +187,16 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
         except: pass
 
     def test_simple_stream_load_twice_truncate(self):
+        """
+        test config:
+            supply a target_config_cache.json file. Example:
+                {
+                    "project_id": "your_GCP_project",
+                    "dataset_id": "your_BigQuery_dataset",
+                    "replication_method": "truncate"
+                }
+        """
+
         from target_bigquery import main
 
         for i in range(2): # two truncate loops
@@ -199,18 +209,40 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
             ret = main()
             state = self.get_state()
-            self.assertEqual(5, len(state))  # initial emit + 3 states
+            # counts the number of state emits
+            self.assertEqual(1, len(state))  # initial emit + 3 states
 
             self.assertEqual(ret, 0, msg="Exit code is not 0!")
             self.assertDictEqual(state[-1], {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
 
             table = self.client.get_table("{}.simple_stream".format(self.dataset_id))
+            # it'll load 3 rows x times, but row number will  remain 3
             self.assertEqual(3, table.num_rows, msg="Number of rows mismatch")
             self.assertIsNone(table.clustering_fields)
             self.assertIsNone(table.partitioning_type)
             self.delete_temp_state()
 
     def test_simple_stream_load_twice_append(self):
+
+        """
+        test config:
+            supply a target_config_cache_append.json file.
+
+            Example:
+                {
+               "project_id": "your_GCP_project",
+                "dataset_id": "your_BigQuery_dataset",
+                "replication_method": "append"
+                }
+
+            OR
+
+                {
+                    "project_id": "your_GCP_project",
+                    "dataset_id": "your_BigQuery_dataset"
+                }
+
+        """
         from target_bigquery import main
 
         for i in range(2): # two append loops
@@ -223,12 +255,13 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
             ret = main()
             state = self.get_state()
-            self.assertEqual(5, len(state))  # initial emit + 3 states
+            self.assertEqual(1, len(state))  # initial emit + 3 states
 
             self.assertEqual(ret, 0, msg="Exit code is not 0!")
             self.assertDictEqual(state[-1], {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
 
             table = self.client.get_table("{}.simple_stream".format(self.dataset_id))
+            # it'll load 3 rows x times, the number of rows will be 3 * x
             self.assertEqual(3 * (i+1), table.num_rows, msg="Number of rows mismatch")
             self.assertIsNone(table.clustering_fields)
             self.assertIsNone(table.partitioning_type)
