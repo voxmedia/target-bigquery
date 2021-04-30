@@ -24,7 +24,9 @@ from tests.rsc.input_json_schemas_recharge import *
 
 from tests.rsc.input_json_schemas_amazon import *
 
-from tests.rsc.input_json_schemas_amazon_shopify import *
+from tests.rsc.input_json_schemas_klaviyo import *
+
+from tests.rsc.input_json_schemas_shopify import *
 
 from tests.rsc.input_json_schemas_invalid import *
 
@@ -301,6 +303,47 @@ class TestStream(unittestcore.BaseUnitTest):
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
             # TODO: check data types
+
+
+    def test_several_nested_schemas_klaviyo(self):
+
+        list_of_schema_inputs_amazon = [klaviyo_bounce,
+                                        klaviyo_click,
+                                        klaviyo_email,
+                                        klaviyo_mark_as_spam,
+                                        klaviyo_open,
+                                        klaviyo_receive,
+                                        klaviyo_subscribe_list,
+                                        klaviyo_unsubscribe,
+                                        klaviyo_unsub_list,
+                                        klaviyo_update_email_preferences,
+                                        klaviyo_global_exclusions,
+                                        klaviyo_lists
+                                        ]
+
+        for next_schema_input in list_of_schema_inputs_amazon:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
+
+            # are results of the two methods above identical? ignore order of columns and case
+            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+
+            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+
+            assert schema_built_new_method_sorted == schema_built_old_method_sorted
+
+            # TODO: check data types
+
+
 
     def test_several_nested_schemas_amazon(self):
 
