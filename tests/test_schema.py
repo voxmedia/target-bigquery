@@ -24,6 +24,8 @@ from tests.rsc.input_json_schemas_recharge import *
 
 from tests.rsc.input_json_schemas_amazon import *
 
+from tests.rsc.input_json_schemas_bing_ads import *
+
 from tests.rsc.input_json_schemas_klaviyo import *
 
 from tests.rsc.input_json_schemas_shopify import *
@@ -35,17 +37,6 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          schema_nested_1_subset_items_problem,
                          schema_nested_2,
                          schema_nested_3_shopify,
-                         bing_ads_campaigns,
-                         bing_ads_ad_extension_detail_report,
-                         bing_ads_ad_group_performance_report,
-                         bing_ads_ad_performance_report,
-                         bing_ads_age_gender_audience_report,
-                         bing_ads_audience_performance_report,
-                         bing_ads_campaign_performance_report,
-                         bing_ads_geographic_performance_report,
-                         bing_ads_goals_and_funnels_report,
-                         bing_ads_keyword_performance_report,
-                         bing_ads_search_query_performance_report,
                          shopify_orders_fixed,
                          # shopify_customers, #old schema.py fails on this in my test. New one works
                          shopify_custom_collections,
@@ -305,6 +296,70 @@ class TestStream(unittestcore.BaseUnitTest):
             # TODO: check data types
 
 
+    def test_several_nested_schemas_amazon(self):
+
+        list_of_schema_inputs_amazon = [amazon_orders, amazon_inventory, amazon_products]
+
+        for next_schema_input in list_of_schema_inputs_amazon:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
+
+            # are results of the two methods above identical? ignore order of columns and case
+            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+
+            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+
+            assert schema_built_new_method_sorted == schema_built_old_method_sorted
+
+            # TODO: check data types
+
+    def test_several_nested_schemas_bing_ads(self):
+
+        list_of_schema_inputs_bing_ads = [bing_ads_accounts_v2,
+                                          bing_ads_campaigns,
+                                          bing_ads_ad_extension_detail_report,
+                                          bing_ads_ad_group_performance_report,
+                                          bing_ads_ad_performance_report,
+                                          bing_ads_age_gender_audience_report,
+                                          bing_ads_audience_performance_report,
+                                          bing_ads_campaign_performance_report,
+                                          bing_ads_geographic_performance_report,
+                                          bing_ads_goals_and_funnels_report,
+                                          bing_ads_keyword_performance_report,
+                                          bing_ads_search_query_performance_report]
+
+        for next_schema_input in list_of_schema_inputs_bing_ads:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
+
+            # are results of the two methods above identical? ignore order of columns and case
+            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+
+            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+
+            assert schema_built_new_method_sorted == schema_built_old_method_sorted
+
+            # TODO: check data types
+
+
     def test_several_nested_schemas_klaviyo(self):
 
         list_of_schema_inputs_amazon = [klaviyo_bounce,
@@ -342,36 +397,6 @@ class TestStream(unittestcore.BaseUnitTest):
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
             # TODO: check data types
-
-
-
-    def test_several_nested_schemas_amazon(self):
-
-        list_of_schema_inputs_amazon = [amazon_orders, amazon_inventory, amazon_products]
-
-        for next_schema_input in list_of_schema_inputs_amazon:
-
-            schema_0_input = next_schema_input
-
-            msg = singer.parse_message(schema_0_input)
-
-            schema_1_simplified = simplify(msg.schema)
-
-            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                         add_metadata=True)
-
-            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
-
-            # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
-
-            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
-
-            assert schema_built_new_method_sorted == schema_built_old_method_sorted
-
-            # TODO: check data types
-
-
 
 
     def test_several_nested_schemas_recharge(self):
@@ -577,6 +602,8 @@ class TestStream(unittestcore.BaseUnitTest):
 
         """strangely, this test fails, which is odd, the pipeline with this old schema conversion and with this schema should be running fine
 
+        This doesn't impact new t-bq release, as new schema.py handles it.
+
         Old conversion test appears to be failing at this anyOf column:
 
              "accepts_marketing_updated_at": {
@@ -652,74 +679,6 @@ class TestStream(unittestcore.BaseUnitTest):
             assert schema_3_built_old_method
 
 
-    def test_shopify_abandoned_checkouts_malformed_new_conversion(self):
-
-        """fails
-
-        it also has empty properties
-,
-                    {
-                      "properties": {},
-                      "type": [
-                        "null",
-                        "object"
-                      ]
-                    }
-        schema invalid
-
-        """
-
-        list_of_schema_inputs = [shopify_abandoned_checkouts_malformed
-                                 ]
-        for next_schema_input in list_of_schema_inputs:
-
-            schema_0_input = next_schema_input
-
-            msg = singer.parse_message(schema_0_input)
-
-            schema_1_simplified = simplify(msg.schema)
-
-            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                         add_metadata=True)
-            assert schema_2_built_new_method
-
-    def test_shopify_abandoned_checkouts_malformed_old_conversion(self):
-
-        """interestingly, it fails
-            for sf in build_schema_old(prop, add_metadata=False):
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-schema = {'format': 'date-time', 'type': 'string'}, key_properties = None
-add_metadata = False, force_fields = {}
-
-    def build_schema_old(schema, key_properties=None, add_metadata=True, force_fields={}):
-        SCHEMA = []
-
-        required_fields = set(key_properties) if key_properties else set()
-        if "required" in schema:
-            required_fields.update(schema["required"])
-
->       for key, props in schema.get("properties",
-                                     schema.get("items", {}).get("properties")
-                                     ).items():  # schema["properties"].items():
-E                                    AttributeError: 'NoneType' object has no attribute 'items'
-
-        """
-
-        list_of_schema_inputs = [shopify_abandoned_checkouts_malformed
-                                 ]
-        for next_schema_input in list_of_schema_inputs:
-
-            schema_0_input = next_schema_input
-
-            msg = singer.parse_message(schema_0_input)
-
-
-            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties,
-                                                         add_metadata=True)
-
-            assert schema_3_built_old_method
-
     def test_shopify_abandoned_checkouts_fixed_new_conversion(self):
 
         """
@@ -787,8 +746,6 @@ E                                    AttributeError: 'NoneType' object has no at
             schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
                                                          add_metadata=True)
             assert schema_2_built_new_method
-
-
 
 
     def test_shopify_metafields_malformed_new_conversion(self):
@@ -1038,7 +995,8 @@ E           KeyError: 'object'
                            invalid_schema_subfield_empty_props,
                            invalid_schema_under_anyOf_empty_props_example_1,
                            invalid_schema_under_anyOf_deep_nested_empty_props,
-                           shopify_metafields_malformed]
+                           shopify_metafields_malformed,
+                           shopify_abandoned_checkouts_malformed]
 
         for incomplete_schema in invalid_schemas:
 

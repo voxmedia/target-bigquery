@@ -54,7 +54,7 @@ def convert_schema_field_to_list(input_schema_field):
     if len(input_schema_field.fields) == 0:
 
         return list((input_schema_field.name, input_schema_field.field_type.upper(), input_schema_field.mode.upper(),
-                     input_schema_field.description, input_schema_field.fields, input_schema_field.policy_tags))
+                     input_schema_field.fields, input_schema_field.policy_tags))
 
     elif len(input_schema_field.fields) > 0:
 
@@ -64,7 +64,7 @@ def convert_schema_field_to_list(input_schema_field):
             processed_subfields.append(convert_schema_field_to_list(field))
 
         return list((input_schema_field.name, input_schema_field.field_type.upper(), input_schema_field.mode.upper(),
-                     input_schema_field.description, sorted(processed_subfields),
+                    sorted(processed_subfields),
                      input_schema_field.policy_tags))
 
 
