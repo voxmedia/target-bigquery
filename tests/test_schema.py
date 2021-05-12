@@ -324,8 +324,10 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_bing_ads(self):
 
-        list_of_schema_inputs_bing_ads = [bing_ads_accounts_v2,
+        list_of_schema_inputs_bing_ads = [bing_ads_accounts,
                                           bing_ads_campaigns,
+                                          bing_ads_ad_groups,
+                                          bing_ads_ads,
                                           bing_ads_ad_extension_detail_report,
                                           bing_ads_ad_group_performance_report,
                                           bing_ads_ad_performance_report,
@@ -335,7 +337,8 @@ class TestStream(unittestcore.BaseUnitTest):
                                           bing_ads_geographic_performance_report,
                                           bing_ads_goals_and_funnels_report,
                                           bing_ads_keyword_performance_report,
-                                          bing_ads_search_query_performance_report]
+                                          bing_ads_search_query_performance_report
+             ]
 
         for next_schema_input in list_of_schema_inputs_bing_ads:
 
