@@ -68,7 +68,7 @@ def convert_schema_field_to_list(input_schema_field):
                      input_schema_field.policy_tags))
 
 
-def convert_list_of_schema_fielts_to_list_of_lists(input_schema_fields_list):
+def convert_list_of_schema_fields_to_list_of_lists(input_schema_fields_list):
     """
     This is a helper function to assist in comparing output of two methods of schema conversion from JSON to BigQuery.
 

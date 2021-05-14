@@ -28,11 +28,14 @@ Sources:
 from tests import unittestcore
 from google.cloud import bigquery
 
+from tests.utils import convert_list_of_schema_fields_to_list_of_lists
+
+
 def create_dict_of_BQ_schemas_from_dataset(project_id, dataset_id):
 
     """input: project id and dataset id
 
-    output: a dictionary containing BigQuery scheams
+    output: a dictionary containing BigQuery schemas
     """
 
     # Construct a BigQuery client object.
@@ -62,8 +65,69 @@ class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
         # dataset_1 = 'my_bigquery_dataset_1'
         # dataset_2 = 'my_bigquery_dataset_2'
 
-        schemas_dataset_1 = create_dict_of_BQ_schemas_from_dataset(GCP_project, dataset_1)
+        schemas_dataset_1_dict = create_dict_of_BQ_schemas_from_dataset(GCP_project, dataset_1)
 
-        schemas_dataset_2 = create_dict_of_BQ_schemas_from_dataset(GCP_project, dataset_2)
+        schemas_dataset_2_dict = create_dict_of_BQ_schemas_from_dataset(GCP_project, dataset_2)
 
-        assert schemas_dataset_1 == schemas_dataset_2
+        # uncomment this line if you want to compare two datasets schemas, but if you want to account for order of columns
+        # assert schemas_dataset_1_dict == schemas_dataset_2_dict
+
+        # compare two dataset schemas, but ignore order of columns in tables
+        schemas_sorted_list_dataset_1 = []
+        schemas_sorted_list_dataset_2 = []
+
+        for stream_name, stream_bq_schema in schemas_dataset_1_dict.items():
+            stream_bq_schema_sorted = convert_list_of_schema_fields_to_list_of_lists(stream_bq_schema)
+            schemas_sorted_list_dataset_1.append(stream_bq_schema_sorted)
+
+        for stream_name, stream_bq_schema in schemas_dataset_2_dict.items():
+            stream_bq_schema_sorted = convert_list_of_schema_fields_to_list_of_lists(stream_bq_schema)
+            schemas_sorted_list_dataset_2.append(stream_bq_schema_sorted)
+
+        print("finished running")
+
+        assert schemas_sorted_list_dataset_1 == schemas_sorted_list_dataset_2
+
+
+def test_simple_comparison_flags_differences_inside_nested_fields():
+
+    """the purpose of this test is to double check:
+
+    if we have two schemas with differences in nested fields - would a simple comparision == catch it?
+
+    change something in the nested field BusinessAddress - the test will fail
+    """
+
+    list_a = [  ['AccountFinancialStatus', 'STRING', 'NULLABLE', (), None],
+                ['AccountLifeCycleStatus', 'STRING', 'NULLABLE', (), None],
+                ['AccountMode', 'STRING', 'NULLABLE', (), None],
+                ['AutoTagType', 'STRING', 'NULLABLE', (), None],
+                ['BackUpPaymentInstrumentId', 'INTEGER', 'NULLABLE', (), None],
+                ['BillToCustomerId', 'INTEGER', 'NULLABLE', (), None],
+                ['BillingThresholdAmount', 'FLOAT', 'NULLABLE', (), None],
+                ['BusinessAddress', 'RECORD', 'NULLABLE',
+                        [['BusinessName', 'STRING', 'NULLABLE', (), None], ['City', 'STRING', 'NULLABLE', (), None],
+                        ['CountryCode', 'STRING', 'NULLABLE', (), None], ['Id', 'INTEGER', 'NULLABLE', (), None],
+                        ['Line1', 'STRING', 'NULLABLE', (), None], ['Line2', 'STRING', 'NULLABLE', (), None],
+                        ['Line3', 'STRING', 'NULLABLE', (), None], ['Line4', 'STRING', 'NULLABLE', (), None],
+                        ['PostalCode', 'STRING', 'NULLABLE', (), None], ['StateOrProvince', 'STRING', 'NULLABLE', (), None],
+                        ['TimeStamp', 'STRING', 'NULLABLE', (), None]], None]
+                ]
+
+    list_b = [  ['AccountFinancialStatus', 'STRING', 'NULLABLE', (), None],
+                ['AccountLifeCycleStatus', 'STRING', 'NULLABLE', (), None],
+                ['AccountMode', 'STRING', 'NULLABLE', (), None],
+                ['AutoTagType', 'STRING', 'NULLABLE', (), None],
+                ['BackUpPaymentInstrumentId', 'INTEGER', 'NULLABLE', (), None],
+                ['BillToCustomerId', 'INTEGER', 'NULLABLE', (), None],
+                ['BillingThresholdAmount', 'FLOAT', 'NULLABLE', (), None],
+                ['BusinessAddress', 'RECORD', 'NULLABLE',
+                        [['BusinessName', 'STRING', 'NULLABLE', (), None], ['City', 'STRING', 'NULLABLE', (), None],
+                        ['CountryCode', 'STRING', 'NULLABLE', (), None], ['Id', 'INTEGER', 'NULLABLE', (), None],
+                        ['Line1', 'STRING', 'NULLABLE', (), None], ['Line2', 'STRING', 'NULLABLE', (), None],
+                        ['Line3', 'STRING', 'NULLABLE', (), None], ['Line4', 'STRING', 'NULLABLE', (), None],
+                        ['PostalCode', 'STRING', 'NULLABLE', (), None], ['StateOrProvince', 'STRING', 'NULLABLE', (), None],
+                        ['TimeStamp', 'STRING', 'NULLABLE', (), None]], None]
+                ]
+
+    assert list_a == list_b

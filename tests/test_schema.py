@@ -14,7 +14,7 @@ from tests.schema_old import build_schema_old
 from target_bigquery.simplify_json_schema import simplify
 from tests import unittestcore
 
-from tests.utils import convert_list_of_schema_fielts_to_list_of_lists
+from tests.utils import convert_list_of_schema_fields_to_list_of_lists
 
 from target_bigquery.validate_json_schema import validate_json_schema_completeness
 
@@ -233,9 +233,9 @@ class TestStream(unittestcore.BaseUnitTest):
         schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
         # are results of the two methods above identical? ignore order of columns and case
-        schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+        schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
 
-        schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+        schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
         assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
@@ -261,9 +261,9 @@ class TestStream(unittestcore.BaseUnitTest):
                                                      add_metadata=True)
 
         # are results of the two methods above identical? ignore order of columns and case
-        schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+        schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
 
-        schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+        schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
         # assert schema_built_new_method_sorted == schema_built_old_method_sorted
         # equalilty assertion will fail, old method is not handling "filters" column correctly,
@@ -287,9 +287,9 @@ class TestStream(unittestcore.BaseUnitTest):
             schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
             # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
 
-            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
@@ -314,9 +314,9 @@ class TestStream(unittestcore.BaseUnitTest):
             schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
             # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
 
-            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
@@ -354,9 +354,9 @@ class TestStream(unittestcore.BaseUnitTest):
             schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
             # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
 
-            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
@@ -393,9 +393,9 @@ class TestStream(unittestcore.BaseUnitTest):
             schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
             # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
 
-            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
@@ -438,9 +438,9 @@ class TestStream(unittestcore.BaseUnitTest):
             schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
             # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
 
-            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
@@ -525,16 +525,16 @@ class TestStream(unittestcore.BaseUnitTest):
         schema_5_fixed_built_old_method = build_schema_old(msg_fixed.schema, key_properties=msg_fixed.key_properties, add_metadata=True)
 
         # are results of the two methods above identical? ignore order of columns and case
-        schema_6_fixed_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_4_fixed_built_new_method)
+        schema_6_fixed_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_4_fixed_built_new_method)
 
-        schema_7_fixed_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_5_fixed_built_old_method)
+        schema_7_fixed_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_5_fixed_built_old_method)
 
         msg_malformed = singer.parse_message(schema_input_2)
 
         schema_8_malformed_built_old_method = build_schema_old(msg_malformed.schema, key_properties=msg_malformed.key_properties,
                                                      add_metadata=True)
 
-        schema_9_malformed_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_8_malformed_built_old_method)
+        schema_9_malformed_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_8_malformed_built_old_method)
 
         assert schema_6_fixed_built_new_method_sorted == schema_7_fixed_built_old_method_sorted == schema_9_malformed_built_old_method_sorted
 
@@ -853,9 +853,9 @@ E           KeyError: 'object'
                                                          add_metadata=True)
 
             # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_2_built_new_method)
+            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
 
-            schema_built_old_method_sorted = convert_list_of_schema_fielts_to_list_of_lists(schema_3_built_old_method)
+            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
