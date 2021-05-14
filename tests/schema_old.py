@@ -1,7 +1,9 @@
 """
-this is the old schema conversion 
+this is the old schema conversion
+old means it's in master branch as of May 2021
 we're keeping it for our unit tests
 our unit test will compare results of this old schema translation with the new schema translation
+test passes if results are identical (order of fields is ignored)
 """
 
 import re

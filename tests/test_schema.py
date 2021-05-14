@@ -24,6 +24,8 @@ from tests.rsc.input_json_schemas_recharge import *
 
 from tests.rsc.input_json_schemas_amazon import *
 
+from tests.rsc.input_json_schemas_asana import *
+
 from tests.rsc.input_json_schemas_bing_ads import *
 
 from tests.rsc.input_json_schemas_klaviyo import *
@@ -301,6 +303,64 @@ class TestStream(unittestcore.BaseUnitTest):
         list_of_schema_inputs_amazon = [amazon_orders, amazon_inventory, amazon_products]
 
         for next_schema_input in list_of_schema_inputs_amazon:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
+
+            # are results of the two methods above identical? ignore order of columns and case
+            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
+
+            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
+
+            assert schema_built_new_method_sorted == schema_built_old_method_sorted
+
+            # TODO: check data types
+
+
+    def test_several_nested_schemas_asana_only_new_method(self):
+
+        list_of_schema_inputs_asana = [ asana_users,
+                                        asana_projects,
+                                        asana_workspaces, # old schema conversion fails here
+                                        asana_stories,
+                                        asana_sections,
+                                        asana_teams,
+                                        asana_tasks,
+                                        asana_tags]
+
+        for next_schema_input in list_of_schema_inputs_asana:
+
+            schema_0_input = next_schema_input
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            assert schema_2_built_new_method
+
+    def test_several_nested_schemas_asana(self):
+
+        list_of_schema_inputs_asana = [ asana_users,
+                                        asana_projects,
+                                        # asana_workspaces, # old schema conversion fails here
+                                        asana_stories,
+                                        asana_sections,
+                                        asana_teams,
+                                        asana_tasks,
+                                        asana_tags]
+
+        for next_schema_input in list_of_schema_inputs_asana:
 
             schema_0_input = next_schema_input
 
