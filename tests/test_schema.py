@@ -1,6 +1,7 @@
 import pytest
 import simplejson
 import singer
+import json
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -29,6 +30,8 @@ from tests.rsc.input_json_schemas_asana import *
 from tests.rsc.input_json_schemas_bing_ads import *
 
 from tests.rsc.input_json_schemas_klaviyo import *
+
+from tests.rsc.input_json_schemas_hubspot import *
 
 from tests.rsc.input_json_schemas_shopify import *
 
@@ -241,37 +244,6 @@ class TestStream(unittestcore.BaseUnitTest):
 
         assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
-    def test_one_nested_schema_3(self):
-
-        # this test fails, but it's okay: this is because the new method says type=RECORD, whereas old method says type=OBJECT
-        # RECORD is the correct data type
-        # new method is correct
-        # assertion of equality of output is not met
-
-        # https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#schema.fields.type
-
-        schema_0_input = HubSpot_contact_lists_schema_fixed_test
-
-        msg = singer.parse_message(schema_0_input)
-
-        schema_1_simplified = simplify(msg.schema)
-
-        schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                 add_metadata=True)
-
-        schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties,
-                                                     add_metadata=True)
-
-        # are results of the two methods above identical? ignore order of columns and case
-        schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
-
-        schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
-
-        # assert schema_built_new_method_sorted == schema_built_old_method_sorted
-        # equalilty assertion will fail, old method is not handling "filters" column correctly,
-        # it's saying its data type is OBJECT, which is not correct
-
-        assert True
 
     def test_several_nested_schemas(self):
 
@@ -422,6 +394,55 @@ class TestStream(unittestcore.BaseUnitTest):
 
             # TODO: check data types
 
+    def test_several_nested_schemas_hubspot(self):
+
+        list_of_schema_inputs_hubspot = [hubspot_campaigns,
+                                         hubspot_companies,
+                                         hubspot_contact_lists,
+                                         hubspot_contacts,
+                                         hubspot_contacts_by_company,
+                                         hubspot_deal_pipelines,
+                                         hubspot_deals,
+                                         hubspot_email_events,
+                                         hubspot_engagements,
+                                         hubspot_forms,
+                                         hubspot_owners,
+                                         hubspot_subscription_changes,
+                                         hubspot_workflows
+        ]
+
+        for next_schema_input in list_of_schema_inputs_hubspot:
+
+            schema_0_input = next_schema_input
+
+            schema_0_input = json.loads(schema_0_input)
+
+            # hubspot schemas are missing required key "key_properties"
+            schema_0_input.update({"key_properties": "Id"})
+
+            schema_0_input.update({"type": "SCHEMA"})
+
+            schema_0_input = str(schema_0_input)
+
+            schema_0_input = schema_0_input.replace("\'", "\"").replace("True","true").replace("False","false")
+
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
+
+            # are results of the two methods above identical? ignore order of columns and case
+            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
+
+            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
+
+            assert schema_built_new_method_sorted == schema_built_old_method_sorted
+
+            # TODO: check data types
 
     def test_several_nested_schemas_klaviyo(self):
 
