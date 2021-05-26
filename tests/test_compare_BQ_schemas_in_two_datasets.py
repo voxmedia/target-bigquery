@@ -27,6 +27,7 @@ Sources:
 
 from tests import unittestcore
 from google.cloud import bigquery
+import copy
 
 from tests.utils import convert_list_of_schema_fields_to_list_of_lists
 
@@ -57,20 +58,40 @@ def create_dict_of_BQ_schemas_from_dataset(project_id, dataset_id):
 
 class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
 
-    def test_if_bq_schemas_match_in_two_datasets(self):
-        """Compare schemas in two BigQuery datasets"""
+    def test_if_bq_schemas_match_in_two_datasets(self, remove_tables_from_dataset_2_which_are_not_present_in_dataset_1=True, compare_in_original_fields_order=True):
+        """Compare schemas in two BigQuery datasets
+
+        remove_tables_from_dataset_2_which_are_not_present_in_dataset_1 = True
+            it's possible that one dataset has tables which are not present in the other dataset.
+            It is expected when the two datasets' reporting periods are different.
+            True flag here will exclude those tables from schema comparison.
+
+         compare_in_original_fields_order=True
+            The two datasets may have tables with different fields order.
+            True flag will compare the two schemas while taking order into account.
+            False flag will skip this step and will only compare sorted schemas.
+        """
 
         # TODO (developer): enter your GCP project, dataset 1 and dataset 2
-        # GCP_project = 'my_GCP_project'
-        # dataset_1 = 'my_bigquery_dataset_1'
-        # dataset_2 = 'my_bigquery_dataset_2'
+        GCP_project = ''
+        dataset_1 = ''
+        dataset_2 = ''
 
         schemas_dataset_1_dict = create_dict_of_BQ_schemas_from_dataset(GCP_project, dataset_1)
 
         schemas_dataset_2_dict = create_dict_of_BQ_schemas_from_dataset(GCP_project, dataset_2)
 
-        # uncomment this line if you want to compare two datasets schemas, but if you want to account for order of columns
-        # assert schemas_dataset_1_dict == schemas_dataset_2_dict
+        if remove_tables_from_dataset_2_which_are_not_present_in_dataset_1:
+
+            for key, value in schemas_dataset_2_dict.items():
+                if key not in schemas_dataset_1_dict.keys():
+                    # workaround for E RuntimeError: dictionary changed size during iteration
+                    schemas_dataset_2_dict = copy.deepcopy(schemas_dataset_2_dict)
+                    schemas_dataset_2_dict.pop(key)
+
+        # compare two datasets schemas, but if you want to account for order of columns
+        if compare_in_original_fields_order:
+            assert schemas_dataset_1_dict == schemas_dataset_2_dict
 
         # compare two dataset schemas, but ignore order of columns in tables
         schemas_sorted_list_dataset_1 = []
@@ -84,14 +105,12 @@ class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
             stream_bq_schema_sorted = convert_list_of_schema_fields_to_list_of_lists(stream_bq_schema)
             schemas_sorted_list_dataset_2.append(stream_bq_schema_sorted)
 
-        print("finished running")
-
         assert schemas_sorted_list_dataset_1 == schemas_sorted_list_dataset_2
 
 
 def test_simple_comparison_flags_differences_inside_nested_fields():
 
-    """the purpose of this test is to double check:
+    """The purpose of this test is to double check:
 
     if we have two schemas with differences in nested fields - would a simple comparision == catch it?
 
