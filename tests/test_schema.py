@@ -584,7 +584,7 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_mailchimp(self):
 
-        #TODO: what do we do about {} in mailchimp?
+
 
         catalog = json.load(open("./rsc/input_json_schemas_mailchimp.json"))
 
@@ -599,9 +599,9 @@ class TestStream(unittestcore.BaseUnitTest):
             # list_members
             # unsubscribes
 
-            if next_schema_input['tap_stream_id'] in ['list_segment_members', 'list_members', 'unsubscribes']:
-
-                continue
+            #  #TODO: what do we do about {} in mailchimp? these tests fail
+            # if next_schema_input['tap_stream_id'] in ['list_segment_members', 'list_members', 'unsubscribes']:
+            #     continue
 
             schema_0_input = copy.deepcopy(next_schema_input)
 
