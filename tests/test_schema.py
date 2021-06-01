@@ -709,7 +709,7 @@ class TestStream(unittestcore.BaseUnitTest):
 
             schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
-            # assert schema_built_new_method_sorted == schema_built_old_method_sorted
+            assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
             if schema_built_new_method_sorted != schema_built_old_method_sorted:
 
