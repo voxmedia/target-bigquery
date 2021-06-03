@@ -128,6 +128,36 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         # self.assertIsNotNone(table.partitioning_type)
 
 
+    def test_complex_stream_with_tables_config_force_field(self):
+        """
+        the purpose of this test is to make sure that if you supply date_start field in Facebook as string,
+        build_schema function will force this field to date, according to target tables config file
+        TODO: verify input and outputs:
+        data type in input json schema, target tbl config force fields and resulting BQ tbl
+        """
+
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin="./rsc/facebook_stream_date_start_is_string.json",
+            config="../sandbox/target_config.json",
+            tables="./rsc/facebook_stream_tables_config.json",
+            processhandler="load-job"
+        )
+
+        ret = main()
+        state = self.get_state()[-1]
+        print(state)
+
+        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+        # self.assertDictEqual(state, {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
+        #
+        # table = self.client.get_table("{}.simple_stream_dev".format(self.dataset_id))
+        # self.assertEqual(3, table.num_rows, msg="Number of rows mismatch")
+        # self.assertIsNotNone(table.clustering_fields)
+        # self.assertIsNotNone(table.partitioning_type)
+
+
     def test_misformed_complex_stream(self):
         """
         Note that the config's "validate_records" flag should be set to False
