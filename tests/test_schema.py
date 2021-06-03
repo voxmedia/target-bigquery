@@ -32,8 +32,6 @@ from tests.rsc.input_json_schemas_bing_ads import *
 
 from tests.rsc.input_json_schemas_klaviyo import *
 
-from tests.rsc.input_json_schemas_facebook import *
-
 from tests.rsc.input_json_schemas_hubspot import *
 
 from tests.rsc.input_json_schemas_shopify import *
@@ -399,29 +397,18 @@ class TestStream(unittestcore.BaseUnitTest):
 
             # TODO: check data types
 
+
     def test_several_nested_schemas_facebook(self):
 
-        list_of_schema_inputs_facebook = [facebook_adcreative,
-                                          facebook_ads,
-                                          facebook_adsets,
-                                          facebook_campaigns,
-                                          facebook_ads_insights,
-                                          facebook_ads_insights_age_and_gender,
-                                          facebook_ads_insights_country,
-                                          facebook_ads_insights_platform_and_device,
-                                          facebook_ads_insights_region,
-                                          facebook_ads_insights_dma
-        ]
+        catalog = json.load(open("./rsc/input_json_schemas_facebook.json"))
 
-        for next_schema_input in list_of_schema_inputs_facebook:
+        for next_schema_input in catalog['streams']:
 
-            schema_0_input = next_schema_input
-
-            schema_0_input = json.loads(schema_0_input)
-
-            schema_0_input.update({"key_properties": "Id"})
+            schema_0_input = copy.deepcopy(next_schema_input)
 
             schema_0_input.update({"type": "SCHEMA"})
+
+            schema_0_input.update({"key_properties": "Id"})
 
             schema_0_input = str(schema_0_input)
 
@@ -442,8 +429,6 @@ class TestStream(unittestcore.BaseUnitTest):
             schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
-
-            # TODO: check data types
 
 
     def test_several_nested_schemas_google_search_console(self):

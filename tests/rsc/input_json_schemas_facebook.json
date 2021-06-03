@@ -1,4 +1,6 @@
-facebook_adcreative = """{
+{
+    "streams": [
+        {
           "stream": "adcreative",
           "tap_stream_id": "adcreative",
           "schema": {
@@ -5273,8 +5275,8 @@ facebook_adcreative = """{
                   }
               }
           ]
-      }"""
-facebook_ads = """{
+      },
+        {
             "stream": "ads",
             "tap_stream_id": "ads",
             "schema": {
@@ -9402,8 +9404,8 @@ facebook_ads = """{
                     }
                 }
             ]
-        }"""
-facebook_adsets="""{
+        },
+        {
             "stream": "adsets",
             "tap_stream_id": "adsets",
             "schema": {
@@ -12845,8 +12847,8 @@ facebook_adsets="""{
                     }
                 }
             ]
-        }"""
-facebook_campaigns = """{
+        },
+        {
             "stream": "campaigns",
             "tap_stream_id": "campaigns",
             "schema": {
@@ -13080,8 +13082,8 @@ facebook_campaigns = """{
                     }
                 }
             ]
-        }"""
-facebook_ads_insights = """{
+        },
+        {
         "stream": "ads_insights",
         "tap_stream_id": "ads_insights",
         "schema": {
@@ -13313,6 +13315,80 @@ facebook_ads_insights = """{
                     }
                 },
                 "outbound_clicks": {
+                    "type": [
+                        "null",
+                        "array"
+                    ],
+                    "items": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "1d_click": {
+                                "type": [
+                                    "null",
+                                    "number"
+                                ]
+                            },
+                            "7d_click": {
+                                "type": [
+                                    "null",
+                                    "number"
+                                ]
+                            },
+                            "28d_click": {
+                                "type": [
+                                    "null",
+                                    "number"
+                                ]
+                            },
+                            "1d_view": {
+                                "type": [
+                                    "null",
+                                    "number"
+                                ]
+                            },
+                            "7d_view": {
+                                "type": [
+                                    "null",
+                                    "number"
+                                ]
+                            },
+                            "28d_view": {
+                                "type": [
+                                    "null",
+                                    "number"
+                                ]
+                            },
+                            "action_destination": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "action_target_id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "action_type": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "value": {
+                                "type": [
+                                    "null",
+                                    "number"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "unique_outbound_clicks": {
                     "type": [
                         "null",
                         "array"
@@ -14167,6 +14243,16 @@ facebook_ads_insights = """{
             {
                 "breadcrumb": [
                     "properties",
+                    "unique_outbound_clicks"
+                ],
+                "metadata": {
+                    "inclusion": "available",
+                    "selected": true
+                }
+            },
+            {
+                "breadcrumb": [
+                    "properties",
                     "video_30_sec_watched_actions"
                 ],
                 "metadata": {
@@ -14631,8 +14717,8 @@ facebook_ads_insights = """{
                 }
             }
         ]
-    }"""
-facebook_ads_insights_age_and_gender = """{
+    },
+        {
             "stream": "ads_insights_age_and_gender",
             "tap_stream_id": "ads_insights_age_and_gender",
             "schema": {
@@ -14864,6 +14950,80 @@ facebook_ads_insights_age_and_gender = """{
                         }
                     },
                     "outbound_clicks": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": [
+                                "null",
+                                "object"
+                            ],
+                            "properties": {
+                                "1d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "7d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "28d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "1d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "7d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "28d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "action_destination": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "action_target_id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "action_type": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "value": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "unique_outbound_clicks": {
                         "type": [
                             "null",
                             "array"
@@ -15733,6 +15893,16 @@ facebook_ads_insights_age_and_gender = """{
                 {
                     "breadcrumb": [
                         "properties",
+                        "unique_outbound_clicks"
+                    ],
+                    "metadata": {
+                        "inclusion": "available",
+                        "selected": true
+                    }
+                },
+                {
+                    "breadcrumb": [
+                        "properties",
                         "video_30_sec_watched_actions"
                     ],
                     "metadata": {
@@ -16215,8 +16385,8 @@ facebook_ads_insights_age_and_gender = """{
                     }
                 }
             ]
-        }"""
-facebook_ads_insights_country = """{
+        },
+        {
             "stream": "ads_insights_country",
             "tap_stream_id": "ads_insights_country",
             "schema": {
@@ -16448,6 +16618,80 @@ facebook_ads_insights_country = """{
                         }
                     },
                     "outbound_clicks": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": [
+                                "null",
+                                "object"
+                            ],
+                            "properties": {
+                                "1d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "7d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "28d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "1d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "7d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "28d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "action_destination": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "action_target_id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "action_type": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "value": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "unique_outbound_clicks": {
                         "type": [
                             "null",
                             "array"
@@ -17308,6 +17552,16 @@ facebook_ads_insights_country = """{
                 {
                     "breadcrumb": [
                         "properties",
+                        "unique_outbound_clicks"
+                    ],
+                    "metadata": {
+                        "inclusion": "available",
+                        "selected": true
+                    }
+                },
+                {
+                    "breadcrumb": [
+                        "properties",
                         "video_30_sec_watched_actions"
                     ],
                     "metadata": {
@@ -17782,8 +18036,8 @@ facebook_ads_insights_country = """{
                     }
                 }
             ]
-        }"""
-facebook_ads_insights_platform_and_device = """{
+        },
+        {
             "stream": "ads_insights_platform_and_device",
             "tap_stream_id": "ads_insights_platform_and_device",
             "schema": {
@@ -18015,6 +18269,80 @@ facebook_ads_insights_platform_and_device = """{
                         }
                     },
                     "outbound_clicks": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": [
+                                "null",
+                                "object"
+                            ],
+                            "properties": {
+                                "1d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "7d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "28d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "1d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "7d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "28d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "action_destination": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "action_target_id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "action_type": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "value": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "unique_outbound_clicks": {
                         "type": [
                             "null",
                             "array"
@@ -18896,6 +19224,16 @@ facebook_ads_insights_platform_and_device = """{
                 {
                     "breadcrumb": [
                         "properties",
+                        "unique_outbound_clicks"
+                    ],
+                    "metadata": {
+                        "inclusion": "available",
+                        "selected": true
+                    }
+                },
+                {
+                    "breadcrumb": [
+                        "properties",
                         "video_30_sec_watched_actions"
                     ],
                     "metadata": {
@@ -19397,8 +19735,8 @@ facebook_ads_insights_platform_and_device = """{
                     }
                 }
             ]
-        }"""
-facebook_ads_insights_region = """{
+        },
+        {
             "stream": "ads_insights_region",
             "tap_stream_id": "ads_insights_region",
             "schema": {
@@ -19630,6 +19968,80 @@ facebook_ads_insights_region = """{
                         }
                     },
                     "outbound_clicks": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": [
+                                "null",
+                                "object"
+                            ],
+                            "properties": {
+                                "1d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "7d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "28d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "1d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "7d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "28d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "action_destination": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "action_target_id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "action_type": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "value": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "unique_outbound_clicks": {
                         "type": [
                             "null",
                             "array"
@@ -20491,6 +20903,16 @@ facebook_ads_insights_region = """{
                 {
                     "breadcrumb": [
                         "properties",
+                        "unique_outbound_clicks"
+                    ],
+                    "metadata": {
+                        "inclusion": "available",
+                        "selected": true
+                    }
+                },
+                {
+                    "breadcrumb": [
+                        "properties",
                         "video_30_sec_watched_actions"
                     ],
                     "metadata": {
@@ -20964,8 +21386,8 @@ facebook_ads_insights_region = """{
                     }
                 }
             ]
-        }"""
-facebook_ads_insights_dma = """{
+        },
+        {
             "stream": "ads_insights_dma",
             "tap_stream_id": "ads_insights_dma",
             "schema": {
@@ -21197,6 +21619,80 @@ facebook_ads_insights_dma = """{
                         }
                     },
                     "outbound_clicks": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": [
+                                "null",
+                                "object"
+                            ],
+                            "properties": {
+                                "1d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "7d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "28d_click": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "1d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "7d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "28d_view": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "action_destination": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "action_target_id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "action_type": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "value": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "unique_outbound_clicks": {
                         "type": [
                             "null",
                             "array"
@@ -22058,6 +22554,16 @@ facebook_ads_insights_dma = """{
                 {
                     "breadcrumb": [
                         "properties",
+                        "unique_outbound_clicks"
+                    ],
+                    "metadata": {
+                        "inclusion": "available",
+                        "selected": true
+                    }
+                },
+                {
+                    "breadcrumb": [
+                        "properties",
                         "video_30_sec_watched_actions"
                     ],
                     "metadata": {
@@ -22532,4 +23038,6 @@ facebook_ads_insights_dma = """{
                     }
                 }
             ]
-        }"""
+        }
+    ]
+}
