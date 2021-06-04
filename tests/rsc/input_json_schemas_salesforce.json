@@ -50243,7 +50243,6 @@
           },
           "Location": {
             "type": [
-              "number",
               "object",
               "null"
             ],

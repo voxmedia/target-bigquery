@@ -664,10 +664,6 @@ class TestStream(unittestcore.BaseUnitTest):
 
         for next_schema_input in catalog['streams']:
 
-            # TODO: unit test fails on Salesforce "SurveyResponse" stream
-            # if next_schema_input["tap_stream_id"] == "SurveyResponse":
-            #     continue
-
             validate_json_schema_completeness(next_schema_input)
 
             schema_0_input = copy.deepcopy(next_schema_input)
