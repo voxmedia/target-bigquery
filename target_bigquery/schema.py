@@ -284,61 +284,6 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
     return schema_bigquery
 
 
-
-# def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}):
-#
-#     """
-#
-#     :param schema: input simplified JSON schema
-#     :param key_properties: JSON schema fields which will become required BigQuery column
-#     :param add_metadata: do we want BigQuery metadata columns (e.g., when data was uploaded?)
-#     :param force_fields: You can force a field to a desired data type via force_fields flag.
-#             Use case example:
-#             tap facebook field "date_start" from stream ads_insights_age_and_gender is being passed as string to BQ,
-#             which contradicts tap catalog file, where we said it's a date. force_fields fixes this issue.
-#     :return: a list of BigQuery SchemaFields, which represents one BigQuery table
-#     """
-#
-#     global required_fields
-#
-#     required_fields = set(key_properties) if key_properties else set()
-#
-#     schema_bigquery = []
-#
-#     for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties", {})).items():
-#
-#         if field_name in force_fields:
-#
-#             next_field = (
-#                 SchemaField(field_name, force_fields[field_name]["type"], force_fields[field_name].get("mode", "nullable"),
-#                             force_fields[field_name].get("description", None), ())
-#             )
-#
-#         else:
-#
-#             next_field = build_field(field_name, field_property)
-#
-#         if field_name in required_fields:
-#             schema_bigquery.append(replace_NULLABLE_mode_with_REQUIRED(next_field))
-#
-#         else:
-#             schema_bigquery.append(next_field)
-#
-#     if add_metadata:
-#
-#         for field_name in METADATA_FIELDS:
-#             schema_bigquery.append(SchemaField(name=field_name,
-#                                                field_type=METADATA_FIELDS[field_name]["bq_type"],
-#                                                mode='NULLABLE',
-#                                                description=None,
-#                                                fields=(),
-#                                                policy_tags=None)
-#                                    )
-#
-#     return schema_bigquery
-
-
-
 def format_record_to_schema(record, bq_schema):
     conversion_dict = {"BYTES": bytes,
                        "STRING": str,
