@@ -287,7 +287,7 @@ target-bigquery --config  sample_config/target-config.json ^
   
 #### Example:
 - We used this solution to fix `"date_start"` field from `"ads_insights_age_and_gender"` stream from tap-facebook. 
-- In tap catalog file, we said we want this column to be a **date**. 
+- In tap catalog file, we said we wanted this column to be a **date**. 
 - However, the tap generates schema where this column is a **string**, despite our tap catalog file. 
 - Therefore, we used `force_fields` flag in target-tables-config.json to override what the tap generates and force the column to be a date.
 - Example of *target-tables-config.json* file:
