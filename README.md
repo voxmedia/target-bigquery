@@ -28,7 +28,7 @@ Email: `analytics-help@adswerve.com`
 
 <img src="readme_screenshots/03_Enable_BigQuery_API.png" width="650" alt="Enable BigQuery API">
 
-### Step 2: Authenticate with a Service Account
+### Step 2: Authenticate with a service account
 
 It is recommended to use `target-bigquery` with a service account.
 
@@ -130,7 +130,7 @@ Sample [tap-config.json file](/sample_config/target-tap-config.json) configures 
 
 Learn more: https://github.com/singer-io/getting-started
 
-### Step 4: Install and Run
+### Step 4: Install and run
 
 1. First, make sure Python 3 is installed on your system or follow these installation instructions for [Mac](python-mac) or [Ubuntu](python-ubuntu).
 
@@ -161,7 +161,7 @@ target-bigquery --config  sample_config/target-config.json > sample_config/state
 
 - If you're using a different Tap, substitute `tap-exchangeratesapi` in the final command above to the command used to run your Tap.
 
-### Step 5: target-tables-config file: Set up Partitioning and Clustering
+### Step 5: target-tables-config file: Set up partitioning and clustering
 
 ### Partitioning
 
@@ -276,7 +276,7 @@ target-bigquery --config  sample_config/target-config.json ^
 <img src="readme_screenshots/14_Partitioned_Table.png" width="650" alt="Download the service account credential JSON file">
 
 
-### Step 6:  *target-tables-config.json* File: Force Data Types and Modes
+### Step 6:  *target-tables-config.json* file: force data types and modes
 
 #### Problem:
 - Normally, tap catalog file governs schema of data which will be loaded into target-bigquery.
