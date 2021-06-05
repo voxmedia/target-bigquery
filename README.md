@@ -161,7 +161,7 @@ target-bigquery --config  sample_config/target-config.json > sample_config/state
 
 - If you're using a different Tap, substitute `tap-exchangeratesapi` in the final command above to the command used to run your Tap.
 
-### Step 5: Set up Partitioning and Clustering
+### Step 5: target-tables-config file: Set up Partitioning and Clustering
 
 ### Partitioning
 
@@ -276,6 +276,35 @@ target-bigquery --config  sample_config/target-config.json ^
 <img src="readme_screenshots/14_Partitioned_Table.png" width="650" alt="Download the service account credential JSON file">
 
 
+### Step 6:  *target-tables-config.json* File: Force Data Types and Modes
+
+#### Problem:
+- Normally, tap catalog file governs schema of data which will be loaded into target-bigquery.
+- However, sometimes you can get a column of an undesired data type, which is not following your tap-catalog file.
+  
+#### Solution:
+- You can force that column to the desired data type by using `force_fields` flag inside your *target-tables-config.json* file.
+  
+#### Example:
+- We used this solution to fix `"date_start"` field from `"ads_insights_age_and_gender"` stream from tap-facebook. 
+- In tap catalog file, we said we want this column to be a **date**. 
+- However, the tap generates schema where this column is a **string**, despite our tap catalog file. 
+- Therefore, we used `force_fields` flag in target-tables-config.json to override what the tap generates and force the column to be a date.
+- Example of *target-tables-config.json* file:
+```
+{
+    "streams": {
+      "ads_insights_age_and_gender": {
+        "partition_field": "date_start",
+        "cluster_fields": ["age", "gender","account_id", "campaign_id"],
+        "force_fields": {
+          "date_start": {"type": "DATE", "mode":  "NULLABLE"},
+          "date_stop": {"type": "DATE", "mode":  "NULLABLE"}
+        }
+      }
+    }
+}
+```
 
 
 ---
