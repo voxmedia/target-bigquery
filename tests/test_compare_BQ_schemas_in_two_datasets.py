@@ -58,18 +58,20 @@ def create_dict_of_BQ_schemas_from_dataset(project_id, dataset_id):
 
 class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
 
-    def test_if_bq_schemas_match_in_two_datasets(self, remove_tables_from_dataset_2_which_are_not_present_in_dataset_1=True, compare_in_original_fields_order=True):
+    def test_if_bq_schemas_match_in_two_datasets(self, remove_tables_from_dataset_2_which_are_not_present_in_dataset_1=False, compare_in_original_fields_order=True):
         """Compare schemas in two BigQuery datasets
 
         remove_tables_from_dataset_2_which_are_not_present_in_dataset_1 = True
             it's possible that one dataset has tables which are not present in the other dataset.
             It is expected when the two datasets' reporting periods are different.
             True flag here will exclude those tables from schema comparison.
+            False flag would mean a stricter comparison.
 
          compare_in_original_fields_order=True
             The two datasets may have tables with different fields order.
             True flag will compare the two schemas while taking order into account.
             False flag will skip this step and will only compare sorted schemas.
+            True flag would mean a stricter comparison.
         """
 
         # TODO (developer): enter your GCP project, dataset 1 and dataset 2

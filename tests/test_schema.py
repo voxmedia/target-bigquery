@@ -552,9 +552,9 @@ class TestStream(unittestcore.BaseUnitTest):
 
 
     @log_capture()
-    def test_several_nested_schemas_mailchimp_validate_completeness_1(self, logcapture):
+    def test_several_nested_schemas_mailchimp_validate_completenes(self, logcapture):
 
-        catalog = json.load(open("./rsc/input_json_schemas_mailchimp.json"))
+        catalog = json.load(open("./rsc/input_json_schemas_mailchimp_invalid_incomplete.json"))
 
         for next_schema_input in catalog['streams']:
             logcapture.records = []
@@ -569,7 +569,7 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_mailchimp(self):
 
-        catalog = json.load(open("./rsc/input_json_schemas_mailchimp.json"))
+        catalog = json.load(open("./rsc/input_json_schemas_mailchimp_fixed.json"))
 
         for next_schema_input in catalog['streams']:
 
