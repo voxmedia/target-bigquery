@@ -503,7 +503,12 @@
               "string"
             ]
           },
-          "merge_fields": {},
+          "merge_fields": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "stats": {
             "properties": {
               "avg_open_rate": {
@@ -581,7 +586,12 @@
               "string"
             ]
           },
-          "interests": {},
+          "interests": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "location": {
             "properties": {
               "latitude": {
@@ -1068,7 +1078,12 @@
               "string"
             ]
           },
-          "merge_fields": {},
+          "merge_fields": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "stats": {
             "properties": {
               "avg_open_rate": {
@@ -2903,7 +2918,12 @@
               "string"
             ]
           },
-          "merge_fields": {},
+          "merge_fields": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "vip": {
             "type": [
               "null",

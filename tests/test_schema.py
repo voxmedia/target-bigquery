@@ -574,17 +574,6 @@ class TestStream(unittestcore.BaseUnitTest):
         for next_schema_input in catalog['streams']:
 
             validate_json_schema_completeness(next_schema_input)
-            # mailchimp catalog we use has four empty fields {}
-            #     "merge_fields":{}
-            #     "interests":{}
-            # they are in 3 streams:
-            # list_segment_members
-            # list_members
-            # unsubscribes
-
-            #  #TODO: what do we do about {} in mailchimp? these tests fail
-            # if next_schema_input['tap_stream_id'] in ['list_segment_members', 'list_members', 'unsubscribes']:
-            #     continue
 
             schema_0_input = copy.deepcopy(next_schema_input)
 
