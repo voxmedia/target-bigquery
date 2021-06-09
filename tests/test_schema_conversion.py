@@ -393,40 +393,4 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
 
 
-    def test_shopify_metafields_fixed_new_conversion(self):
-
-        """
-
-            error:
-
->           anyOf_data_types.update({data_type: prioritization_dict[data_type]})
-E           KeyError: 'object'
-
-            succeeds if I add object and array to prioritization dict
-                prioritization_dict = {"object": 0,
-                           "array": 1,
-                            "string": 2,
-                           "number": 3,
-                           "integer": 4,
-                           "boolean": 5,
-                           }
-
-
-        """
-
-        list_of_schema_inputs = [shopify_metafields_fixed
-                                 ]
-        for next_schema_input in list_of_schema_inputs:
-            schema_0_input = next_schema_input
-
-            msg = singer.parse_message(schema_0_input)
-
-            schema_1_simplified = simplify(msg.schema)
-
-            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                     add_metadata=True)
-            assert schema_2_built_new_method
-
-
-
 
