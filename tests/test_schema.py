@@ -24,10 +24,6 @@ from tests.rsc.input_json_schemas import *
 
 from tests.rsc.input_json_schemas_recharge import *
 
-from tests.rsc.input_json_schemas_klaviyo import *
-
-from tests.rsc.input_json_schemas_hubspot import *
-
 from tests.rsc.input_json_schemas_shopify import *
 
 from tests.rsc.input_json_schemas_invalid import *
@@ -358,122 +354,18 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_google_search_console(self):
 
-        catalog = json.load(open("./rsc/input_json_schemas_google_search_console.json"))
-
-        for next_schema_input in catalog['streams']:
-
-            schema_0_input = copy.deepcopy(next_schema_input)
-
-            schema_0_input.update({"type": "SCHEMA"})
-
-            schema_0_input = str(schema_0_input)
-
-            schema_0_input = schema_0_input.replace("\'", "\"").replace("True","true").replace("False","false")
-
-            msg = singer.parse_message(schema_0_input)
-
-            schema_1_simplified = simplify(msg.schema)
-
-            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                         add_metadata=True)
-
-            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
-
-            # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
-
-            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
-
-            assert schema_built_new_method_sorted == schema_built_old_method_sorted
+        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_google_search_console.json")
 
 
     def test_several_nested_schemas_hubspot(self):
 
-        list_of_schema_inputs_hubspot = [hubspot_campaigns,
-                                         hubspot_companies,
-                                         hubspot_contact_lists,
-                                         hubspot_contacts,
-                                         hubspot_contacts_by_company,
-                                         hubspot_deal_pipelines,
-                                         hubspot_deals,
-                                         hubspot_email_events,
-                                         hubspot_engagements,
-                                         hubspot_forms,
-                                         hubspot_owners,
-                                         hubspot_subscription_changes,
-                                         hubspot_workflows
-        ]
+        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_hubspot.json")
 
-        for next_schema_input in list_of_schema_inputs_hubspot:
-
-            schema_0_input = next_schema_input
-
-            schema_0_input = json.loads(schema_0_input)
-
-            # hubspot schemas are missing required key "key_properties"
-            schema_0_input.update({"key_properties": "Id"})
-
-            schema_0_input.update({"type": "SCHEMA"})
-
-            schema_0_input = str(schema_0_input)
-
-            schema_0_input = schema_0_input.replace("\'", "\"").replace("True","true").replace("False","false")
-
-            msg = singer.parse_message(schema_0_input)
-
-            schema_1_simplified = simplify(msg.schema)
-
-            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                         add_metadata=True)
-
-            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
-
-            # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
-
-            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
-
-            assert schema_built_new_method_sorted == schema_built_old_method_sorted
-
-            # TODO: check data types
 
     def test_several_nested_schemas_klaviyo(self):
 
-        list_of_schema_inputs_amazon = [klaviyo_bounce,
-                                        klaviyo_click,
-                                        klaviyo_email,
-                                        klaviyo_mark_as_spam,
-                                        klaviyo_open,
-                                        klaviyo_receive,
-                                        klaviyo_subscribe_list,
-                                        klaviyo_unsubscribe,
-                                        klaviyo_unsub_list,
-                                        klaviyo_update_email_preferences,
-                                        klaviyo_global_exclusions,
-                                        klaviyo_lists
-                                        ]
+        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_klaviyo.json")
 
-        for next_schema_input in list_of_schema_inputs_amazon:
-
-            schema_0_input = next_schema_input
-
-            msg = singer.parse_message(schema_0_input)
-
-            schema_1_simplified = simplify(msg.schema)
-
-            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                         add_metadata=True)
-
-            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
-
-            # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
-
-            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
-
-            assert schema_built_new_method_sorted == schema_built_old_method_sorted
-
-            # TODO: check data types
 
 
     @log_capture()

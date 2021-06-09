@@ -1,6 +1,6 @@
-
-hubspot_campaigns="""{
-           
+{
+    "streams": [
+        {
             "stream": "campaigns",
             "tap_stream_id": "campaigns",
             "schema": {
@@ -299,9 +299,8 @@ hubspot_campaigns="""{
                     }
                 }
             ]
-        }"""
-hubspot_companies="""{
-           
+        },
+        {
             "stream": "companies",
             "tap_stream_id": "companies",
             "schema": {
@@ -12171,9 +12170,8 @@ hubspot_companies="""{
                     }
                 }
             ]
-        }"""
-hubspot_contact_lists="""{
-           
+        },
+        {
             "stream": "contact_lists",
             "tap_stream_id": "contact_lists",
             "schema": {
@@ -12520,9 +12518,8 @@ hubspot_contact_lists="""{
                     }
                 }
             ]
-        }"""
-hubspot_contacts="""{
-           
+        },
+        {
             "stream": "contacts",
             "tap_stream_id": "contacts",
             "schema": {
@@ -26742,9 +26739,8 @@ hubspot_contacts="""{
                     }
                 }
             ]
-        }"""
-hubspot_contacts_by_company="""{
-           
+        },
+        {
             "stream": "contacts_by_company",
             "tap_stream_id": "contacts_by_company",
             "schema": {
@@ -26794,10 +26790,8 @@ hubspot_contacts_by_company="""{
                     }
                 }
             ]
-        }"""
-
-hubspot_deal_pipelines= """{
-    
+        },
+        {
             "stream": "deal_pipelines",
             "tap_stream_id": "deal_pipelines",
             "schema": {
@@ -26953,9 +26947,8 @@ hubspot_deal_pipelines= """{
                     }
                 }
             ]
-        }"""
-hubspot_deals="""{
-           
+        },
+        {
             "stream": "deals",
             "tap_stream_id": "deals",
             "schema": {
@@ -36504,9 +36497,8 @@ hubspot_deals="""{
                     }
                 }
             ]
-        }"""
-hubspot_email_events="""{
-           
+        },
+        {
             "stream": "email_events",
             "tap_stream_id": "email_events",
             "schema": {
@@ -36998,9 +36990,8 @@ hubspot_email_events="""{
                     }
                 }
             ]
-        }"""
-hubspot_engagements="""{
-           
+        },
+        {
             "stream": "engagements",
             "tap_stream_id": "engagements",
             "schema": {
@@ -37344,9 +37335,8 @@ hubspot_engagements="""{
                     }
                 }
             ]
-        }"""
-hubspot_forms="""{
-           
+        },
+        {
             "stream": "forms",
             "tap_stream_id": "forms",
             "schema": {
@@ -38401,9 +38391,8 @@ hubspot_forms="""{
                     }
                 }
             ]
-        }"""
-hubspot_owners="""{
-           
+        },
+        {
             "stream": "owners",
             "tap_stream_id": "owners",
             "schema": {
@@ -38704,9 +38693,8 @@ hubspot_owners="""{
                     }
                 }
             ]
-        }"""
-hubspot_subscription_changes="""{
-           
+        },
+        {
             "stream": "subscription_changes",
             "tap_stream_id": "subscription_changes",
             "schema": {
@@ -38859,9 +38847,8 @@ hubspot_subscription_changes="""{
                     }
                 }
             ]
-        }"""
-hubspot_workflows="""{
-           
+        },
+        {
             "stream": "workflows",
             "tap_stream_id": "workflows",
             "schema": {
@@ -39309,4 +39296,6 @@ hubspot_workflows="""{
                     }
                 }
             ]
-        }"""
+        }
+    ]
+}

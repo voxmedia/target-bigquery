@@ -1,4 +1,6 @@
-klaviyo_bounce = """{"type": "SCHEMA", 
+{
+  "streams": [
+    {
       "stream": "bounce",
       "tap_stream_id": "KU6iPf",
       "key_properties": [
@@ -152,9 +154,8 @@ klaviyo_bounce = """{"type": "SCHEMA",
           }
         }
       ]
-    }"""
-klaviyo_click = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "click",
       "tap_stream_id": "Kh5gcC",
       "key_properties": [
@@ -313,9 +314,8 @@ klaviyo_click = """{
           }
         }
       ]
-    }"""
-klaviyo_email = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "dropped_email",
       "tap_stream_id": "J7EriL",
       "key_properties": [
@@ -468,9 +468,8 @@ klaviyo_email = """{
           }
         }
       ]
-    }"""
-klaviyo_mark_as_spam = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "mark_as_spam",
       "tap_stream_id": "PuW5Qd",
       "key_properties": [
@@ -623,9 +622,8 @@ klaviyo_mark_as_spam = """{
           }
         }
       ]
-    }"""
-klaviyo_open = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "open",
       "tap_stream_id": "HuDnG9",
       "key_properties": [
@@ -785,9 +783,8 @@ klaviyo_open = """{
           }
         }
       ]
-    }"""
-klaviyo_receive = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "receive",
       "tap_stream_id": "M5v9H7",
       "key_properties": [
@@ -940,9 +937,8 @@ klaviyo_receive = """{
           }
         }
       ]
-    }"""
-klaviyo_subscribe_list = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "subscribe_list",
       "tap_stream_id": "JPRxJ3",
       "key_properties": [
@@ -1094,9 +1090,8 @@ klaviyo_subscribe_list = """{
           }
         }
       ]
-    }"""
-klaviyo_unsubscribe = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "unsubscribe",
       "tap_stream_id": "MGwcjJ",
       "key_properties": [
@@ -1249,9 +1244,8 @@ klaviyo_unsubscribe = """{
           }
         }
       ]
-    }"""
-klaviyo_unsub_list = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "unsub_list",
       "tap_stream_id": "Hq4hfW",
       "key_properties": [
@@ -1403,9 +1397,8 @@ klaviyo_unsub_list = """{
           }
         }
       ]
-    }"""
-klaviyo_update_email_preferences = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "update_email_preferences",
       "tap_stream_id": "HVE24G",
       "key_properties": [
@@ -1557,9 +1550,8 @@ klaviyo_update_email_preferences = """{
           }
         }
       ]
-    }"""
-klaviyo_global_exclusions = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "global_exclusions",
       "tap_stream_id": "global_exclusions",
       "key_properties": [
@@ -1633,9 +1625,8 @@ klaviyo_global_exclusions = """{
           }
         }
       ]
-    }"""
-klaviyo_lists = """{
-      "type": "SCHEMA", 
+    },
+    {
       "stream": "lists",
       "tap_stream_id": "lists",
       "key_properties": [
@@ -1749,4 +1740,6 @@ klaviyo_lists = """{
           }
         }
       ]
-    }"""
+    }
+  ]
+}
