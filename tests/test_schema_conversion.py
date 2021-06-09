@@ -39,7 +39,6 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          shopify_collects
                          ]
 
-
 class TestSchemaConversion(unittestcore.BaseUnitTest):
 
     def setUp(self):
@@ -57,10 +56,6 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
                                                      add_metadata=True)
 
         schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
-
-        # are results of the two methods above identical?
-
-        # assert schema_2_built_new_method == schema_3_built_old_method
 
         for f in schema_2_built_new_method:
             if f.name == "id":
@@ -390,7 +385,3 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
     def test_several_nested_schemas_shopify(self):
 
         compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_shopify.json")
-
-
-
-

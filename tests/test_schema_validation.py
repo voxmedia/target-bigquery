@@ -26,9 +26,9 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          schema_nested_2,
                          schema_nested_3_shopify,
                          shopify_orders_fixed,
-                         # shopify_customers, #old schema.py fails on this in my test. New one works
+                         shopify_customers, #old schema.py fails on this in my test. New one works
                          shopify_custom_collections,
-                         # shopify_abandoned_checkouts_fixed, #old schema.py fails on this in my test. New one works
+                         shopify_abandoned_checkouts_fixed, #old schema.py fails on this in my test. New one works
                          shopify_products,
                          shopify_transactions,
                          # shopify_metafields_malformed, # not valid schema
