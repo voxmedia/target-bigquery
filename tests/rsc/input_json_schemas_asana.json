@@ -1,5 +1,6 @@
-asana_teams="""{
-      "type": "SCHEMA",
+{
+  "streams": [
+    {
       "stream": "teams",
       "tap_stream_id": "teams",
       "schema": {
@@ -204,9 +205,8 @@ asana_teams="""{
       ],
       "replication_key": null,
       "replication_method": "FULL_TABLE"
-    }"""
-asana_stories="""{
-      "type": "SCHEMA",
+    },
+    {
       "stream": "stories",
       "tap_stream_id": "stories",
       "schema": {
@@ -1501,9 +1501,8 @@ asana_stories="""{
       ],
       "replication_key": "created_at",
       "replication_method": "INCREMENTAL"
-    }"""
-asana_users="""{
-      "type": "SCHEMA",
+    },
+    {
       "stream": "users",
       "tap_stream_id": "users",
       "schema": {
@@ -1694,9 +1693,8 @@ asana_users="""{
       ],
       "replication_key": null,
       "replication_method": "FULL_TABLE"
-    }"""
-asana_workspaces="""{
-      "type": "SCHEMA",
+    },
+    {
       "stream": "workspaces",
       "tap_stream_id": "workspaces",
       "schema": {
@@ -1811,10 +1809,8 @@ asana_workspaces="""{
       ],
       "replication_key": null,
       "replication_method": "FULL_TABLE"
-    }"""
-
-asana_projects="""{
-      "type": "SCHEMA",
+    },
+    {
       "stream": "projects",
       "tap_stream_id": "projects",
       "schema": {
@@ -2512,9 +2508,8 @@ asana_projects="""{
       ],
       "replication_key": "modified_at",
       "replication_method": "INCREMENTAL"
-    }"""
-asana_portfolios = """{
-      "type": "SCHEMA",
+    },
+    {
       "stream": "portfolios",
       "tap_stream_id": "portfolios",
       "schema": {
@@ -3154,9 +3149,8 @@ asana_portfolios = """{
       ],
       "replication_key": null,
       "replication_method": "FULL_TABLE"
-    }"""
-asana_sections="""{
-      "type": "SCHEMA",
+    },
+    {
       "stream": "sections",
       "tap_stream_id": "sections",
       "schema": {
@@ -3330,9 +3324,8 @@ asana_sections="""{
       ],
       "replication_key": null,
       "replication_method": "FULL_TABLE"
-    }"""
-asana_tasks="""{
-      "type": "SCHEMA",
+    },
+    {
       "stream": "tasks",
       "tap_stream_id": "tasks",
       "schema": {
@@ -4503,9 +4496,8 @@ asana_tasks="""{
       ],
       "replication_key": "modified_at",
       "replication_method": "INCREMENTAL"
-    }"""
-asana_tags="""{
-      "type": "SCHEMA",
+    },
+    {
       "stream": "tags",
       "tap_stream_id": "tags",
       "schema": {
@@ -4730,4 +4722,6 @@ asana_tags="""{
       ],
       "replication_key": "created_at",
       "replication_method": "INCREMENTAL"
-    }"""
+    }
+  ]
+}
