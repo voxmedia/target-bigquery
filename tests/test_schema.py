@@ -24,8 +24,6 @@ from tests.rsc.input_json_schemas import *
 
 from tests.rsc.input_json_schemas_recharge import *
 
-from tests.rsc.input_json_schemas_bing_ads import *
-
 from tests.rsc.input_json_schemas_klaviyo import *
 
 from tests.rsc.input_json_schemas_hubspot import *
@@ -380,25 +378,22 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_bing_ads(self):
 
-        list_of_schema_inputs_bing_ads = [bing_ads_accounts,
-                                          bing_ads_campaigns,
-                                          bing_ads_ad_groups,
-                                          bing_ads_ads,
-                                          bing_ads_ad_extension_detail_report,
-                                          bing_ads_ad_group_performance_report,
-                                          bing_ads_ad_performance_report,
-                                          bing_ads_age_gender_audience_report,
-                                          bing_ads_audience_performance_report,
-                                          bing_ads_campaign_performance_report,
-                                          bing_ads_geographic_performance_report,
-                                          bing_ads_goals_and_funnels_report,
-                                          bing_ads_keyword_performance_report,
-                                          bing_ads_search_query_performance_report
-             ]
+        catalog = json.load(open("./rsc/input_json_schemas_bing_ads.json"))
 
-        for next_schema_input in list_of_schema_inputs_bing_ads:
+        for next_schema_input in catalog['streams']:
 
-            schema_0_input = next_schema_input
+            validate_json_schema_completeness(next_schema_input)
+
+            schema_0_input = copy.deepcopy(next_schema_input)
+
+            schema_0_input.update({"type": "SCHEMA"})
+
+            if "key_properties" not in schema_0_input.keys():
+                schema_0_input.update({"key_properties": "Id"})
+
+            schema_0_input = str(schema_0_input)
+
+            schema_0_input = schema_0_input.replace("\'", "\"").replace("True","true").replace("False","false")
 
             msg = singer.parse_message(schema_0_input)
 
