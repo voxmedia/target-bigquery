@@ -75,7 +75,8 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
                            invalid_schema_under_anyOf_empty_props_example_1,
                            invalid_schema_under_anyOf_deep_nested_empty_props,
                            shopify_metafields_malformed,
-                           shopify_abandoned_checkouts_malformed]
+                           shopify_abandoned_checkouts_malformed,
+                           shopify_orders_malformed]
 
         for incomplete_schema in invalid_schemas:
             with pytest.raises(ValueError, match="JSON schema is invalid/incomplete. It has empty properties"):
