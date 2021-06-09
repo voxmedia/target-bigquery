@@ -132,14 +132,27 @@ def convert_list_of_schema_fields_to_list_of_lists(input_schema_fields_list):
     return sorted(list_of_lists)
 
 
-def compare_old_vs_new_schema_conversion(catalog_schema_file):
+def compare_old_vs_new_schema_conversion(catalog_schema_file, exclude_stream=None, only_test_stream=None):
+
+    """
+    :param catalog_schema_file: input JSON schema / tap catalog json file
+    :param exclude_stream:
+    :param only_test_stream:
+
+    convert JSON schema using old vs new method. Make sure results are identical. Ignore order of fields.
+    """
 
     catalog = json.load(open(catalog_schema_file))
 
     for next_schema_input in catalog['streams']:
 
+        if next_schema_input['tap_stream_id'] == exclude_stream:
+            continue
+
+        # make sure stream doesn't have empty (undefined object {}) type or properties
         validate_json_schema_completeness(next_schema_input)
 
+        # clean up schema formatting
         schema_0_input = copy.deepcopy(next_schema_input)
 
         if "type" not in schema_0_input.keys():
@@ -152,6 +165,7 @@ def compare_old_vs_new_schema_conversion(catalog_schema_file):
 
         schema_0_input = schema_0_input.replace("\'", "\"").replace("True", "true").replace("False", "false").replace("None", "null")
 
+        # convert schema using old vs. new method
         msg = singer.parse_message(schema_0_input)
 
         schema_1_simplified = simplify(msg.schema)
