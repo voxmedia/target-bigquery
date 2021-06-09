@@ -275,11 +275,19 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_amazon(self):
 
-        list_of_schema_inputs_amazon = [amazon_orders, amazon_inventory, amazon_products]
+        catalog = json.load(open("./rsc/input_json_schemas_amazon.json"))
 
-        for next_schema_input in list_of_schema_inputs_amazon:
+        for next_schema_input in catalog['streams']:
 
-            schema_0_input = next_schema_input
+            validate_json_schema_completeness(next_schema_input)
+
+            schema_0_input = copy.deepcopy(next_schema_input)
+
+            schema_0_input.update({"type": "SCHEMA"})
+
+            schema_0_input = str(schema_0_input)
+
+            schema_0_input = schema_0_input.replace("\'", "\"").replace("True","true").replace("False","false")
 
             msg = singer.parse_message(schema_0_input)
 
@@ -298,7 +306,6 @@ class TestStream(unittestcore.BaseUnitTest):
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
             # TODO: check data types
-
 
     def test_several_nested_schemas_asana_only_new_method(self):
 
