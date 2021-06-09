@@ -24,8 +24,6 @@ from tests.rsc.input_json_schemas import *
 
 from tests.rsc.input_json_schemas_recharge import *
 
-from tests.rsc.input_json_schemas_amazon import *
-
 from tests.rsc.input_json_schemas_asana import *
 
 from tests.rsc.input_json_schemas_bing_ads import *
