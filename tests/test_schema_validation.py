@@ -38,7 +38,6 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          ]
 
 
-
 class TestSchemaValidation(unittestcore.BaseUnitTest):
 
     def setUp(self):

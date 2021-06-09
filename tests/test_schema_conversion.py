@@ -42,8 +42,6 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
 
 class TestSchemaConversion(unittestcore.BaseUnitTest):
 
-    # TODO: reduce repetition in this script. Specifically, for the unit tests of schema conversion
-
     def setUp(self):
         super(TestSchemaConversion, self).setUp()
 
