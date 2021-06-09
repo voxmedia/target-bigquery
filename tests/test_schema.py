@@ -16,7 +16,7 @@ from tests.schema_old import build_schema_old
 from target_bigquery.simplify_json_schema import simplify
 from tests import unittestcore
 
-from tests.utils import convert_list_of_schema_fields_to_list_of_lists
+from tests.utils import convert_list_of_schema_fields_to_list_of_lists, compare_old_vs_new_schema_conversion
 
 from target_bigquery.validate_json_schema import validate_json_schema_completeness
 
@@ -269,37 +269,7 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_amazon(self):
 
-        catalog = json.load(open("./rsc/input_json_schemas_amazon.json"))
-
-        for next_schema_input in catalog['streams']:
-
-            validate_json_schema_completeness(next_schema_input)
-
-            schema_0_input = copy.deepcopy(next_schema_input)
-
-            schema_0_input.update({"type": "SCHEMA"})
-
-            schema_0_input = str(schema_0_input)
-
-            schema_0_input = schema_0_input.replace("\'", "\"").replace("True","true").replace("False","false")
-
-            msg = singer.parse_message(schema_0_input)
-
-            schema_1_simplified = simplify(msg.schema)
-
-            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                         add_metadata=True)
-
-            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
-
-            # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
-
-            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
-
-            assert schema_built_new_method_sorted == schema_built_old_method_sorted
-
-            # TODO: check data types
+        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_amazon.json")
 
 
     def test_several_nested_schemas_asana(self):
@@ -378,73 +348,12 @@ class TestStream(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_bing_ads(self):
 
-        catalog = json.load(open("./rsc/input_json_schemas_bing_ads.json"))
-
-        for next_schema_input in catalog['streams']:
-
-            validate_json_schema_completeness(next_schema_input)
-
-            schema_0_input = copy.deepcopy(next_schema_input)
-
-            schema_0_input.update({"type": "SCHEMA"})
-
-            if "key_properties" not in schema_0_input.keys():
-                schema_0_input.update({"key_properties": "Id"})
-
-            schema_0_input = str(schema_0_input)
-
-            schema_0_input = schema_0_input.replace("\'", "\"").replace("True","true").replace("False","false")
-
-            msg = singer.parse_message(schema_0_input)
-
-            schema_1_simplified = simplify(msg.schema)
-
-            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                         add_metadata=True)
-
-            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
-
-            # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
-
-            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
-
-            assert schema_built_new_method_sorted == schema_built_old_method_sorted
-
-            # TODO: check data types
+        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_bing_ads.json")
 
 
     def test_several_nested_schemas_facebook(self):
 
-        catalog = json.load(open("./rsc/input_json_schemas_facebook.json"))
-
-        for next_schema_input in catalog['streams']:
-
-            schema_0_input = copy.deepcopy(next_schema_input)
-
-            schema_0_input.update({"type": "SCHEMA"})
-
-            schema_0_input.update({"key_properties": "Id"})
-
-            schema_0_input = str(schema_0_input)
-
-            schema_0_input = schema_0_input.replace("\'", "\"").replace("True","true").replace("False","false")
-
-            msg = singer.parse_message(schema_0_input)
-
-            schema_1_simplified = simplify(msg.schema)
-
-            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                         add_metadata=True)
-
-            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
-
-            # are results of the two methods above identical? ignore order of columns and case
-            schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
-
-            schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
-
-            assert schema_built_new_method_sorted == schema_built_old_method_sorted
+        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_facebook.json")
 
 
     def test_several_nested_schemas_google_search_console(self):
