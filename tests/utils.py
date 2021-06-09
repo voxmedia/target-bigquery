@@ -132,7 +132,7 @@ def convert_list_of_schema_fields_to_list_of_lists(input_schema_fields_list):
     return sorted(list_of_lists)
 
 
-def compare_old_vs_new_schema_conversion(catalog_schema_file, exclude_stream=None, only_test_stream=None):
+def compare_old_vs_new_schema_conversion(catalog_schema_file, exclude_stream=None):
 
     """
     :param catalog_schema_file: input JSON schema / tap catalog json file
