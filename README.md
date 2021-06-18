@@ -116,7 +116,7 @@ Sample **target-config.json** file:
 
 This is a little bit outside of the scope of this documentation, but let's quickly take a look at sample *tap* config files as well, to see how tap and target work together.
 
-Sample [tap-config.json(/sample_config/tap-config.json)] file configures the data source:
+Sample [tap-config.json](/sample_config/tap-config.json) file configures the data source:
 ```
 {   "base": "USD",
     "start_date": "2021-01-01"
