@@ -116,14 +116,14 @@ Sample **target-config.json** file:
 
 This is a little bit outside of the scope of this documentation, but let's quickly take a look at sample *tap* config files as well, to see how tap and target work together.
 
-Sample [tap-config.json file](/sample_config/target-tap-config.json) configures the data source:
+Sample [tap-config.json(/sample_config/tap-config.json)] file configures the data source:
 ```
 {   "base": "USD",
     "start_date": "2021-01-01"
 }
 ```
 
-- Sample [state.json file](/sample_config/state.json) is now just a empty JSON file `{}`, and it will be written or updated when the tap runs. 
+- Sample [state.json](/sample_config/state.json) file is now just a empty JSON file `{}`, and it will be written or updated when the tap runs. 
 - This is an optional file.
 - The tap will write the date into **state.json** file, indicating when the data loading stopped at. 
 - Next time you run the tap, it'll continue from this date in the state file. If **state.json** file is provided, then it takes presedence over the "start_date" in the tap config file.
@@ -153,7 +153,7 @@ Sample **target-config.json** file:
 
 › pip install tap-exchangeratesapi git+git://github.com/adswerve/target-bigquery
 
-› tap-exchangeratesapi --config sample_config/tap-exchange-rate-api.json | ^
+› tap-exchangeratesapi --config sample_config/tap-config.json | ^
 target-bigquery --config  sample_config/target-config.json > sample_config/state.json
 ```
 
@@ -262,7 +262,7 @@ You can only set up partitioning.
 
 3. Load data data into BigQuery, while configuring target tables. Pass **target-tables-config.json** as a command line argument. 
 ```bash
-› tap-exchangeratesapi --config sample_config/tap-exchange-rate-api.json | ^
+› tap-exchangeratesapi --config sample_config/tap-config.json | ^
 target-bigquery --config  sample_config/target-config.json ^
 -t sample_config/target-tables-config.json > sample_config/state.json
 ```
