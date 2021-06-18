@@ -116,7 +116,7 @@ Sample **target-config.json** file:
 
 This is a little bit outside of the scope of this documentation, but let's quickly take a look at sample *tap* config files as well, to see how tap and target work together.
 
-Sample [tap-config.json](/sample_config/tap-config.json) file configures the data source:
+Sample [tap-config.json](/sample_config/tap-config-exchange-rates-api.json) file configures the data source:
 ```
 {   "base": "USD",
     "start_date": "2021-01-01"
@@ -153,7 +153,7 @@ Sample **target-config.json** file:
 
 › pip install tap-exchangeratesapi git+git://github.com/adswerve/target-bigquery
 
-› tap-exchangeratesapi --config sample_config/tap-config.json | ^
+› tap-exchangeratesapi --config sample_config/tap-config-exchange-rates-api.json | ^
 target-bigquery --config  sample_config/target-config.json > sample_config/state.json
 ```
 
@@ -262,7 +262,7 @@ You can only set up partitioning.
 
 3. Load data data into BigQuery, while configuring target tables. Pass **target-tables-config.json** as a command line argument. 
 ```bash
-› tap-exchangeratesapi --config sample_config/tap-config.json | ^
+› tap-exchangeratesapi --config sample_config/tap-config-exchange-rates-api.json | ^
 target-bigquery --config  sample_config/target-config.json ^
 -t sample_config/target-tables-config.json > sample_config/state.json
 ```
