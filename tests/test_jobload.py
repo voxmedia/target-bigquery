@@ -1,4 +1,5 @@
 from tests import unittestcore
+import os
 
 """
 Tests:
@@ -14,8 +15,8 @@ class TestJobLoad(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/simple_stream.json",
-            config="../sandbox/target_config.json",
+            stdin=os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'simple_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sample_config'),'target-config.json'),
             processhandler="load-job"
         )
 
@@ -29,9 +30,9 @@ class TestJobLoad(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/simple_stream.json",
-            config="../sandbox/target_config.json",
-            tables="./rsc/simple_stream_table_config.json",
+            stdin=os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'simple_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sample_config'),'target-config.json'),
+            tables=os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'klaviyo_stream.json'),
             processhandler="load-job"
         )
 
@@ -45,8 +46,8 @@ class TestJobLoad(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/complex_stream.json",
-            config="../sandbox/target_config.json",
+            stdin=os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'klaviyo_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sample_config'),'target-config.json'),
             processhandler="load-job"
         )
 

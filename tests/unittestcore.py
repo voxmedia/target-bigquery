@@ -12,8 +12,10 @@ class BaseUnitTest(unittest.TestCase):
         os.environ["TARGET_BIGQUERY_STATE_FILE"] = "state.json.tmp"
         self.delete_temp_state()
 
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
+        # TODO:  Move this to a command line parameter (argparse python package).
+        #  It makes sense because it'll be different for everyone
+        if not bool(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]): \
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join("/auth_keys", "as-dev-gord-default-comput-engine-03fedd5cb82f.json")
 
         self.client = None
         self.project_id = None
