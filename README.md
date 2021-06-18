@@ -90,7 +90,7 @@ Create a service account credential:
 
 #### Target config file
 
-Create a file called **target-config.json** in your working directory, following [this sample target-config.json file](/sample_config/target-config.json) (or see the example below).
+Create a file called **target-config.json** in your working directory, following this sample [target-config.json](/sample_config/target-config-exchange-rates-api.json) file (or see the example below).
 
 - Required parameters are the project name `project_id` and `dataset_id`. 
 - Optional parameters are `table_suffix`, `validate records`, `add_metadata_columns`, `location` and `table_config`. 
@@ -136,7 +136,7 @@ Learn more: https://github.com/singer-io/getting-started
 
 2. `target-bigquery` can be run with any [Singer Tap], but we'll use [tap-exchangeratesapi] - which pulls currency exchange rate data from a public data set - as an example. (Learn more about [Exchangeratesapi.io](http://exchangeratesapi.io/))
 
-3. In the `sample_config/target-config. file, enter the id of your GCP (Google Cloud Platform Project) - you can find it on the Home page of your [GCP web console](https://console.cloud.google.com).
+3. In the **target-config.json** file, enter the id of your GCP (Google Cloud Platform Project) - you can find it on the Home page of your [GCP web console](https://console.cloud.google.com).
 
 Sample **target-config.json** file:
 ```
@@ -154,7 +154,7 @@ Sample **target-config.json** file:
 › pip install tap-exchangeratesapi git+git://github.com/adswerve/target-bigquery
 
 › tap-exchangeratesapi --config sample_config/tap-config-exchange-rates-api.json | ^
-target-bigquery --config  sample_config/target-config.json > sample_config/state.json
+target-bigquery --config  sample_config/target-config-exchange-rates-api.json > sample_config/state.json
 ```
 
 - "^" on a Windows machine indicates a new line. On a Mac, use "\\".
@@ -263,7 +263,7 @@ You can only set up partitioning.
 3. Load data data into BigQuery, while configuring target tables. Pass **target-tables-config.json** as a command line argument. 
 ```bash
 › tap-exchangeratesapi --config sample_config/tap-config-exchange-rates-api.json | ^
-target-bigquery --config  sample_config/target-config.json ^
+target-bigquery --config  sample_config/target-config-exchange-rates-api.json ^
 -t sample_config/target-tables-config.json > sample_config/state.json
 ```
 - "^" indicates a new line in  Windows Command Prompt. In Mac terminal, use "\\".
