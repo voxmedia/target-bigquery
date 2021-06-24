@@ -106,7 +106,3 @@ ENV/
 .mypy_cache/
 
 .vscode/
-
-sandbox/
-
-archived
