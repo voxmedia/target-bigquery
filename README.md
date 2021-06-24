@@ -294,8 +294,8 @@ You can only set up partitioning.
 
 3. Load data data into BigQuery, while configuring target tables. Pass **target-tables-config.json** as a command line argument. 
 ```bash
-› tap-exchangeratesapi --config sample_config/tap-config-exchange-rates-api.json | ^
-target-bigquery --config  sample_config/target-config-exchange-rates-api.json ^
+{project_root_dir}\tap\Scripts\tap-exchangeratesapi --config sample_config/tap-config-exchange-rates-api.json | ^
+{project_root_dir}\target\Scripts\target-bigquery --config  sample_config/target-config-exchange-rates-api.json ^
 -t sample_config/target-tables-config.json > sample_config/state.json
 ```
 - "^" indicates a new line in  Windows Command Prompt. In Mac terminal, use "\\".
