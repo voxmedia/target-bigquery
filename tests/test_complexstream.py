@@ -1,6 +1,7 @@
 from tests import unittestcore
 from google.cloud.bigquery import SchemaField
 import json
+import os
 
 class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
@@ -8,8 +9,11 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/klaviyo_stream.json",
-            config="../sandbox/target-config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'klaviyo_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+                                'target-config.json'),
             processhandler="load-job"
         )
 
@@ -23,8 +27,11 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/recharge_stream.json",
-            config="../sandbox/target-config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'recharge_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+                                'target-config.json'),
             processhandler="load-job"
         )
 
@@ -41,8 +48,11 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/bing_ads_stream.json",
-            config="../sandbox/target-config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'bing_ads_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+                                'target-config.json'),
             processhandler="load-job"
         )
 
@@ -73,8 +83,11 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/bing_ads_stream_schema_vs_data_have_diff_data_types.json",
-            config="../sandbox/target-config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'bing_ads_stream_schema_vs_data_have_diff_data_types.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+                                'target-config.json'),
             processhandler="load-job"
         )
 
@@ -89,8 +102,11 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/facebook_stream.json",
-            config="../sandbox/target-config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'facebook_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+                                'target-config.json'),
             processhandler="load-job"
         )
 
@@ -110,9 +126,14 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/facebook_stream.json",
-            config="../sandbox/target-config.json",
-            tables="./rsc/config/facebook_stream_tables_config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'facebook_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+                                'target-config.json'),
+            tables=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'config'), 'facebook_stream_tables_config.json'),
             processhandler="load-job"
         )
 
@@ -144,9 +165,14 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/facebook_stream_date_start_is_required_string.json",
-            config="../sandbox/target-config.json",
-            tables="./rsc/config/facebook_stream_tables_config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'facebook_stream_date_start_is_required_string.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+                                'target-config.json'),
+            tables=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'config'), 'facebook_stream_tables_config.json'),
             processhandler="load-job"
         )
 
@@ -182,8 +208,11 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/facebook_stream.json",
-            config="../sandbox/malformed_target_config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'facebook_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-malformed_target_config.json'),
             processhandler="load-job",
         )
 
