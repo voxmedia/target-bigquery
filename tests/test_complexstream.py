@@ -192,3 +192,12 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         print(state)
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
+
+##TODO: start here.
+## fix unit test
+## fix directories
+## document set up
+## refactor config files, maybe move from rsc into sample_config??
+## maybe refactor input schemas into a schemas subdir??
+## or maybe have 3 locations: sample_config (README), sandbox and rsc. Explain this in README
+

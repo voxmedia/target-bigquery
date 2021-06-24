@@ -14,11 +14,11 @@ from tests import unittestcore
 
 from target_bigquery.validate_json_schema import validate_json_schema_completeness
 
-from tests.rsc.input_json_schemas import *
+from tests.rsc.schemas.input_json_schemas import *
 
-from tests.rsc.input_json_schemas_shopify import *
+from tests.rsc.schemas.input_json_schemas_shopify import *
 
-from tests.rsc.input_json_schemas_invalid import *
+from tests.rsc.schemas.input_json_schemas_invalid import *
 
 list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          schema_nested_1,
@@ -109,7 +109,7 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
 
     @log_capture()
     def test_several_nested_schemas_mailchimp_validate_completenes(self, logcapture):
-        catalog = json.load(open("./rsc/input_json_schemas_mailchimp_invalid_incomplete.json"))
+        catalog = json.load(open("rsc/schemas/input_json_schemas_mailchimp_invalid_incomplete.json"))
 
         for next_schema_input in catalog['streams']:
             logcapture.records = []

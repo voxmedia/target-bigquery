@@ -17,9 +17,9 @@ from tests.utils import convert_list_of_schema_fields_to_list_of_lists, compare_
 
 from target_bigquery.validate_json_schema import validate_json_schema_completeness
 
-from tests.rsc.input_json_schemas import *
+from tests.rsc.schemas.input_json_schemas import *
 
-from tests.rsc.input_json_schemas_shopify import *
+from tests.rsc.schemas.input_json_schemas_shopify import *
 
 
 list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
@@ -252,7 +252,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_amazon(self):
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_amazon.json")
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_amazon.json")
 
 
     def test_several_nested_schemas_asana(self):
@@ -262,12 +262,12 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         works with the new schema conversion
         """
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_asana.json", exclude_stream='workspaces')
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_asana.json", exclude_stream='workspaces')
 
 
     def test_several_nested_schemas_asana_workspaces_new_method(self):
 
-        catalog = json.load(open("./rsc/input_json_schemas_asana.json"))
+        catalog = json.load(open("rsc/schemas/input_json_schemas_asana.json"))
 
         for next_schema_input in catalog['streams']:
 
@@ -303,32 +303,32 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_bing_ads(self):
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_bing_ads.json")
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_bing_ads.json")
 
 
     def test_several_nested_schemas_facebook(self):
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_facebook.json")
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_facebook.json")
 
 
     def test_several_nested_schemas_google_search_console(self):
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_google_search_console.json")
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_google_search_console.json")
 
 
     def test_several_nested_schemas_hubspot(self):
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_hubspot.json")
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_hubspot.json")
 
 
     def test_several_nested_schemas_klaviyo(self):
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_klaviyo.json")
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_klaviyo.json")
 
 
     def test_several_nested_schemas_mailchimp(self):
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_mailchimp_fixed.json")
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_mailchimp_fixed.json")
 
 
     def test_several_nested_schemas_recharge(self):
@@ -338,12 +338,12 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         works with the new schema conversion
         """
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_recharge.json", exclude_stream='products')
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_recharge.json", exclude_stream='products')
 
 
     def test_several_nested_schemas_recharge_products_new_method(self):
 
-        catalog = json.load(open("./rsc/input_json_schemas_recharge.json"))
+        catalog = json.load(open("rsc/schemas/input_json_schemas_recharge.json"))
 
         for next_schema_input in catalog['streams']:
 
@@ -379,9 +379,9 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_salesforce(self):
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_salesforce.json")
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_salesforce.json")
 
 
     def test_several_nested_schemas_shopify(self):
 
-        compare_old_vs_new_schema_conversion("./rsc/input_json_schemas_shopify.json")
+        compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_shopify.json")
