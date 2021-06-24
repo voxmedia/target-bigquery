@@ -1,17 +1,21 @@
 from tests import unittestcore
 import os
 
-"""
-Tests:
-Load truncate tables with partition fields (should fail)
-Load truncate tables without partition (rows should == expected #)
-Load append tables with partition field of int or string (should fail)
-
+"""Setup:
+    - Create a sandbox directory under project root directory
+    - Add the following files:
+        - sa.json with GCP credential
+        - target-config.json:
+            {
+                "project_id": "{your-project-id}",
+                "dataset_id": "{your_dataset_id}"
+            }
 """
 
 class TestJobLoad(unittestcore.BaseUnitTest):
 
     def test_simple_stream(self):
+
         from target_bigquery import main
 
         self.set_cli_args(
