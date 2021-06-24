@@ -151,7 +151,6 @@ Sample **target-config.json** file:
 We recommend that you **install tap and target in their own virtual environments.** It will be easier to manage requirements and avoid dependency conflicts.
 
 - The commands below are for running locally on a Windows machine. For a Mac or Linux machine, the syntax will be slightly different. 
-- "^" on a Windows machine indicates a new line. On a Mac, use "\\".
 
 ```bash
 cd "{your project root directory}"
@@ -182,8 +181,12 @@ py -m venv target
 .\target\Scripts\activate && pip install git+git://github.com/adswerve/target-bigquery
 
 # load data
-"{project_root_dir}\tap\Scripts\tap-exchangeratesapi" --config sample_config/tap-config-exchange-rates-api.json | ^
-"{project_root_dir}\target\Scripts\target-bigquery" --config  sample_config/target-config-exchange-rates-api.json > sample_config/state.json
+
+{project_root_dir}\tap\Scripts\tap-exchangeratesapi --config sample_config/tap-config-exchange-rates-api.json | ^
+{project_root_dir}\target\Scripts\target-bigquery --config  sample_config/target-config-exchange-rates-api.json > sample_config/state.json
+# if directory has spaces, you can use quotes:
+# "{project root dir with spaces}\tap\Scripts\tap-exchangeratesapi" 
+# ^ on a Windows machine indicates a new line. On a Mac, use "\\".
 ```
 
 
