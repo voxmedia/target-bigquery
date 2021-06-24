@@ -146,20 +146,49 @@ Sample **target-config.json** file:
 }
 ```
 
-4. These commands will install `tap-exchangeratesapi` and `target-bigquery` with pip and then run them together, piping the output of `tap-exchangeratesapi` to `target-bigquery`:
+4. These commands will install `tap-exchangeratesapi` and `target-bigquery` with pip and then run them together, piping the output of `tap-exchangeratesapi` to `target-bigquery`.
 
-```bash
-> cd "{your project root directory}"
+We recommend that you **install tap and target in their own virtual environments.** It will be easier to manage requirements and avoid dependency conflicts.
 
-› pip install tap-exchangeratesapi git+git://github.com/adswerve/target-bigquery
-
-› tap-exchangeratesapi --config sample_config/tap-config-exchange-rates-api.json | ^
-target-bigquery --config  sample_config/target-config-exchange-rates-api.json > sample_config/state.json
-```
-
+- The commands below are for running locally on a Windows machine. For a Mac or Linux machine, the syntax will be slightly different. 
 - "^" on a Windows machine indicates a new line. On a Mac, use "\\".
 
-- If you're using a different Tap, substitute `tap-exchangeratesapi` in the final command above to the command used to run your Tap.
+```bash
+cd "{your project root directory}"
+
+# upgrade pip
+# Windows:
+py -m pip install --upgrade pip 
+# Linux: 
+# python3 -m pip install --upgrade pip
+
+# create a virtual env for tap
+# Windows:
+py -m venv tap
+# Linux:
+# python3 -m venv /pyenv/tap
+
+# activate the virtual env and install tap 
+# Windows:
+.\tap\Scripts\activate && pip install tap-exchangeratesapi==0.1.1
+
+# create a virtual env for target
+# Windows: 
+py -m venv target
+# Linux:
+# python3 -m venv /pyenv/target
+
+# activate the virtual env and install target
+.\target\Scripts\activate && pip install git+git://github.com/adswerve/target-bigquery
+
+# load data
+"{project_root_dir}\tap\Scripts\tap-exchangeratesapi" --config sample_config/tap-config-exchange-rates-api.json | ^
+"{project_root_dir}\target\Scripts\target-bigquery" --config  sample_config/target-config-exchange-rates-api.json > sample_config/state.json
+```
+
+
+
+- If you're using a different tap, substitute `tap-exchangeratesapi` in the final command above to the command used to run your tap.
 
 ### Step 5: target-tables-config file: Set up partitioning and clustering
 
