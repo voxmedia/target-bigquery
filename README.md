@@ -367,6 +367,12 @@ You can only set up partitioning.
         }
         ```
 ## Config files in this project
+
+This project has three locations with config files:
+
+1) **sample_config** - sample config files to illustrate points made in this README
+2) **tests/rsc/config** - config files necessary for unit tests
+3) **sandbox** - config files you create for unit tests. We didn't include them because they have sensitive info (e.g., GCP project names). Follow instructions in the section **Unit tests set up**, as well as comments in unit tests. 
 ---
 
 [Singer Tap]: https://singer.io

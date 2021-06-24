@@ -224,5 +224,4 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
 ##TODO: start here.
 ## document set up
-## or maybe have 3 locations: sample_config (README), sandbox and rsc. Explain this in README
 
