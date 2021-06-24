@@ -5,7 +5,7 @@ Configuring data load tests.
 
     Inside your sandbox sub-directory (under t-bq project root dir), create a target-config file
     
-        Example target_config.json:
+        Example target-config.json:
         {
             "project_id": "{your_project_id}",
             "dataset_id": "{your_dataset_id}"
@@ -27,7 +27,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/simple_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             processhandler="load-job"
         )
 
@@ -48,7 +48,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/simple_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             tables="./rsc/simple_stream_table_config.json",
             processhandler="load-job"
         )
@@ -80,7 +80,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
             Inside your sandbox sub-directory (under t-bq project root dir), create a target-config file
 
-                Example target_config.json:
+                Example target-config.json:
                 {
                     "project_id": "{your_project_id}",
                     "dataset_id": "{your_dataset_id}",
@@ -112,7 +112,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/salesforce_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             processhandler="load-job"
         )
 
@@ -133,7 +133,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/salesforce_stream_incomplete.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             processhandler="load-job"
         )
 
@@ -175,7 +175,7 @@ class TestSimpleStreamPartialLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/simple_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             processhandler="partial-load-job"
         )
 
@@ -196,7 +196,7 @@ class TestSimpleStreamPartialLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/simple_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             tables="./rsc/simple_stream_table_config.json",
             processhandler="partial-load-job"
         )
@@ -221,7 +221,7 @@ class TestSimpleStreamBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/simple_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             processhandler="bookmarks-partial-load-job"
         )
 
@@ -242,7 +242,7 @@ class TestSimpleStreamBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/simple_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             tables="./rsc/simple_stream_table_config.json",
             processhandler="bookmarks-partial-load-job"
         )

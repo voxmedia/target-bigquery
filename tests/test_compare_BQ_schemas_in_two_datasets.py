@@ -114,7 +114,7 @@ def test_simple_comparison_flags_differences_inside_nested_fields():
 
     """The purpose of this test is to double check:
 
-    if we have two schemas with differences in nested fields - would a simple comparision == catch it?
+    if we have two schemas with differences in nested fields - would a simple comparison == catch it?
 
     change something in the nested field BusinessAddress - the test will fail
     """

@@ -9,7 +9,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/klaviyo_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             processhandler="load-job"
         )
 
@@ -24,7 +24,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/recharge_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             processhandler="load-job"
         )
 
@@ -42,7 +42,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/bing_ads_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             processhandler="load-job"
         )
 
@@ -74,7 +74,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/bing_ads_stream_schema_vs_data_have_diff_data_types.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             processhandler="load-job"
         )
 
@@ -90,7 +90,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/facebook_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             processhandler="load-job"
         )
 
@@ -111,7 +111,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/facebook_stream.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             tables="./rsc/facebook_stream_tables_config.json",
             processhandler="load-job"
         )
@@ -145,7 +145,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin="./rsc/facebook_stream_date_start_is_required_string.json",
-            config="../sandbox/target_config.json",
+            config="../sandbox/target-config.json",
             tables="./rsc/facebook_stream_tables_config.json",
             processhandler="load-job"
         )

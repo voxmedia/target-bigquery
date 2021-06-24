@@ -16,7 +16,7 @@ class TestJobLoad(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin=os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'simple_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sample_config'),'target-config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
             processhandler="load-job"
         )
 
@@ -31,8 +31,8 @@ class TestJobLoad(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin=os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'simple_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sample_config'),'target-config.json'),
-            tables=os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'klaviyo_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
+            tables=os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'simple_stream_table_config.json'),
             processhandler="load-job"
         )
 
@@ -47,7 +47,7 @@ class TestJobLoad(unittestcore.BaseUnitTest):
 
         self.set_cli_args(
             stdin=os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'klaviyo_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sample_config'),'target-config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
             processhandler="load-job"
         )
 
