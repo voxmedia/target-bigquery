@@ -48,6 +48,9 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
         """
         supply invalid json file
         raises JSONDecodeError
+
+        If you supply a valid json, such  as schema_nested_1:
+            this will fail the test: Failed: DID NOT RAISE <class 'simplejson.scanner.JSONDecodeError'>
         """
         schema_0_input = schema_nested_2_invalid_JSON
 

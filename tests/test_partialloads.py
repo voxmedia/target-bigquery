@@ -1,5 +1,39 @@
 from tests import unittestcore
 
+"""Setup:
+
+    - Add the following files into sandbox directory under project root directory:
+    
+            - sa.json with GCP credential
+            
+            - target_config_cache.json:
+                    
+                    {
+                        "project_id": "{your-project-id}",
+                        "dataset_id": "{your_dataset_id}"
+                        "replication_method": "truncate",
+                        "max_cache": 0
+                    }
+                    
+            - target_config_cache_append.json:
+            
+                {
+                    "project_id": "{your-project-id}",
+                    "dataset_id": "{your_dataset_id}"
+                    "replication_method": "append",
+                    "max_cache": 0
+                }
+                
+                OR
+                
+                {
+                    "project_id": "{your-project-id}",
+                    "dataset_id": "{your_dataset_id}"
+                    "max_cache": 0
+                }     
+"""
+
+
 
 class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
@@ -52,7 +86,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
         self.set_cli_args(
             stdin="./rsc/partial_load_streams/simple_stream.json",
             config="../sandbox/target_config_cache.json",
-            tables="./rsc/simple_stream_table_config.json",
+            tables="./rsc/config/simple_stream_table_config.json",
             processhandler="partial-load-job"
         )
 
@@ -210,7 +244,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
             ret = main()
             state = self.get_state()
             # counts the number of state emits
-            self.assertEqual(1, len(state))  # initial emit + 3 states
+            self.assertEqual(4, len(state))  # initial emit + 3 states
 
             self.assertEqual(ret, 0, msg="Exit code is not 0!")
             self.assertDictEqual(state[-1], {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
@@ -224,25 +258,6 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
     def test_simple_stream_load_twice_append(self):
 
-        """
-        test config:
-            supply a target_config_cache_append.json file.
-
-            Example:
-                {
-               "project_id": "your_GCP_project",
-                "dataset_id": "your_BigQuery_dataset",
-                "replication_method": "append"
-                }
-
-            OR
-
-                {
-                    "project_id": "your_GCP_project",
-                    "dataset_id": "your_BigQuery_dataset"
-                }
-
-        """
         from target_bigquery import main
 
         for i in range(2): # two append loops
@@ -255,7 +270,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
             ret = main()
             state = self.get_state()
-            self.assertEqual(1, len(state))  # initial emit + 3 states
+            self.assertEqual(4, len(state))  # initial emit + 3 states
 
             self.assertEqual(ret, 0, msg="Exit code is not 0!")
             self.assertDictEqual(state[-1], {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
@@ -297,7 +312,7 @@ class TestPartialLoadsBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
         self.set_cli_args(
             stdin="./rsc/partial_load_streams/simple_stream.json",
             config="../sandbox/target_config_cache.json",
-            tables="./rsc/simple_stream_table_config.json",
+            tables="./rsc/config/simple_stream_table_config.json",
             processhandler="bookmarks-partial-load-job"
         )
 

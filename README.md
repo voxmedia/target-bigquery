@@ -362,9 +362,36 @@ You can only set up partitioning.
     - *target-config.json*:
         ```
         {
-        "project_id": "{your-project-id}",
-        "dataset_id": "{your_dataset_id}"
+          "project_id": "{your-project-id}",
+          "dataset_id": "{your_dataset_id}"
         }
+        ```
+
+    - target_config_cache.json:
+       ```
+      {
+          "project_id": "{your-project-id}",
+          "dataset_id": "{your_dataset_id}"
+          "replication_method": "truncate",
+          "max_cache": 0
+      }
+       ```
+    - target_config_cache_append.json:
+      ```
+        {
+            "project_id": "{your-project-id}",
+            "dataset_id": "{your_dataset_id}"
+            "replication_method": "append",
+            "max_cache": 0
+        }
+        ```
+        OR
+        ```
+        {
+            "project_id": "{your-project-id}",
+            "dataset_id": "{your_dataset_id}"
+            "max_cache": 0
+        }    
         ```
 ## Config files in this project
 
