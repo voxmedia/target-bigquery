@@ -16,7 +16,7 @@ A [Singer](https://singer.io) target that writes data to Google BigQuery.
     - [Step 5: target-tables-config file: set up partitioning and clustering](#step-5-target-tables-config-file-set-up-partitioning-and-clustering)
         - [Partitioning](#partitioning)
         - [Clustering](#clustering)
-    - [Setting up partitioning and clustering](#setting-up-partitioning-and-clustering)
+        - [Setting up partitioning and clustering](#setting-up-partitioning-and-clustering)
     - [Step 6: target-tables-config.json file: force data types and modes](#step-6-target-tables-config-file-force-data-types-and-modes)
     
 ## Contact
