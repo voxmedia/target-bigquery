@@ -212,7 +212,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'facebook_stream.json'),
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
-                                'target-malformed_target_config.json'),
+                                'malformed_target_config.json'),
             processhandler="load-job",
         )
 
