@@ -14,8 +14,8 @@ A [Singer](https://singer.io) target that writes data to Google BigQuery.
       - [Tap config files](#tap-config-files)
     - [Step 4: Install and run](#step-4-install-and-run)
     - [Step 5: target-tables-config file: set up partitioning and clustering](#step-5-target-tables-config-file-set-up-partitioning-and-clustering)
-        - [Partitioning](#partitioning)
-        - [Clustering](#clustering)
+        - [Partitioning background](#partitioning-background)
+        - [Clustering background](#clustering-background)
         - [Setting up partitioning and clustering](#setting-up-partitioning-and-clustering)
     - [Step 6: target-tables-config file: force data types and modes](#step-6-target-tables-config-file-force-data-types-and-modes)
 - [Unit tests set up](#unit-tests-set-up)
@@ -212,7 +212,7 @@ py -m venv target
 
 ### Step 5: target-tables-config file: set up partitioning and clustering
 
-### Partitioning
+### Partitioning background
 
 A [partitioned table](https://cloud.google.com/bigquery/docs/partitioned-tables) is a special table that is divided into segments, called partitions, that make it easier to manage and query your data. By dividing a large table into smaller partitions, you can:
 - improve query performance,
@@ -229,7 +229,7 @@ You can partition BigQuery tables by:
 
 
 
-### Clustering
+### Clustering background
 
  - When you create a clustered table in BigQuery, the table data is automatically organized based on the contents of one or more columns in the table’s schema. 
  - The columns you specify are used to colocate related data. 
