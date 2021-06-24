@@ -18,7 +18,9 @@ A [Singer](https://singer.io) target that writes data to Google BigQuery.
         - [Clustering](#clustering)
         - [Setting up partitioning and clustering](#setting-up-partitioning-and-clustering)
     - [Step 6: target-tables-config file: force data types and modes](#step-6-target-tables-config-file-force-data-types-and-modes)
-    
+- [Unit tests set up](#unit-tests-set-up)
+- [Config files in this project](#config-files-in-this-project)
+
 ## Contact
 
 Email: `analytics-help@adswerve.com`
@@ -364,7 +366,7 @@ You can only set up partitioning.
         "dataset_id": "{your_dataset_id}"
         }
         ```
-
+## Config files in this project
 ---
 
 [Singer Tap]: https://singer.io

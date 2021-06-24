@@ -223,7 +223,6 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
 ##TODO: start here.
-## fix directories
 ## document set up
 ## or maybe have 3 locations: sample_config (README), sandbox and rsc. Explain this in README
 
