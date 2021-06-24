@@ -58,7 +58,7 @@ def create_dict_of_BQ_schemas_from_dataset(project_id, dataset_id):
 
 class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
 
-    def test_if_bq_schemas_match_in_two_datasets(self, remove_tables_from_dataset_2_which_are_not_present_in_dataset_1=False, compare_in_original_fields_order=True):
+    def test_if_bq_schemas_match_in_two_datasets(self, remove_tables_from_dataset_2_which_are_not_present_in_dataset_1=True, compare_in_original_fields_order=False):
         """Compare schemas in two BigQuery datasets
 
         remove_tables_from_dataset_2_which_are_not_present_in_dataset_1 = True
@@ -110,45 +110,45 @@ class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
         assert schemas_sorted_list_dataset_1 == schemas_sorted_list_dataset_2
 
 
-def test_simple_comparison_flags_differences_inside_nested_fields():
+    def test_simple_comparison_flags_differences_inside_nested_fields(self):
 
-    """The purpose of this test is to double check:
+        """The purpose of this test is to double check:
 
-    if we have two schemas with differences in nested fields - would a simple comparison == catch it?
+        if we have two schemas with differences in nested fields - would a simple comparison == catch it?
 
-    change something in the nested field BusinessAddress - the test will fail
-    """
+        change something in the nested field BusinessAddress - the test will fail
+        """
 
-    list_a = [  ['AccountFinancialStatus', 'STRING', 'NULLABLE', (), None],
-                ['AccountLifeCycleStatus', 'STRING', 'NULLABLE', (), None],
-                ['AccountMode', 'STRING', 'NULLABLE', (), None],
-                ['AutoTagType', 'STRING', 'NULLABLE', (), None],
-                ['BackUpPaymentInstrumentId', 'INTEGER', 'NULLABLE', (), None],
-                ['BillToCustomerId', 'INTEGER', 'NULLABLE', (), None],
-                ['BillingThresholdAmount', 'FLOAT', 'NULLABLE', (), None],
-                ['BusinessAddress', 'RECORD', 'NULLABLE',
-                        [['BusinessName', 'STRING', 'NULLABLE', (), None], ['City', 'STRING', 'NULLABLE', (), None],
-                        ['CountryCode', 'STRING', 'NULLABLE', (), None], ['Id', 'INTEGER', 'NULLABLE', (), None],
-                        ['Line1', 'STRING', 'NULLABLE', (), None], ['Line2', 'STRING', 'NULLABLE', (), None],
-                        ['Line3', 'STRING', 'NULLABLE', (), None], ['Line4', 'STRING', 'NULLABLE', (), None],
-                        ['PostalCode', 'STRING', 'NULLABLE', (), None], ['StateOrProvince', 'STRING', 'NULLABLE', (), None],
-                        ['TimeStamp', 'STRING', 'NULLABLE', (), None]], None]
-                ]
+        list_a = [  ['AccountFinancialStatus', 'STRING', 'NULLABLE', (), None],
+                    ['AccountLifeCycleStatus', 'STRING', 'NULLABLE', (), None],
+                    ['AccountMode', 'STRING', 'NULLABLE', (), None],
+                    ['AutoTagType', 'STRING', 'NULLABLE', (), None],
+                    ['BackUpPaymentInstrumentId', 'INTEGER', 'NULLABLE', (), None],
+                    ['BillToCustomerId', 'INTEGER', 'NULLABLE', (), None],
+                    ['BillingThresholdAmount', 'FLOAT', 'NULLABLE', (), None],
+                    ['BusinessAddress', 'RECORD', 'NULLABLE',
+                            [['BusinessName', 'STRING', 'NULLABLE', (), None], ['City', 'STRING', 'NULLABLE', (), None],
+                            ['CountryCode', 'STRING', 'NULLABLE', (), None], ['Id', 'INTEGER', 'NULLABLE', (), None],
+                            ['Line1', 'STRING', 'NULLABLE', (), None], ['Line2', 'STRING', 'NULLABLE', (), None],
+                            ['Line3', 'STRING', 'NULLABLE', (), None], ['Line4', 'STRING', 'NULLABLE', (), None],
+                            ['PostalCode', 'STRING', 'NULLABLE', (), None], ['StateOrProvince', 'STRING', 'NULLABLE', (), None],
+                            ['TimeStamp', 'STRING', 'NULLABLE', (), None]], None]
+                    ]
 
-    list_b = [  ['AccountFinancialStatus', 'STRING', 'NULLABLE', (), None],
-                ['AccountLifeCycleStatus', 'STRING', 'NULLABLE', (), None],
-                ['AccountMode', 'STRING', 'NULLABLE', (), None],
-                ['AutoTagType', 'STRING', 'NULLABLE', (), None],
-                ['BackUpPaymentInstrumentId', 'INTEGER', 'NULLABLE', (), None],
-                ['BillToCustomerId', 'INTEGER', 'NULLABLE', (), None],
-                ['BillingThresholdAmount', 'FLOAT', 'NULLABLE', (), None],
-                ['BusinessAddress', 'RECORD', 'NULLABLE',
-                        [['BusinessName', 'STRING', 'NULLABLE', (), None], ['City', 'STRING', 'NULLABLE', (), None],
-                        ['CountryCode', 'STRING', 'NULLABLE', (), None], ['Id', 'INTEGER', 'NULLABLE', (), None],
-                        ['Line1', 'STRING', 'NULLABLE', (), None], ['Line2', 'STRING', 'NULLABLE', (), None],
-                        ['Line3', 'STRING', 'NULLABLE', (), None], ['Line4', 'STRING', 'NULLABLE', (), None],
-                        ['PostalCode', 'STRING', 'NULLABLE', (), None], ['StateOrProvince', 'STRING', 'NULLABLE', (), None],
-                        ['TimeStamp', 'STRING', 'NULLABLE', (), None]], None]
-                ]
+        list_b = [  ['AccountFinancialStatus', 'STRING', 'NULLABLE', (), None],
+                    ['AccountLifeCycleStatus', 'STRING', 'NULLABLE', (), None],
+                    ['AccountMode', 'STRING', 'NULLABLE', (), None],
+                    ['AutoTagType', 'STRING', 'NULLABLE', (), None],
+                    ['BackUpPaymentInstrumentId', 'INTEGER', 'NULLABLE', (), None],
+                    ['BillToCustomerId', 'INTEGER', 'NULLABLE', (), None],
+                    ['BillingThresholdAmount', 'FLOAT', 'NULLABLE', (), None],
+                    ['BusinessAddress', 'RECORD', 'NULLABLE',
+                            [['BusinessName', 'STRING', 'NULLABLE', (), None], ['City', 'STRING', 'NULLABLE', (), None],
+                            ['CountryCode', 'STRING', 'NULLABLE', (), None], ['Id', 'INTEGER', 'NULLABLE', (), None],
+                            ['Line1', 'STRING', 'NULLABLE', (), None], ['Line2', 'STRING', 'NULLABLE', (), None],
+                            ['Line3', 'STRING', 'NULLABLE', (), None], ['Line4', 'STRING', 'NULLABLE', (), None],
+                            ['PostalCode', 'STRING', 'NULLABLE', (), None], ['StateOrProvince', 'STRING', 'NULLABLE', (), None],
+                            ['TimeStamp', 'STRING', 'NULLABLE', (), None]], None]
+                    ]
 
-    assert list_a == list_b
+        assert list_a == list_b

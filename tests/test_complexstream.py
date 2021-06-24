@@ -136,7 +136,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             as a required string,
             build_schema function will force this field to NULLABLE DATE, according to target tables config file
         """
-        target_config_file = json.load(open("./rsc/facebook_stream_tables_config.json"))
+        target_config_file = json.load(open("rsc/config/facebook_stream_tables_config.json"))
 
         assert target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['date_start']['type'] == 'DATE'
         assert target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['date_start']['mode'] == 'NULLABLE'
