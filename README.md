@@ -311,7 +311,7 @@ You can only set up partitioning.
 ```bash
 {project_root_dir}\tap\Scripts\tap-exchangeratesapi --config sample_config/tap-config-exchange-rates-api.json | ^
 {project_root_dir}\target\Scripts\target-bigquery --config  sample_config/target-config-exchange-rates-api.json ^
--t sample_config/target-tables-config.json > sample_config/state.json
+-t sample_config/target-tables-config-exchange-rates-api.json > sample_config/state.json
 ```
 - "^" indicates a new line in  Windows Command Prompt. In Mac terminal, use "\\".
 - If you don't want to pass **target-tables-config.json** file as a CLI argument, you can add ```"table_config": "target-tables-config.json"``` to your **target-config.json** file. See **Step 3: Configure** above.
