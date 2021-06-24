@@ -3,6 +3,16 @@ from google.cloud.bigquery import SchemaField
 import json
 import os
 
+"""Setup:
+    - Add the following files into sandbox directory under project root directory:
+            - sa.json with GCP credential
+            - target-config.json:
+                {
+                    "project_id": "{your-project-id}",
+                    "dataset_id": "{your_dataset_id}"
+                }
+"""
+
 class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
     def test_klaviyo_stream(self):
@@ -203,7 +213,16 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
     def test_misformed_complex_stream(self):
         """
-        Note that the config's "validate_records" flag should be set to False
+        Note that the target config's "validate_records" flag should be set to False
+
+        sandbox/malformed_target_config.json:
+
+            {
+                "project_id": "{your-project-id}",
+                "dataset_id": "{your_dataset_id}",
+                "validate_records":  false
+            }
+
         """
         from target_bigquery import main
 
@@ -221,7 +240,3 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         print(state)
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
-
-##TODO: start here.
-## document set up
-
