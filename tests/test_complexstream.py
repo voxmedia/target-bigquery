@@ -8,7 +8,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/klaviyo_stream.json",
+            stdin="./rsc/data/klaviyo_stream.json",
             config="../sandbox/target-config.json",
             processhandler="load-job"
         )
@@ -23,7 +23,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/recharge_stream.json",
+            stdin="./rsc/data/recharge_stream.json",
             config="../sandbox/target-config.json",
             processhandler="load-job"
         )
@@ -41,7 +41,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/bing_ads_stream.json",
+            stdin="./rsc/data/bing_ads_stream.json",
             config="../sandbox/target-config.json",
             processhandler="load-job"
         )
@@ -73,7 +73,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/bing_ads_stream_schema_vs_data_have_diff_data_types.json",
+            stdin="./rsc/data/bing_ads_stream_schema_vs_data_have_diff_data_types.json",
             config="../sandbox/target-config.json",
             processhandler="load-job"
         )
@@ -89,7 +89,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/facebook_stream.json",
+            stdin="./rsc/data/facebook_stream.json",
             config="../sandbox/target-config.json",
             processhandler="load-job"
         )
@@ -110,9 +110,9 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/facebook_stream.json",
+            stdin="./rsc/data/facebook_stream.json",
             config="../sandbox/target-config.json",
-            tables="./rsc/facebook_stream_tables_config.json",
+            tables="./rsc/config/facebook_stream_tables_config.json",
             processhandler="load-job"
         )
 
@@ -144,9 +144,9 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/facebook_stream_date_start_is_required_string.json",
+            stdin="./rsc/data/facebook_stream_date_start_is_required_string.json",
             config="../sandbox/target-config.json",
-            tables="./rsc/facebook_stream_tables_config.json",
+            tables="./rsc/config/facebook_stream_tables_config.json",
             processhandler="load-job"
         )
 
@@ -182,7 +182,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/facebook_stream.json",
+            stdin="./rsc/data/facebook_stream.json",
             config="../sandbox/malformed_target_config.json",
             processhandler="load-job",
         )
@@ -194,10 +194,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
 ##TODO: start here.
-## fix unit test
 ## fix directories
 ## document set up
-## refactor config files, maybe move from rsc into sample_config??
-## maybe refactor input schemas into a schemas subdir??
 ## or maybe have 3 locations: sample_config (README), sandbox and rsc. Explain this in README
 
