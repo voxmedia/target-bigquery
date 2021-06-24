@@ -4,6 +4,21 @@ A [Singer](https://singer.io) target that writes data to Google BigQuery.
 
 `target-bigquery` works together with any other [Singer Tap] to move data from sources like [Braintree], [Freshdesk] and [Hubspot] to Google BigQuery. 
 
+## Contents
+- [Contact](#contact)
+- [How to use it](#how-to-use-it)
+    - [Step 1: Enable Google BigQuery API](#step-1-enable-google-bigquery-api)
+    - [Step 2: Authenticate with a service account](#step-2-authenticate-with-a-service-account)
+    - [Step 3: Configure](#step-3-configure)
+      - [Target config file](#target-config-file)
+      - [Tap config files](#tap-config-files)
+    - [Step 4: Install and run](#step-4-install-and-run)
+    - [Step 5: target-tables-config file: set up partitioning and clustering](#step-5-target-tables-config-file-set-up-partitioning-and-clustering)
+        - [Partitioning](#partitioning)
+        - [Clustering](#clustering)
+    - [Setting up partitioning and clustering](#setting-up-partitioning-and-clustering)
+    - [Step 6: target-tables-config.json file: force data types and modes](#step-6-target-tables-config-file-force-data-types-and-modes)
+    
 ## Contact
 
 Email: `analytics-help@adswerve.com`
@@ -193,7 +208,7 @@ py -m venv target
 
 - If you're using a different tap, substitute `tap-exchangeratesapi` in the final command above to the command used to run your tap.
 
-### Step 5: target-tables-config file: Set up partitioning and clustering
+### Step 5: target-tables-config file: set up partitioning and clustering
 
 ### Partitioning
 
@@ -308,7 +323,7 @@ You can only set up partitioning.
 <img src="readme_screenshots/14_Partitioned_Table.png" width="650" alt="Download the service account credential JSON file">
 
 
-### Step 6:  *target-tables-config.json* file: force data types and modes
+### Step 6: target-tables-config file: force data types and modes
 
 #### Problem:
 - Normally, tap catalog file governs schema of data which will be loaded into target-bigquery.
