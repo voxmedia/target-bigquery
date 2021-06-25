@@ -1,4 +1,3 @@
-import copy
 import json
 import uuid
 from datetime import datetime
@@ -100,7 +99,8 @@ class BaseProcessHandler(object):
 
         :param schema, list of BigQuery SchemaFields
         :return: schema_dict, dict. Dict of BigQuery schema fields.
-            Dict key is field name and value is BigQuery mode and type
+            Dict key is field name
+            Dict value is a dict also. It has BigQuery mode and type
         """
         schema_dict = {}
         for field in schema:
@@ -145,6 +145,19 @@ class LoadJobProcessHandler(BaseProcessHandler):
         yield from ()
 
     def handle_record_message(self, msg):
+        """
+        handle record message:
+            1) clean up record - prettify field names, make sure they match BigQuery naming conventions
+
+            2) format record to schema. Make sure that data produced by the tap matches schema produced by the tap
+
+            3) validate record using validator feature from jsonschema library
+
+            4) add rows with data to process handler object
+
+        :param msg, RecordMessage: message with message.type == RECORD
+        :return:
+        """
         assert isinstance(msg, singer.RecordMessage)
 
         stream = msg.stream
