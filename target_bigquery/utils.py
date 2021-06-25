@@ -14,7 +14,7 @@ def emit_state(state):
     """
     Given a state, writes the state to a state file (e.g., state.json.tmp)
 
-    :param state: state with bookmarks dictionary. State
+    :param state, State: state with bookmarks dictionary
     """
     if state is not None:
         line = json.dumps(state)
@@ -34,9 +34,9 @@ def ensure_dataset(project_id, dataset_id, location):
 
     https://googleapis.dev/python/bigquery/latest/generated/google.cloud.bigquery.client.Client.html
 
-    :param project_id: GCP project id from target config file. Passed to bigquery.Client(). str
-    :param dataset_id: BigQuery dataset id from target config file. str
-    :param location: location for the dataset (US). Passed to bigquery.Client(). str
+    :param project_id, str: GCP project id from target config file. Passed to bigquery.Client().
+    :param dataset_id, str: BigQuery dataset id from target config file.
+    :param location, str: location for the dataset (US). Passed to bigquery.Client().
     :return: client (BigQuery Client Object) and Dataset (BigQuery dataset)
     """
     from google.cloud.bigquery import DatasetReference
