@@ -11,6 +11,10 @@ logger = singer.get_logger()
 
 
 def emit_state(state):
+    """
+    writes a state file (state.json.tmp)
+    :param state: state with bookmarks dictionary
+    """
     if state is not None:
         line = json.dumps(state)
         logger.debug("Emitting state {}".format(line))
@@ -24,6 +28,13 @@ def emit_state(state):
 
 
 def ensure_dataset(project_id, dataset_id, location):
+    """
+
+    :param project_id:
+    :param dataset_id:
+    :param location:
+    :return:
+    """
     from google.cloud.bigquery import DatasetReference
     client = bigquery.Client(project=project_id, location=location)
 
