@@ -1,8 +1,3 @@
-from tests import unittestcore
-from google.cloud.bigquery import SchemaField
-import json
-import os
-
 """Setup:
     - Add the following files into sandbox directory under project root directory:
             - sa.json with GCP credential
@@ -12,6 +7,10 @@ import os
                     "dataset_id": "{your_dataset_id}"
                 }
 """
+from tests import unittestcore
+from google.cloud.bigquery import SchemaField
+import json
+import os
 
 
 class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
