@@ -1,5 +1,8 @@
 singer-python==5.9.0
 google-cloud==0.34.0
 google-cloud-bigquery==1.25.0
-pytest
-testfixtures
+pytest~=6.2.4
+testfixtures~=6.17.1
+simplejson~=3.11.1
+jsonschema~=2.6.0
+setuptools~=57.0.0
