@@ -54,6 +54,19 @@ class BaseProcessHandler(object):
         raise NotImplementedError()
 
     def handle_schema_message(self, msg):
+        """
+        handle schema message:
+
+            1) validate json schema completeness (make sure it doesn't have instances of empty objects {}
+
+            2) simplify schema (we borrowed it from target-postgres).
+                Make it more uniform and get rid of anyOf (for the most part)
+
+            3) convert JSON schema to BigQuery schema
+
+        :param msg, SchemaMessage: JSON schema
+        :return: schema, list of SchemaFields: BigQuery schema
+        """
         assert isinstance(msg, singer.SchemaMessage)
 
         # only first schema sent per stream is saved
