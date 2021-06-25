@@ -16,6 +16,7 @@ logger = singer.get_logger()
 
 
 def main():
+    # parse command line arguments (e.g., target config file path, state, table config file path, process handler type)
     parser = argparse.ArgumentParser()  # argparse.ArgumentParser(parents=[tools.argparser])
     parser.add_argument("-c", "--config", help="Config file", required=True)
     parser.add_argument("-t", "--tables", help="Table configs file", required=False)
@@ -27,7 +28,6 @@ def main():
                         default="partial-load-job"
     )
 
-    # parse command line arguments (e.g., target config file path, state, table config file path, process handler type)
     flags = parser.parse_args()
 
     # read target-config file into a dict
@@ -71,7 +71,7 @@ def main():
         from target_bigquery.processhandler import LoadJobProcessHandler, PartialLoadJobProcessHandler, \
             BookmarksStatePartialLoadJobProcessHandler
 
-        # determine process handler
+        # determine type of process handler
         ph = None
 
         if flags.processhandler == "load-job":

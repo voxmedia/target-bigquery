@@ -261,6 +261,18 @@ class LoadJobProcessHandler(BaseProcessHandler):
                     # metadata_columns,
                     truncate,
                     rows):
+        """
+        Load data to BigQuery
+
+        :param client, BigQuery Client object
+        :param dataset, Dataset: destination dataset
+        :param table_name, str:
+        :param table_schema, list of BigQuery SchemaFields:
+        :param table_config, dict:
+        :param truncate, bool: determines if we append or truncate (FULL_TABLE replication)
+        :param rows, _TemporaryFileWrapper:
+        :return:
+        """
         logger = self.logger
         partition_field = table_config.get("partition_field", None)
         cluster_fields = table_config.get("cluster_fields", None)
@@ -272,17 +284,21 @@ class LoadJobProcessHandler(BaseProcessHandler):
         load_config = LoadJobConfig()
         load_config.ignore_unknown_values = True
         load_config.schema = table_schema
+
+        # partitioning
         if partition_field:
             load_config.time_partitioning = bigquery.table.TimePartitioning(
                 type_=bigquery.table.TimePartitioningType.DAY,
                 field=partition_field
             )
 
+        # clusteing
         if cluster_fields:
             load_config.clustering_fields = cluster_fields
 
         load_config.source_format = SourceFormat.NEWLINE_DELIMITED_JSON
 
+        # either truncate or append
         if truncate:
             logger.info(f"Load {table_name} by FULL_TABLE (truncate)")
             load_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
@@ -293,6 +309,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
         logger.info("loading {} to BigQuery".format(table_name))
 
         load_job = None
+        # run load job or raise error
         try:
             load_job = client.load_table_from_file(
                 rows, dataset.table(table_name), job_config=load_config, rewind=True
