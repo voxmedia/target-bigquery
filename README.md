@@ -393,6 +393,34 @@ You can only set up partitioning.
             "max_cache": 0
         }    
         ```
+
+    - target-config.json:
+      ```
+      {
+      "project_id": "{your-project-id}",
+      "dataset_id": "{your_dataset_id}"
+      }
+      ```
+
+    - target_config_contains_target_tables_config.json:  
+
+      ``` 
+      {
+      "project_id": "{your-project-id}",
+      "dataset_id": "{your_dataset_id}"
+      "table_config": "rsc/config/simple_stream_table_config.json"
+      }      
+      ```
+
+    - malformed_target_config.json:
+
+      ```
+      {
+      "project_id": "{your-project-id}",
+      "dataset_id": "{your_dataset_id}"
+      "validate_records":  false
+      }   
+      ```
 ## Config files in this project
 
 This project has three locations with config files:

@@ -74,10 +74,15 @@ class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
             True flag would mean a stricter comparison.
         """
 
-        # TODO (developer): enter your GCP project, dataset 1 and dataset 2
+        '''*****************************'''
+        ''' Configuration Section Start '''
+        '''*****************************'''
         GCP_project = ''
         dataset_1 = ''
         dataset_2 = ''
+        '''*****************************'''
+        '''  Configuration Section End  '''
+        '''*****************************'''
 
         schemas_dataset_1_dict = create_dict_of_BQ_schemas_from_dataset(GCP_project, dataset_1)
 

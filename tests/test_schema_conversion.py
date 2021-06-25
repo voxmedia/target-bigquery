@@ -247,7 +247,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
-            # TODO: check data types
+
 
 
     def test_several_nested_schemas_amazon(self):
@@ -298,7 +298,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
                 assert schema_built_new_method_sorted
 
-            # TODO: check data types
+            # TODO: check data types in this test and subsequent ones
 
 
     def test_several_nested_schemas_bing_ads(self):
@@ -374,7 +374,6 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
                 assert schema_built_new_method_sorted
 
-            # TODO: check data types
 
 
     def test_several_nested_schemas_salesforce(self):

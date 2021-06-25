@@ -1,16 +1,34 @@
 from tests import unittestcore
 
-"""
-Configuring data load tests.
-
-    Inside your sandbox sub-directory (under t-bq project root dir), create a target-config file
+"""Setup:
+    - Add the following files into sandbox directory under project root directory:
     
-        Example target-config.json:
-        {
-            "project_id": "{your_project_id}",
-            "dataset_id": "{your_dataset_id}"
-        }
+            - sa.json with GCP credential
+            
+            - target-config.json:
+                {
+                    "project_id": "{your-project-id}",
+                    "dataset_id": "{your_dataset_id}"
+                }
+                
+            - target_config_contains_target_tables_config.json:    
+                  {
+                    "project_id": "{your-project-id}",
+                    "dataset_id": "{your_dataset_id}"
+                    "table_config": "rsc/config/simple_stream_table_config.json"
+                  }      
+              
+            - malformed_target_config.json:
+            
+                {
+                    "project_id": "{your-project-id}",
+                    "dataset_id": "{your_dataset_id}"
+                    "validate_records":  false
+                }
+              
+"""
 
+"""
 Job load tests create a dataset in BQ and load a table into it. When the test finishes, the dataset gets deleted. 
     At the end of the test, case.py file in the unittest library gets invoked. 
     self._callTearDown() method runs, and it deletes the BQ dataset. 
@@ -26,7 +44,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/simple_stream.json",
+            stdin="./rsc/data/simple_stream.json",
             config="../sandbox/target-config.json",
             processhandler="load-job"
         )
@@ -47,9 +65,9 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/simple_stream.json",
+            stdin="./rsc/data/simple_stream.json",
             config="../sandbox/target-config.json",
-            tables="./rsc/simple_stream_table_config.json",
+            tables="./rsc/config/simple_stream_table_config.json",
             processhandler="load-job"
         )
 
@@ -78,19 +96,20 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         Configuring this data load test:
 
-            Inside your sandbox sub-directory (under t-bq project root dir), create a target-config file
+            Inside your sandbox sub-directory (under t-bq project root dir), create this file:
 
-                Example target-config.json:
-                {
-                    "project_id": "{your_project_id}",
-                    "dataset_id": "{your_dataset_id}",
-                    "table_config": "rsc/simple_stream_table_config.json"
-                }
+                target_config_contains_target_tables_config.json
+
+                    {
+                        "project_id": "{your_project_id}",
+                        "dataset_id": "{your_dataset_id}",
+                        "table_config": "rsc/config/simple_stream_table_config.json"
+                    }
         """
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/simple_stream.json",
+            stdin="./rsc/data/simple_stream.json",
             config="../sandbox/target_config_contains_target_tables_config.json",
             processhandler="load-job"
         )
@@ -111,7 +130,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/salesforce_stream.json",
+            stdin="./rsc/data/salesforce_stream.json",
             config="../sandbox/target-config.json",
             processhandler="load-job"
         )
@@ -122,17 +141,21 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
-    def test_salesforce_stream_incomplete(self):
+    def test_salesforce_stream_incomplete_this_test_should_fail(self):
 
-        """This test desired behavior:
-        - test fails, because schema is invalid
+        """
+        This test fails, and that's desired behavior
+
+        - test fails, because schema is invalid/incomplete
+
         - warning is given to user:
-        WARNING the pipeline might fail because of undefined fields: {}
+            WARNING the pipeline might fail because of undefined fields: {}
+
         """
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/salesforce_stream_incomplete.json",
+            stdin="./rsc/data/salesforce_stream_incomplete.json",
             config="../sandbox/target-config.json",
             processhandler="load-job"
         )
@@ -150,7 +173,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/simple_stream_malformed.json",
+            stdin="./rsc/data/simple_stream_malformed.json",
             config="../sandbox/malformed_target_config.json",
             processhandler="load-job",
         )
@@ -162,7 +185,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
         self.assertDictEqual(state, {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
 
-        table = self.client.get_table("{}.simple_stream_dev".format(self.dataset_id))
+        table = self.client.get_table("{}.simple_stream".format(self.dataset_id))
         self.assertEqual(3, table.num_rows, msg="Number of rows mismatch")
         self.assertIsNone(table.clustering_fields)
         self.assertIsNone(table.partitioning_type)
@@ -174,7 +197,7 @@ class TestSimpleStreamPartialLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/simple_stream.json",
+            stdin="./rsc/data/simple_stream.json",
             config="../sandbox/target-config.json",
             processhandler="partial-load-job"
         )
@@ -195,9 +218,9 @@ class TestSimpleStreamPartialLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/simple_stream.json",
+            stdin="./rsc/data/simple_stream.json",
             config="../sandbox/target-config.json",
-            tables="./rsc/simple_stream_table_config.json",
+            tables="./rsc/config/simple_stream_table_config.json",
             processhandler="partial-load-job"
         )
 
@@ -220,7 +243,7 @@ class TestSimpleStreamBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/simple_stream.json",
+            stdin="./rsc/data/simple_stream.json",
             config="../sandbox/target-config.json",
             processhandler="bookmarks-partial-load-job"
         )
@@ -241,9 +264,9 @@ class TestSimpleStreamBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/simple_stream.json",
+            stdin="./rsc/data/simple_stream.json",
             config="../sandbox/target-config.json",
-            tables="./rsc/simple_stream_table_config.json",
+            tables="./rsc/config/simple_stream_table_config.json",
             processhandler="bookmarks-partial-load-job"
         )
 
