@@ -93,18 +93,6 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         Feature:
             Passing target tables config file (contains partitioning and clustering info) inside target config file.
-
-        Configuring this data load test:
-
-            Inside your sandbox sub-directory (under t-bq project root dir), create this file:
-
-                target_config_contains_target_tables_config.json
-
-                    {
-                        "project_id": "{your_project_id}",
-                        "dataset_id": "{your_dataset_id}",
-                        "table_config": "rsc/config/simple_stream_table_config.json"
-                    }
         """
         from target_bigquery import main
 
