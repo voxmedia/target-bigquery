@@ -1,4 +1,3 @@
-from tests import unittestcore
 
 """Setup:
     - Add the following files into sandbox directory under project root directory:
@@ -38,14 +37,20 @@ If you want test BQ dataset to persist after your unit test, then manually creat
     
 """
 
+from tests import unittestcore
+import os
+
+
 class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
     def test_simple_stream(self):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/simple_stream.json",
-            config="../sandbox/target-config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'simple_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
             processhandler="load-job"
         )
 
@@ -65,9 +70,12 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/simple_stream.json",
-            config="../sandbox/target-config.json",
-            tables="./rsc/config/simple_stream_table_config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'simple_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
+            tables=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                                       'tests'),'rsc'),'config'),'simple_stream_table_config.json'),
             processhandler="load-job"
         )
 
@@ -97,8 +105,10 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/simple_stream.json",
-            config="../sandbox/target_config_contains_target_tables_config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'simple_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target_config_contains_target_tables_config.json'),
             processhandler="load-job"
         )
 
@@ -118,8 +128,10 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/salesforce_stream.json",
-            config="../sandbox/target-config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'salesforce_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
             processhandler="load-job"
         )
 
@@ -143,8 +155,10 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/salesforce_stream_incomplete.json",
-            config="../sandbox/target-config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'salesforce_stream_incomplete.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
             processhandler="load-job"
         )
 
@@ -161,8 +175,10 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/simple_stream_malformed.json",
-            config="../sandbox/malformed_target_config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'simple_stream_malformed.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'malformed_target_config.json'),
             processhandler="load-job",
         )
 
@@ -185,8 +201,10 @@ class TestSimpleStreamPartialLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/simple_stream.json",
-            config="../sandbox/target-config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'simple_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
             processhandler="partial-load-job"
         )
 
@@ -206,9 +224,12 @@ class TestSimpleStreamPartialLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/simple_stream.json",
-            config="../sandbox/target-config.json",
-            tables="./rsc/config/simple_stream_table_config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'simple_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
+            tables=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                                       'tests'),'rsc'),'config'),'simple_stream_table_config.json'),
             processhandler="partial-load-job"
         )
 
@@ -231,8 +252,10 @@ class TestSimpleStreamBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/simple_stream.json",
-            config="../sandbox/target-config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'simple_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
             processhandler="bookmarks-partial-load-job"
         )
 
@@ -252,9 +275,12 @@ class TestSimpleStreamBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/data/simple_stream.json",
-            config="../sandbox/target-config.json",
-            tables="./rsc/config/simple_stream_table_config.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'simple_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
+            tables=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                                       'tests'),'rsc'),'config'),'simple_stream_table_config.json'),
             processhandler="bookmarks-partial-load-job"
         )
 
