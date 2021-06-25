@@ -37,7 +37,7 @@ def ensure_dataset(project_id, dataset_id, location):
     :param project_id: GCP project id from target config file. Passed to bigquery.Client(). str
     :param dataset_id: BigQuery dataset id from target config file. str
     :param location: location for the dataset (US). Passed to bigquery.Client(). str
-    :return: BigQuery Client Object and BigQuery dataset
+    :return: client (BigQuery Client Object) and Dataset (BigQuery dataset)
     """
     from google.cloud.bigquery import DatasetReference
     client = bigquery.Client(project=project_id, location=location)
