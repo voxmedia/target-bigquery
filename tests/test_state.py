@@ -39,6 +39,7 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
         ret = main()
         state = self.get_state()
         self.assertEqual(2, len(state))  # initial emit + end state emit
+        # TODO: fails: Expected: 2  Actual: 1
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
         self.assertDictEqual(state[-1], {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
@@ -55,6 +56,7 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
         ret = main()
         state = self.get_state()
         self.assertEqual(2, len(state))  # initial emit + end state emit
+        # TODO: fails: Expected: 2  Actual: 1
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
         self.assertDictEqual(state[-1], {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})

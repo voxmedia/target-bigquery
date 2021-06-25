@@ -18,7 +18,8 @@ class TestJobLoad(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'data'),'simple_stream.json'),
+            stdin=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                                      'tests'),'rsc'),'data'),'simple_stream.json'),
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
             processhandler="load-job"
         )
@@ -33,9 +34,12 @@ class TestJobLoad(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'data'),'simple_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
-            tables=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'config'),'simple_stream_table_config.json'),
+            stdin=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                                      'tests'),'rsc'),'data'),'simple_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                             'sandbox'),'target-config.json'),
+            tables=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                                       'tests'),'rsc'),'config'),'simple_stream_table_config.json'),
             processhandler="load-job"
         )
 
@@ -49,7 +53,8 @@ class TestJobLoad(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'tests'),'rsc'),'data'),'klaviyo_stream.json'),
+            stdin=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                                      'tests'),'rsc'),'data'),'klaviyo_stream.json'),
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
             processhandler="load-job"
         )
