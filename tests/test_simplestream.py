@@ -1,4 +1,3 @@
-
 """Setup:
     - Add the following files into sandbox directory under project root directory:
     
@@ -50,7 +49,8 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'simple_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
             processhandler="load-job"
         )
 
@@ -73,9 +73,11 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'simple_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
-            tables=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                                                       'tests'),'rsc'),'config'),'simple_stream_table_config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
+            tables=os.path.join(
+                os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                       'tests'), 'rsc'), 'config'), 'simple_stream_table_config.json'),
             processhandler="load-job"
         )
 
@@ -91,9 +93,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         self.assertIsNotNone(table.clustering_fields)
         self.assertIsNotNone(table.partitioning_type)
 
-
     def test_simple_stream_with_tables_config_passed_inside_target_config_file(self):
-
         """
         Purpose:
             test a feature discussed here:
@@ -108,7 +108,8 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'simple_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target_config_contains_target_tables_config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target_config_contains_target_tables_config.json'),
             processhandler="load-job"
         )
 
@@ -131,7 +132,8 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'salesforce_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
             processhandler="load-job"
         )
 
@@ -142,7 +144,6 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
     def test_salesforce_stream_incomplete_this_test_should_fail(self):
-
         """
         This test fails, and that's desired behavior
 
@@ -158,7 +159,8 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'salesforce_stream_incomplete.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
             processhandler="load-job"
         )
 
@@ -178,7 +180,8 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'simple_stream_malformed.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'malformed_target_config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'malformed_target_config.json'),
             processhandler="load-job",
         )
 
@@ -204,7 +207,8 @@ class TestSimpleStreamPartialLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'simple_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
             processhandler="partial-load-job"
         )
 
@@ -227,9 +231,11 @@ class TestSimpleStreamPartialLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'simple_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
-            tables=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                                                       'tests'),'rsc'),'config'),'simple_stream_table_config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
+            tables=os.path.join(
+                os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                       'tests'), 'rsc'), 'config'), 'simple_stream_table_config.json'),
             processhandler="partial-load-job"
         )
 
@@ -255,7 +261,8 @@ class TestSimpleStreamBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'simple_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
             processhandler="bookmarks-partial-load-job"
         )
 
@@ -278,9 +285,11 @@ class TestSimpleStreamBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'simple_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),'target-config.json'),
-            tables=os.path.join(os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                                                       'tests'),'rsc'),'config'),'simple_stream_table_config.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
+            tables=os.path.join(
+                os.path.join(os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                       'tests'), 'rsc'), 'config'), 'simple_stream_table_config.json'),
             processhandler="bookmarks-partial-load-job"
         )
 
@@ -295,4 +304,3 @@ class TestSimpleStreamBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
         self.assertEqual(3, table.num_rows, msg="Number of rows mismatch")
         self.assertIsNotNone(table.clustering_fields)
         self.assertIsNotNone(table.partitioning_type)
-

@@ -4,13 +4,12 @@ import singer
 import json
 
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 from testfixtures import log_capture
 
-
 from tests import unittestcore
-
 
 from target_bigquery.validate_json_schema import validate_json_schema_completeness
 
@@ -26,9 +25,9 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          schema_nested_2,
                          schema_nested_3_shopify,
                          shopify_orders_fixed,
-                         shopify_customers, #old schema.py fails on this in my test. New one works
+                         shopify_customers,  # old schema.py fails on this in my test. New one works
                          shopify_custom_collections,
-                         shopify_abandoned_checkouts_fixed, #old schema.py fails on this in my test. New one works
+                         shopify_abandoned_checkouts_fixed,  # old schema.py fails on this in my test. New one works
                          shopify_products,
                          shopify_transactions,
                          # shopify_metafields_malformed, # not valid schema
@@ -42,7 +41,6 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
 
     def setUp(self):
         super(TestSchemaValidation, self).setUp()
-
 
     def test_schema_invalid_JSON(self):
         """
@@ -62,7 +60,6 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
         with pytest.raises(simplejson.scanner.JSONDecodeError):
             msg = singer.parse_message(schema_0_input)
 
-
     def test_schema_completeness_validation_valid_input(self):
         """"if you uncomment shopify_metafields_malformed in list_of_schema_inputs,
             this test will fail"""
@@ -70,7 +67,6 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             validate_json_schema_completeness(complete_schema)
 
         assert True
-
 
     def test_schema_completeness_validation_empty_props(self):
         invalid_schemas = [invalild_schema_top_field_empty_props,
@@ -85,7 +81,6 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             with pytest.raises(ValueError, match="JSON schema is invalid/incomplete. It has empty properties"):
                 validate_json_schema_completeness(incomplete_schema)
 
-
     def test_schema_completeness_validation_empty_type(self):
         invalid_schemas = [invalild_schema_top_field_empty_type,
                            invalid_schema_subfield_empty_type,
@@ -97,7 +92,6 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             with pytest.raises(ValueError, match="JSON schema is invalid/incomplete. It has empty type"):
                 validate_json_schema_completeness(incomplete_schema)
 
-
     @log_capture()
     def test_schema_completeness_validation_empty_dictionary_not_pros_not_type_not_items(self, logcapture):
         invalid_schemas = [invalid_salesforce_schema]
@@ -108,7 +102,6 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             expected_log = ('root', 'WARNING', "the pipeline might fail because of undefined fields: {}")
 
             logcapture.check(expected_log, )
-
 
     @log_capture()
     def test_several_nested_schemas_mailchimp_validate_completenes(self, logcapture):
@@ -122,6 +115,3 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
                 expected_log = ('root', 'WARNING', "the pipeline might fail because of undefined fields: {}")
 
                 logcapture.check(expected_log, )
-
-
-

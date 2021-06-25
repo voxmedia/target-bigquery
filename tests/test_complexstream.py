@@ -13,6 +13,7 @@ import os
                 }
 """
 
+
 class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
     def test_klaviyo_stream(self):
@@ -22,7 +23,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'klaviyo_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target-config.json'),
             processhandler="load-job"
         )
@@ -40,7 +41,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'recharge_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target-config.json'),
             processhandler="load-job"
         )
@@ -61,7 +62,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'bing_ads_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target-config.json'),
             processhandler="load-job"
         )
@@ -96,7 +97,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'bing_ads_stream_schema_vs_data_have_diff_data_types.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target-config.json'),
             processhandler="load-job"
         )
@@ -107,7 +108,6 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
-
     def test_complex_stream(self):
         from target_bigquery import main
 
@@ -115,7 +115,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'facebook_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target-config.json'),
             processhandler="load-job"
         )
@@ -139,7 +139,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'facebook_stream.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target-config.json'),
             tables=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
@@ -159,7 +159,6 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         # self.assertIsNotNone(table.clustering_fields)
         # self.assertIsNotNone(table.partitioning_type)
 
-
     def test_complex_stream_with_tables_config_force_field(self):
         """
         the purpose of this test is to make sure that if you supply date_start field
@@ -169,8 +168,10 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         """
         target_config_file = json.load(open("rsc/config/facebook_stream_tables_config.json"))
 
-        assert target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['date_start']['type'] == 'DATE'
-        assert target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['date_start']['mode'] == 'NULLABLE'
+        assert target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['date_start'][
+                   'type'] == 'DATE'
+        assert target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['date_start'][
+                   'mode'] == 'NULLABLE'
 
         from target_bigquery import main
 
@@ -178,7 +179,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'facebook_stream_date_start_is_required_string.json'),
-            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'sandbox'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target-config.json'),
             tables=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
@@ -201,15 +202,14 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         actual = table.schema[42]
 
         expected = SchemaField(name='date_start',
-                                               field_type='DATE',
-                                               mode='NULLABLE',
-                                               description=None,
-                                               fields=(),
-                                               policy_tags=None)
+                               field_type='DATE',
+                               mode='NULLABLE',
+                               description=None,
+                               fields=(),
+                               policy_tags=None)
 
         assert actual == expected
         print("finished running")
-
 
     def test_misformed_complex_stream(self):
         """

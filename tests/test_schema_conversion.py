@@ -3,10 +3,12 @@ import json
 import copy
 
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-from target_bigquery.schema import build_schema, prioritize_one_data_type_from_multiple_ones_in_anyOf, convert_field_type
+from target_bigquery.schema import build_schema, prioritize_one_data_type_from_multiple_ones_in_anyOf, \
+    convert_field_type
 
 from tests.schema_old import build_schema_old
 
@@ -20,7 +22,6 @@ from target_bigquery.validate_json_schema import validate_json_schema_completene
 from tests.rsc.schemas.input_json_schemas import *
 
 from tests.rsc.schemas.input_json_schemas_shopify import *
-
 
 list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          schema_nested_1,
@@ -39,6 +40,7 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          shopify_collects
                          ]
 
+
 class TestSchemaConversion(unittestcore.BaseUnitTest):
 
     def setUp(self):
@@ -53,7 +55,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         schema_1_simplified = simplify(msg.schema)
 
         schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                     add_metadata=True)
+                                                 add_metadata=True)
 
         schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
@@ -82,34 +84,34 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
     def test_prioritize_one_data_type_from_multiple_ones_in_anyOf_string(self):
 
         test_input = {
-                'anyOf': [
-                    {
-                        'type': [
-                            'integer',
-                            'null'
-                        ]
-                    },
-                    {
-                        'type': [
-                            'boolean',
-                            'null'
-                        ]
-                    },
-                    {
-                        'type': [
-                            'string',
-                            'null'
-                        ]
-                    }
-                    ,
-                    {
-                        'type': [
-                            'number',
-                            'null'
-                        ]
-                    }
-                ]
-            }
+            'anyOf': [
+                {
+                    'type': [
+                        'integer',
+                        'null'
+                    ]
+                },
+                {
+                    'type': [
+                        'boolean',
+                        'null'
+                    ]
+                },
+                {
+                    'type': [
+                        'string',
+                        'null'
+                    ]
+                }
+                ,
+                {
+                    'type': [
+                        'number',
+                        'null'
+                    ]
+                }
+            ]
+        }
 
         prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_anyOf(test_input)
 
@@ -120,7 +122,6 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         assert converted_data_type == "STRING"
 
     def test_prioritize_one_data_type_from_multiple_ones_in_anyOf_float(self):
-
 
         test_input = {
             'anyOf': [
@@ -183,7 +184,6 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         assert converted_data_type == "INTEGER"
 
-
     def test_one_nested_schema_1(self):
 
         schema_0_input = schema_nested_1
@@ -193,7 +193,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         schema_1_simplified = simplify(msg.schema)
 
         schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                     add_metadata=True)
+                                                 add_metadata=True)
 
         schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
@@ -213,7 +213,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         schema_1_simplified = simplify(msg.schema)
 
         schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                     add_metadata=True)
+                                                 add_metadata=True)
 
         schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
@@ -224,11 +224,9 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
-
     def test_several_nested_schemas(self):
 
         for next_schema_input in list_of_schema_inputs:
-
             schema_0_input = next_schema_input
 
             msg = singer.parse_message(schema_0_input)
@@ -236,9 +234,10 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             schema_1_simplified = simplify(msg.schema)
 
             schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                         add_metadata=True)
+                                                     add_metadata=True)
 
-            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties,
+                                                         add_metadata=True)
 
             # are results of the two methods above identical? ignore order of columns and case
             schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
@@ -247,13 +246,9 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
             assert schema_built_new_method_sorted == schema_built_old_method_sorted
 
-
-
-
     def test_several_nested_schemas_amazon(self):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_amazon.json")
-
 
     def test_several_nested_schemas_asana(self):
 
@@ -264,14 +259,13 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_asana.json", exclude_stream='workspaces')
 
-
     def test_several_nested_schemas_asana_workspaces_new_method(self):
 
         catalog = json.load(open("rsc/schemas/input_json_schemas_asana.json"))
 
         for next_schema_input in catalog['streams']:
 
-            if next_schema_input['tap_stream_id'] == 'workspaces': # old conversion fails here
+            if next_schema_input['tap_stream_id'] == 'workspaces':  # old conversion fails here
 
                 validate_json_schema_completeness(next_schema_input)
 
@@ -281,55 +275,51 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
                 schema_0_input = str(schema_0_input)
 
-                schema_0_input = schema_0_input.replace("\'", "\"").replace("True","true").replace("False","false").replace("None","null")
+                schema_0_input = schema_0_input.replace("\'", "\"").replace("True", "true").replace("False",
+                                                                                                    "false").replace(
+                    "None", "null")
 
                 msg = singer.parse_message(schema_0_input)
 
                 schema_1_simplified = simplify(msg.schema)
 
                 schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                             add_metadata=True)
+                                                         add_metadata=True)
 
                 # old conversion fails on asana workspaces
                 # schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
                 # are results of the two methods above identical? ignore order of columns and case
-                schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
+                schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(
+                    schema_2_built_new_method)
 
                 assert schema_built_new_method_sorted
 
             # TODO: check data types in this test and subsequent ones
 
-
     def test_several_nested_schemas_bing_ads(self):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_bing_ads.json")
-
 
     def test_several_nested_schemas_facebook(self):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_facebook.json")
 
-
     def test_several_nested_schemas_google_search_console(self):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_google_search_console.json")
-
 
     def test_several_nested_schemas_hubspot(self):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_hubspot.json")
 
-
     def test_several_nested_schemas_klaviyo(self):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_klaviyo.json")
 
-
     def test_several_nested_schemas_mailchimp(self):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_mailchimp_fixed.json")
-
 
     def test_several_nested_schemas_recharge(self):
 
@@ -340,14 +330,13 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_recharge.json", exclude_stream='products')
 
-
     def test_several_nested_schemas_recharge_products_new_method(self):
 
         catalog = json.load(open("rsc/schemas/input_json_schemas_recharge.json"))
 
         for next_schema_input in catalog['streams']:
 
-            if next_schema_input['tap_stream_id'] == 'products': # old conversion fails here
+            if next_schema_input['tap_stream_id'] == 'products':  # old conversion fails here
 
                 validate_json_schema_completeness(next_schema_input)
 
@@ -357,29 +346,29 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
                 schema_0_input = str(schema_0_input)
 
-                schema_0_input = schema_0_input.replace("\'", "\"").replace("True","true").replace("False","false").replace("None","null")
+                schema_0_input = schema_0_input.replace("\'", "\"").replace("True", "true").replace("False",
+                                                                                                    "false").replace(
+                    "None", "null")
 
                 msg = singer.parse_message(schema_0_input)
 
                 schema_1_simplified = simplify(msg.schema)
 
                 schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                             add_metadata=True)
+                                                         add_metadata=True)
 
                 # old conversion fails on asana workspaces
                 # schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
 
                 # are results of the two methods above identical? ignore order of columns and case
-                schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_2_built_new_method)
+                schema_built_new_method_sorted = convert_list_of_schema_fields_to_list_of_lists(
+                    schema_2_built_new_method)
 
                 assert schema_built_new_method_sorted
-
-
 
     def test_several_nested_schemas_salesforce(self):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_salesforce.json")
-
 
     def test_several_nested_schemas_shopify(self):
 
