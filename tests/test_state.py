@@ -1,5 +1,23 @@
+"""Setup:
+
+    - Add the following files into sandbox directory under project root directory:
+
+            - sa.json with GCP credential
+
+            - target_config_cache.json:
+
+                    {
+                        "project_id": "{your-project-id}",
+                        "dataset_id": "{your_dataset_id}"
+                        "replication_method": "truncate",
+                        "max_cache": 0
+                    }
+"""
+
 from tests import unittestcore
 from target_bigquery.state import State
+import os
+
 
 class TestSimpleStream(unittestcore.BaseUnitTest):
 
@@ -31,8 +49,11 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/partial_load_streams/no_data_stream.json",
-            config="../sandbox/target_config_cache.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'partial_load_streams'), 'no_data_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target_config_cache.json'),
             processhandler="partial-load-job"
         )
 
@@ -48,8 +69,11 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         self.set_cli_args(
-            stdin="./rsc/partial_load_streams/no_data_stream.json",
-            config="../sandbox/target_config_cache.json",
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'partial_load_streams'), 'no_data_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target_config_cache.json'),
             processhandler="bookmarks-partial-load-job"
         )
 
