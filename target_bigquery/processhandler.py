@@ -55,7 +55,7 @@ class BaseProcessHandler(object):
 
     def handle_schema_message(self, msg):
         """
-        handle schema message:
+        Handle schema message:
 
             1) validate json schema completeness (make sure it doesn't have instances of empty objects {}
 
@@ -95,6 +95,13 @@ class BaseProcessHandler(object):
         yield from ()
 
     def _build_bq_schema_dict(self, schema):  # could move this to derived class but seems right to handle in base
+        """
+        Convert BigQuery schema as a list to BigQuery schema as a dictionary
+
+        :param schema, list of BigQuery SchemaFields
+        :return: schema_dict, dict. Dict of BigQuery schema fields.
+            Dict key is field name and value is BigQuery mode and type
+        """
         schema_dict = {}
         for field in schema:
             f = field if isinstance(field, dict) else field.to_api_repr()
