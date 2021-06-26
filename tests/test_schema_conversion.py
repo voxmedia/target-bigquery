@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-from target_bigquery.schema import build_schema, prioritize_one_data_type_from_multiple_ones_in_anyOf, \
+from target_bigquery.schema import build_schema, prioritize_one_data_type_from_multiple_ones_in_any_of, \
     convert_field_type
 
 from tests.schema_old import build_schema_old
@@ -81,7 +81,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             elif f.name == "geo":
                 self.assertEqual(f.field_type.upper(), "GEOGRAPHY")
 
-    def test_prioritize_one_data_type_from_multiple_ones_in_anyOf_string(self):
+    def test_prioritize_one_data_type_from_multiple_ones_in_any_of_string(self):
 
         test_input = {
             'anyOf': [
@@ -113,7 +113,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             ]
         }
 
-        prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_anyOf(test_input)
+        prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_any_of(test_input)
 
         assert prioritized_data_type == "string"
 
@@ -121,7 +121,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         assert converted_data_type == "STRING"
 
-    def test_prioritize_one_data_type_from_multiple_ones_in_anyOf_float(self):
+    def test_prioritize_one_data_type_from_multiple_ones_in_any_of_float(self):
 
         test_input = {
             'anyOf': [
@@ -147,7 +147,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             ]
         }
 
-        prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_anyOf(test_input)
+        prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_any_of(test_input)
 
         assert prioritized_data_type == "number"
 
@@ -155,7 +155,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         assert converted_data_type == "FLOAT"
 
-    def test_prioritize_one_data_type_from_multiple_ones_in_anyOf_integer(self):
+    def test_prioritize_one_data_type_from_multiple_ones_in_any_of_integer(self):
 
         test_input = {
             'anyOf': [
@@ -176,7 +176,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             ]
         }
 
-        prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_anyOf(test_input)
+        prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_any_of(test_input)
 
         assert prioritized_data_type == "integer"
 

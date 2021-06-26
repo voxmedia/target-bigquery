@@ -42,7 +42,7 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
     def setUp(self):
         super(TestSchemaValidation, self).setUp()
 
-    def test_schema_invalid_JSON(self):
+    def test_schema_invalid_json(self):
         """
         supply invalid json file
         raises JSONDecodeError

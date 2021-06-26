@@ -56,7 +56,7 @@ def bigquery_transformed_key(key):
     return key
 
 
-def prioritize_one_data_type_from_multiple_ones_in_anyOf(field_property):
+def prioritize_one_data_type_from_multiple_ones_in_any_of(field_property):
 
     """
     :param field_property: JSON field property, which has anyOf and multiple data types
@@ -118,17 +118,17 @@ def prioritize_one_data_type_from_multiple_ones_in_anyOf(field_property):
                            "array": 6,
                            }
 
-    anyof_data_types = {}
+    any_of_data_types = {}
 
     for i in range(0, len(field_property['anyOf'])):
 
         data_type = field_property['anyOf'][i]['type'][0]
 
-        anyof_data_types.update({data_type: prioritization_dict[data_type]})
+        any_of_data_types.update({data_type: prioritization_dict[data_type]})
 
     # return key with minimum value, which is the highest priority data type
     # https://stackoverflow.com/questions/268272/getting-key-with-maximum-value-in-dictionary
-    return min(anyof_data_types, key=anyof_data_types.get)
+    return min(any_of_data_types, key=any_of_data_types.get)
 
 
 def convert_field_type(field_property):
@@ -154,7 +154,7 @@ def convert_field_type(field_property):
 
     if "anyOf" in field_property:
 
-        prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_anyOf(field_property)
+        prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_any_of(field_property)
 
         field_type_bigquery = conversion_dict[prioritized_data_type]
 
@@ -191,7 +191,7 @@ def determine_field_mode(field_name, field_property):
     return field_mode
 
 
-def replace_NULLABLE_mode_with_REQUIRED(schema_field_input):
+def replace_nullable_mode_with_required(schema_field_input):
 
     schema_field_updated = SchemaField(name=schema_field_input.name,
                                        field_type=schema_field_input.field_type,
@@ -275,7 +275,7 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
             next_field = build_field(field_name, field_property)
 
             if field_name in required_fields:
-                next_field = replace_NULLABLE_mode_with_REQUIRED(next_field)
+                next_field = replace_nullable_mode_with_required(next_field)
 
         schema_bigquery.append(next_field)
 

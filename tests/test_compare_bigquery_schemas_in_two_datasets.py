@@ -32,7 +32,7 @@ import copy
 from tests.utils import convert_list_of_schema_fields_to_list_of_lists
 
 
-def create_dict_of_BQ_schemas_from_dataset(project_id, dataset_id):
+def create_dict_of_bq_schemas_from_dataset(project_id, dataset_id):
     """input: project id and dataset id
 
     output: a dictionary containing BigQuery schemas
@@ -85,9 +85,9 @@ class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
         '''  Configuration Section End  '''
         '''*****************************'''
 
-        schemas_dataset_1_dict = create_dict_of_BQ_schemas_from_dataset(GCP_project, dataset_1)
+        schemas_dataset_1_dict = create_dict_of_bq_schemas_from_dataset(GCP_project, dataset_1)
 
-        schemas_dataset_2_dict = create_dict_of_BQ_schemas_from_dataset(GCP_project, dataset_2)
+        schemas_dataset_2_dict = create_dict_of_bq_schemas_from_dataset(GCP_project, dataset_2)
 
         if remove_tables_from_dataset_2_which_are_not_present_in_dataset_1:
 
