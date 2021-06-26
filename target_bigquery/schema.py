@@ -118,17 +118,17 @@ def prioritize_one_data_type_from_multiple_ones_in_anyOf(field_property):
                            "array": 6,
                            }
 
-    anyOf_data_types = {}
+    anyof_data_types = {}
 
     for i in range(0, len(field_property['anyOf'])):
 
         data_type = field_property['anyOf'][i]['type'][0]
 
-        anyOf_data_types.update({data_type: prioritization_dict[data_type]})
+        anyof_data_types.update({data_type: prioritization_dict[data_type]})
 
     # return key with minimum value, which is the highest priority data type
     # https://stackoverflow.com/questions/268272/getting-key-with-maximum-value-in-dictionary
-    return min(anyOf_data_types, key=anyOf_data_types.get)
+    return min(anyof_data_types, key=anyof_data_types.get)
 
 
 def convert_field_type(field_property):
@@ -156,21 +156,21 @@ def convert_field_type(field_property):
 
         prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_anyOf(field_property)
 
-        field_type_BigQuery = conversion_dict[prioritized_data_type]
+        field_type_bigquery = conversion_dict[prioritized_data_type]
 
     elif field_property["type"][0] == "string" and "format" in field_property:
 
-        field_type_BigQuery = conversion_dict[field_property["format"]]
+        field_type_bigquery = conversion_dict[field_property["format"]]
 
     elif (("items" in field_property) and ("properties" not in field_property["items"])):
 
-        field_type_BigQuery = conversion_dict[field_property['items']['type'][0]]
+        field_type_bigquery = conversion_dict[field_property['items']['type'][0]]
 
     else:
 
-        field_type_BigQuery = conversion_dict[field_property["type"][0]]
+        field_type_bigquery = conversion_dict[field_property["type"][0]]
 
-    return field_type_BigQuery
+    return field_type_bigquery
 
 
 def determine_field_mode(field_name, field_property):
