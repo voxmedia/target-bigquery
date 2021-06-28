@@ -244,7 +244,6 @@ def build_field(field_name, field_property):
 def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}):
 
     """
-
     :param schema: input simplified JSON schema
     :param key_properties: JSON schema fields which will become required BigQuery column
     :param add_metadata: do we want BigQuery metadata columns (e.g., when data was uploaded?)

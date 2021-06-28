@@ -13,7 +13,6 @@ def process(
         **kwargs
 ):
     """
-
     For every line in tap_stream:
         - parses JSON
         - determines whether it's state, record or schema,
