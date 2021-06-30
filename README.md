@@ -46,7 +46,6 @@ pip install -e .
 Install additional dependencies required for development and testing. 
 ```
 pip install -r dev-requirements.txt
-
 ```
 
 ## How to use it
