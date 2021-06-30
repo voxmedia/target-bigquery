@@ -85,9 +85,9 @@ class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
         '''*****************************'''
         ''' Configuration Section Start '''
         '''*****************************'''
-        GCP_project = 'adswerve-data-transfer-dev'
-        dataset_1 = 't_bq_test_recharge_loaded_with_t_bq_master'
-        dataset_2 = 't_bq_test_recharge_loaded_with_t_bq_dev'  # matches dataset 1
+        GCP_project = ''
+        dataset_1 = ''
+        dataset_2 = ''  # matches dataset 1
         '''*****************************'''
         '''  Configuration Section End  '''
         '''*****************************'''
