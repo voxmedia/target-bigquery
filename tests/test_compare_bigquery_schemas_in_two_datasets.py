@@ -19,6 +19,8 @@ Test config:
         In sandbox subdirectory of target-bigquery, add an sa.json file with GCP credentials.
             See README file of this repo - it has instructions how to get these credentials.
 
+            In sa.json, I use adswerve data transfer development project for this test
+
             unittestcore.py file will set GOOGLE_APPLICATION_CREDENTIALS env var to the file path
 
      IMPORTANT: Supply GCP project, dataset 1 and dataset 2 in the unit test
@@ -83,9 +85,9 @@ class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
         '''*****************************'''
         ''' Configuration Section Start '''
         '''*****************************'''
-        GCP_project = ''
-        dataset_1 = ''
-        dataset_2 = ''
+        GCP_project = 'adswerve-data-transfer-dev'
+        dataset_1 = 't_bq_test_recharge_loaded_with_t_bq_master'
+        dataset_2 = 't_bq_test_recharge_loaded_with_t_bq_dev'  # matches dataset 1
         '''*****************************'''
         '''  Configuration Section End  '''
         '''*****************************'''
