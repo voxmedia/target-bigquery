@@ -208,7 +208,6 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
                                policy_tags=None)
 
         assert actual == expected
-        print("finished running")
 
     def test_misformed_complex_stream(self):
         """
