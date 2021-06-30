@@ -37,6 +37,7 @@ If you want test BQ dataset to persist after your unit test, then manually creat
 """
 
 from tests import unittestcore
+import unittest
 import os
 
 
@@ -143,6 +144,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
+    @unittest.skip("this test desired behavior is to fail")
     def test_salesforce_stream_incomplete_this_test_should_fail(self):
         """
         This test fails, and that's desired behavior
