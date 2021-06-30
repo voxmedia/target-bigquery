@@ -37,7 +37,6 @@ If you want test BQ dataset to persist after your unit test, then manually creat
 """
 
 from tests import unittestcore
-import unittest
 import os
 
 
@@ -144,12 +143,11 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
-    @unittest.skip("this test desired behavior is to fail")
-    def test_salesforce_stream_incomplete_this_test_should_fail(self):
+    def test_salesforce_stream_incomplete_load_should_fail(self):
         """
-        This test fails, and that's desired behavior
+        This data load fails, and that's desired behavior
 
-        - test fails, because schema is invalid/incomplete
+        - schema is invalid/incomplete
 
         - warning is given to user:
             WARNING the pipeline might fail because of undefined fields: {}
@@ -167,10 +165,13 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         )
 
         ret = main()
-        state = self.get_state()[-1]
-        print(state)
 
-        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+        # Exit statuses:
+            # 0 if OK,
+            # 1 if minor problems
+            # 2 if serious problem
+        self.assertEqual(ret, 2, msg="Exit code is not 2!")
+
 
     def test_misformed_simple_stream(self):
         """
