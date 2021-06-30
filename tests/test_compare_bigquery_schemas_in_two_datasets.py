@@ -63,7 +63,8 @@ def create_dict_of_bq_schemas_from_dataset(project_id, dataset_id):
 
 class TestIfBiigQuerySchemasInTwoDatasetsMatch(unittestcore.BaseUnitTest):
 
-    @unittest.skip("Skipped - additional manual configuration is required - see comments. Enter GCP project and two datasets.")
+    @unittest.skip(
+        "Skipped - additional manual configuration is required - see comments. \nHardcode GCP project and two datasets you want to compare. \nYou might need to change sa.json in your sandbox directory")
     def test_if_bq_schemas_match_in_two_datasets(self,
                                                  remove_tables_from_dataset_2_which_are_not_present_in_dataset_1=True,
                                                  compare_in_original_fields_order=False):
