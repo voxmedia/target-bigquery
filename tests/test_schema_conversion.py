@@ -317,6 +317,60 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_klaviyo.json")
 
+    def test_several_nested_schemas_klaviyo_field_names_contain_spaces_and_dollar_signs(self):
+
+        catalog_schema_file = ("rsc/schemas/input_json_schemas_klaviyo_field_names_contain_spaces_and_dollar_signs.json")
+
+        catalog = json.load(open(catalog_schema_file))
+
+        for next_schema_input in catalog['streams']:
+
+            if next_schema_input['stream'] != "only_test_this_stream_skip_others":
+                continue
+
+            # make sure stream doesn't have empty (undefined object {}) type or properties
+            validate_json_schema_completeness(next_schema_input)
+
+            # clean up schema formatting
+            schema_0_input = copy.deepcopy(next_schema_input)
+
+            if "type" not in schema_0_input.keys():
+                schema_0_input.update({"type": "SCHEMA"})
+
+            if "key_properties" not in schema_0_input.keys():
+                schema_0_input.update({"key_properties": "Id"})
+
+            schema_0_input = str(schema_0_input)
+
+            schema_0_input = schema_0_input.replace("\'", "\"").replace("True", "true").replace("False",
+                                                                                                "false").replace("None",
+                                                                                                                 "null")
+
+            # convert schema using old vs. new method
+            msg = singer.parse_message(schema_0_input)
+
+            schema_1_simplified = simplify(msg.schema)
+
+            schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                     add_metadata=True)
+
+            schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+
+            assert schema_3_built_old_method[0].name == "$dollarsign"
+            assert schema_3_built_old_method[1].name == "contains space"
+            assert schema_3_built_old_method[2].name == "contains:colon"
+
+            assert schema_2_built_new_method[0].name  == "dollarsign"
+            assert schema_2_built_new_method[1].name == "contains_space"
+            assert schema_2_built_new_method[2].name == "contains_colon"
+
+
+
+
+
+
     def test_several_nested_schemas_mailchimp(self):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_mailchimp_fixed.json")
