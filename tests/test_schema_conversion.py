@@ -362,7 +362,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             assert schema_3_built_old_method[1].name == "contains space"
             assert schema_3_built_old_method[2].name == "contains:colon"
 
-            assert schema_2_built_new_method[0].name  == "dollarsign"
+            assert schema_2_built_new_method[0].name  == "_dollarsign"
             assert schema_2_built_new_method[1].name == "contains_space"
             assert schema_2_built_new_method[2].name == "contains_colon"
 
