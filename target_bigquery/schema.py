@@ -47,7 +47,7 @@ def bigquery_transformed_key(key):
     :return: cleaned up JSON field name
     """
 
-    key = key.replace("-","_").replace(".", "_").replace("$", "_").replace(" ", "_").replace(":", "_").replace("'", "_")
+    key = key.replace("-","_").replace(".", "_").replace("$", "_").replace(" ", "_").replace(":", "_").replace("'", "_").replace("&", "_")
 
     if re.match(r"^\d", key):
         key = "_" + key
