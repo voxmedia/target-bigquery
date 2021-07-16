@@ -14812,25 +14812,7 @@
                   "string"
                 ]
               },
-              "Page Name": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "Variant": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
               "Name Of Your Practice": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "Page Url": {
                 "type": [
                   "null",
                   "string"
@@ -22401,7 +22383,7 @@
         }
       ]
     },
-    {
+        {
       "stream": "marked_email_as_spam",
       "tap_stream_id": "PuW5Qd",
       "key_properties": [
@@ -22755,12 +22737,6 @@
                 "type": [
                   "null",
                   "integer"
-                ]
-              },
-              "ID": {
-                "type": [
-                  "null",
-                  "string"
                 ]
               },
               "Advanced Practice": {
