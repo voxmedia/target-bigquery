@@ -90,6 +90,9 @@ def check_schema_for_dupes_in_field_names(schema):
 
     # TODO: clean up error msg
 
+    #TODO: maybe also check that transformed column name meets BigQuery column naming conventions
+    # https://en.wikipedia.org/wiki/List_of_Unicode_characters
+
     fields = []
 
     for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties", {})).items():
