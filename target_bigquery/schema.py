@@ -42,12 +42,53 @@ def bigquery_transformed_key(key):
 
     """
     Clean up / prettify field names, make sure they match BigQuery naming conventions.
+    
+    Fields must:
+        • contain only 
+            -letters, 
+            -numbers, and 
+            -underscores, 
+        • start with a 
+            -letter or 
+            -underscore, and
+        • be at most 300 characters long
 
     :param key: JSON field name
     :return: cleaned up JSON field name
     """
+    remove_list = [" ",
+                    "!",
+                    "\"",
+                    "#",
+                    "$",
+                    "%",
+                    "&",
+                    "'",
+                    "(",
+                    ")",
+                    "*",
+                    "+",
+                    ",",
+                    "-",
+                    ".",
+                    "/",
+                    ":",
+                    ";",
+                    "<",
+                    "=",
+                    ">",
+                    "?",
+                    "@",
+                    "\\",
+                    "]",
+                    "^",
+                    "`",
+                    "|",
+                    "}",
+                    "~"]
 
-    key = key.replace("-","_").replace(".", "_").replace("$", "_").replace(" ", "_").replace(":", "_").replace("'", "_").replace("&", "_").replace("?", "_").replace("(", "_").replace(")", "_")
+    for c in remove_list:
+        key = key.replace(c, "_")
 
     if re.match(r"^\d", key):
         key = "_" + key
