@@ -11,7 +11,7 @@ from testfixtures import log_capture
 
 from tests import unittestcore
 
-from target_bigquery.validate_json_schema import validate_json_schema_completeness
+from target_bigquery.validate_json_schema import validate_json_schema_completeness, check_schema_for_dupes_in_field_names
 
 from tests.rsc.schemas.input_json_schemas import *
 
@@ -115,3 +115,22 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
                 expected_log = ('root', 'WARNING', "the pipeline might fail because of undefined fields: {}")
 
                 logcapture.check(expected_log, )
+
+
+    def test_check_for_dupes_in_field_names(self):
+        """
+        Preventing this error while loading:
+            INFO loading t_ordered_product_5d0e81f06f7b46048424c3cfa338102c to BigQuery
+            ERROR failed to load table t_ordered_product_5d0e81f06f7b46048424c3cfa338102c from file: 400 POST https://bigquery.googleapis.com/upload/bigquery/v2/projects/adswerve-data-transfer-dev/jobs?uploadType=resumable: Field person.Name already exists in schema
+            CRITICAL 400 POST https://bigquery.googleapis.com/upload/bigquery/v2/projects/adswerve-data-transfer-dev/jobs?uploadType=resumable: Field person.Name already exists in schema
+        :return:
+        """
+        catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short.json"))
+
+        for next_schema_input in catalog['streams']:
+            validate_json_schema_completeness(next_schema_input)
+
+            check_schema_for_dupes_in_field_names(next_schema_input)
+
+
+

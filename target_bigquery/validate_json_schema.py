@@ -1,5 +1,6 @@
 import re
 import singer
+from target_bigquery.schema import bigquery_transformed_key
 
 LOGGER = singer.get_logger()
 
@@ -62,3 +63,34 @@ def validate_json_schema_completeness(schema_input):
 
         if pattern_not_valid.search(schema_input_no_spaces):
             LOGGER.warning("the pipeline might fail because of undefined fields: {}")
+
+
+
+def check_schema_for_dupes_in_field_names(schema_input):
+
+    schema = schema_input['schema']
+
+    fields = []
+
+    for field_name, field_property in schema.get("properties", schema_input.get("items", {}).get("properties", {})).items():
+
+        if not ("items" in field_property and "properties" in field_property["items"]) and not (
+                "properties" in field_property):
+            field_name_cleaned = bigquery_transformed_key(field_name)
+            print(field_name)
+            print(field_name_cleaned)
+            fields.append(field_name_cleaned)
+
+    fields.sort()
+    fields_deduped = sorted(list(set(fields)))
+
+    assert fields == fields_deduped
+
+
+
+
+
+
+
+
+
