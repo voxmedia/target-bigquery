@@ -11,7 +11,7 @@ from testfixtures import log_capture
 
 from tests import unittestcore
 
-from target_bigquery.validate_json_schema import validate_json_schema_completeness, check_schema_for_dupes_in_field_names
+from target_bigquery.validate_json_schema import validate_json_schema_completeness, check_stream_for_dupes_in_field_names
 
 from tests.rsc.schemas.input_json_schemas import *
 
@@ -130,7 +130,7 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
         for next_schema_input in catalog['streams']:
             validate_json_schema_completeness(next_schema_input)
 
-            check_schema_for_dupes_in_field_names(next_schema_input)
+            check_stream_for_dupes_in_field_names(next_schema_input)
 
 
 

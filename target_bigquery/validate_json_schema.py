@@ -65,26 +65,59 @@ def validate_json_schema_completeness(schema_input):
             LOGGER.warning("the pipeline might fail because of undefined fields: {}")
 
 
+def check_stream_for_dupes_in_field_names(stream):
 
-def check_schema_for_dupes_in_field_names(schema_input):
+    schema = stream['schema']
+    stream_name = stream['stream']
+    try:
+        check_schema_for_dupes_in_field_names(schema)
+    except Exception as e:
+        raise ValueError("Duplicate field in stream", str(stream_name))
 
-    schema = schema_input['schema']
+
+
+def check_schema_for_dupes_in_field_names(schema):
 
     fields = []
 
-    for field_name, field_property in schema.get("properties", schema_input.get("items", {}).get("properties", {})).items():
+    for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties", {})).items():
 
         if not ("items" in field_property and "properties" in field_property["items"]) and not (
                 "properties" in field_property):
-            field_name_cleaned = bigquery_transformed_key(field_name)
-            print(field_name)
-            print(field_name_cleaned)
-            fields.append(field_name_cleaned)
+            field_name_cleaned = bigquery_transformed_key(field_name.upper())
+
+            fields.append(field_name_cleaned.upper())
+
+        elif ("items" in field_property and "properties" in field_property["items"]) or (
+                "properties" in field_property):
+            check_schema_for_dupes_in_field_names(field_property)
 
     fields.sort()
+
     fields_deduped = sorted(list(set(fields)))
 
-    assert fields == fields_deduped
+    if fields == fields_deduped:
+        pass
+    else:
+
+        # https://stackoverflow.com/questions/23240969/python-count-repeated-elements-in-the-list
+        field_names_and_counts = {i:fields.count(i) for i in fields}
+        print(field_names_and_counts)
+
+        dupe_keys = []
+
+        for key, value in field_names_and_counts.items():
+            if value > 1:
+                dupe_keys.append(key)
+
+
+        raise ValueError("Duplicate field", str(dupe_keys))
+
+
+
+
+
+
 
 
 
