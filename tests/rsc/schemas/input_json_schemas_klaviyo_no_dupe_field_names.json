@@ -24405,12 +24405,6 @@
                   "string"
                 ]
               },
-              "Name": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
               "$phone_number_region": {
                 "type": [
                   "null",
@@ -28070,12 +28064,6 @@
                 ]
               },
               "$consent_form_id": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "Name": {
                 "type": [
                   "null",
                   "string"
@@ -32058,32 +32046,7 @@
                                       "string"
                                     ]
                                   },
-                                  "Timestamp": {
-                                    "type": [
-                                      "null",
-                                      "string"
-                                    ],
-                                    "format": "date-time"
-                                  },
-                                  "Ack": {
-                                    "type": [
-                                      "null",
-                                      "string"
-                                    ]
-                                  },
                                   "CorrelationID": {
-                                    "type": [
-                                      "null",
-                                      "string"
-                                    ]
-                                  },
-                                  "Version": {
-                                    "type": [
-                                      "null",
-                                      "string"
-                                    ]
-                                  },
-                                  "Build": {
                                     "type": [
                                       "null",
                                       "string"
@@ -35026,12 +34989,6 @@
                   "string"
                 ]
               },
-              "Name": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
               "Full Name": {
                 "type": [
                   "null",
@@ -35055,13 +35012,6 @@
                   "null",
                   "string"
                 ]
-              },
-              "Ship Date": {
-                "type": [
-                  "null",
-                  "string"
-                ],
-                "format": "date-time"
               },
               "campaign": {
                 "type": [
@@ -36402,12 +36352,6 @@
                 ]
               },
               "Child's Age": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "Name": {
                 "type": [
                   "null",
                   "string"

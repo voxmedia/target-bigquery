@@ -121,7 +121,8 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
         """
         this should raise an error: it has a dupe at the bottom level: "NAME"
         """
-        catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short.json"))
+        catalog = json.load(open(
+            "rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short_1_dupe_at_nested_level.json"))
 
         for next_schema_input in catalog['streams']:
             validate_json_schema_completeness(next_schema_input)
@@ -132,20 +133,24 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
         """
         this should raise an error: it has a dupe at the top level: "_ID"
         """
-        catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short_2.json"))
+        catalog = json.load(open(
+            "rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short_2_dupe_at_top_level.json"))
 
         for next_schema_input in catalog['streams']:
             validate_json_schema_completeness(next_schema_input)
-
-            check_stream_for_dupes_in_field_names(next_schema_input)
+            # check_stream_for_dupes_in_field_names(next_schema_input)
+            with pytest.raises(ValueError): #TODO: check for exact error msg
+                check_stream_for_dupes_in_field_names(next_schema_input)
 
     def test_check_for_dupes_in_field_names_input_fixed(self):
         """
         """
-        catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_fixed.json"))
+        catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_no_dupe_field_names.json"))
 
         for next_schema_input in catalog['streams']:
             validate_json_schema_completeness(next_schema_input)
 
             check_stream_for_dupes_in_field_names(next_schema_input)
+
+            assert True
 

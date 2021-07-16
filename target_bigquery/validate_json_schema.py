@@ -75,7 +75,7 @@ def check_stream_for_dupes_in_field_names(stream):
     try:
         check_schema_for_dupes_in_field_names(schema)
     except Exception as e:
-        raise ValueError([("Duplicate fields in stream", str(stream_name)), e])
+        raise ValueError([ValueError("Duplicate fields in stream", str(stream_name)), e])
         # https://stackoverflow.com/questions/12826291/raise-two-errors-at-the-same-time/50414672
 
 
@@ -87,6 +87,8 @@ def check_schema_for_dupes_in_field_names(schema):
     # TODO: integrate into processhandler
 
     # TODO: unit test with a sync
+
+    # TODO: clean up error msg
 
     fields = []
 
