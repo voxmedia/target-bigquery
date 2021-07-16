@@ -65,8 +65,10 @@ def validate_json_schema_completeness(schema_input):
             LOGGER.warning("the pipeline might fail because of undefined fields: {}")
 
 
-def check_stream_for_dupes_in_field_names(stream):
 
+
+def check_stream_for_dupes_in_field_names(stream):
+    # TODO:  refactor: say singer.parse instead of stream['stream']
     schema = stream['schema']
     stream_name = stream['stream']
 
@@ -79,6 +81,12 @@ def check_stream_for_dupes_in_field_names(stream):
 
 
 def check_schema_for_dupes_in_field_names(schema):
+
+    # TODO: test diff edge cases
+
+    # TODO: integrate into processhandler
+
+    # TODO: unit test with a sync
 
     fields = []
 

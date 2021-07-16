@@ -119,11 +119,7 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
 
     def test_check_for_dupes_in_field_names(self):
         """
-        Preventing this error while loading:
-            INFO loading t_ordered_product_5d0e81f06f7b46048424c3cfa338102c to BigQuery
-            ERROR failed to load table t_ordered_product_5d0e81f06f7b46048424c3cfa338102c from file: 400 POST https://bigquery.googleapis.com/upload/bigquery/v2/projects/adswerve-data-transfer-dev/jobs?uploadType=resumable: Field person.Name already exists in schema
-            CRITICAL 400 POST https://bigquery.googleapis.com/upload/bigquery/v2/projects/adswerve-data-transfer-dev/jobs?uploadType=resumable: Field person.Name already exists in schema
-        :return:
+        this should raise an error: it has a dupe at the bottom level: "NAME"
         """
         catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short.json"))
 
@@ -132,5 +128,24 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
 
             check_stream_for_dupes_in_field_names(next_schema_input)
 
+    def test_check_for_dupes_in_field_names_2(self):
+        """
+        this should raise an error: it has a dupe at the top level: "_ID"
+        """
+        catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short_2.json"))
 
+        for next_schema_input in catalog['streams']:
+            validate_json_schema_completeness(next_schema_input)
+
+            check_stream_for_dupes_in_field_names(next_schema_input)
+
+    def test_check_for_dupes_in_field_names_input_fixed(self):
+        """
+        """
+        catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_fixed.json"))
+
+        for next_schema_input in catalog['streams']:
+            validate_json_schema_completeness(next_schema_input)
+
+            check_stream_for_dupes_in_field_names(next_schema_input)
 
