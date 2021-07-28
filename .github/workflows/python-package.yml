@@ -1,8 +1,15 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
 #TODO: idea: only run a few unit tests in one branch and run all of them in master and consolidated development branch?
 # It takes a long time to run all unit tests on GitHub and locally
 
+#TODO: how do we run two workflows sequentially, not simultaneously?
+#If there two commits pushed mins within each other, 2 workflows are going run simultaneously and they'll both fail cus they interfere with each other
+#(they both interact with the same GCP project, BQ dataset)
+# https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency
+
+# There's a few mins delay (~5 mins) for status badge in README to update (passing vs failing)
 
 name: Python package
 
