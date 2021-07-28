@@ -4,8 +4,12 @@
 name: Python package
 
 env:
-  TARGET_CONFIG: ${{ secrets.TARGET_CONFIG }}
   GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+  TARGET_CONFIG: ${{ secrets.TARGET_CONFIG }}
+  TARGET_CONFIG_CACHE: ${{ secrets.TARGET_CONFIG_CACHE }}
+  TARGET_CONFIG_CACHE_APPEND: ${{ secrets.TARGET_CONFIG_CACHE_APPEND }}
+  TARGET_CONFIG_CONTAINS_TARGET_TABLES_CONFIG: ${{ secrets.TARGET_CONFIG_CONTAINS_TARGET_TABLES_CONFIG }}
+  MALFORMED_TARGET_CONFIG: ${{ secrets.MALFORMED_TARGET_CONFIG }}
 
 on:
   push:
@@ -41,9 +45,16 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
+
         echo "$GOOGLE_APPLICATION_CREDENTIALS" > "sandbox/sa.json"
         echo "$TARGET_CONFIG" > "sandbox/target-config.json"
+        echo "TARGET_CONFIG_CACHE" > "sandbox/target-config-cache.json"
+        echo "TARGET_CONFIG_CACHE_APPEND" > "sandbox/target_config_cache_append.json"
+        echo "TARGET_CONFIG_CONTAINS_TARGET_TABLES_CONFIG" > "sandbox/target_config_contains_target_tables_config.json"
+        echo "MALFORMED_TARGET_CONFIG" > "sandbox/malformed_target_config.json"
+
         pip install pytest
         pytest --verbose tests/test_complexstream.py::TestComplexStreamLoadJob::test_complex_stream_with_tables_config_force_field  tests/test_schema_conversion.py
+
         shred --iterations=7 sandbox/*
         rm --recursive --force sandbox
