@@ -9,13 +9,24 @@
                     "dataset_id": "{your_dataset_id}"
                 }
                 
-            - target_config_contains_target_tables_config.json:    
+            - target_config_contains_target_tables_config.json:
+
+                if you're running unit test from this test file:
                   {
                     "project_id": "{your-project-id}",
                     "dataset_id": "{your_dataset_id}"
                     "table_config": "rsc/config/simple_stream_table_config.json"
-                  }      
-              
+                  }
+
+                if you're running unit test from shell, example:
+                    pytest --verbose tests/test_simplestream.py::TestSimpleStreamLoadJob::test_simple_stream_with_tables_config_passed_inside_target_config_file
+
+                  {
+                    "project_id": "adswerve-data-transfer-dev",
+                    "dataset_id": "target_bigquery_unit_test",
+                    "table_config": "tests/rsc/config/simple_stream_table_config.json"
+                  }
+
             - malformed_target_config.json:
             
                 {

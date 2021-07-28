@@ -382,62 +382,79 @@ You can only set up partitioning.
 
 ## Unit tests set up
 
-- Add the following files to *sandbox* directory under project root directory:
-    - sa.json with GCP credential
-    - target-config.json:
-        ```
-        {
-          "project_id": "{your-project-id}",
-          "dataset_id": "{your_dataset_id}"
-        }
-        ```
+Add the following files to *sandbox* directory under project root directory:
+- **sa.json** with GCP credential
 
-    - target_config_cache.json:
-       ```
-      {
-          "project_id": "{your-project-id}",
-          "dataset_id": "{your_dataset_id}"
-          "replication_method": "truncate",
-          "max_cache": 0
-      }
-       ```
-    - target_config_cache_append.json:
-      ```
-        {
-            "project_id": "{your-project-id}",
-            "dataset_id": "{your_dataset_id}"
-            "replication_method": "append",
-            "max_cache": 0
-        }
-        ```
-        OR
-        ```
-        {
-            "project_id": "{your-project-id}",
-            "dataset_id": "{your_dataset_id}"
-            "max_cache": 0
-        }    
-        ```
+- **target-config.json**:
 
-    - target_config_contains_target_tables_config.json:  
+  ```
+  {
+    "project_id": "{your-project-id}",
+    "dataset_id": "{your_dataset_id}"
+  }
+  ```
 
-      ``` 
-      {
+- **target_config_cache.json**:
+  ```
+  {
+    "project_id": "{your-project-id}",
+    "dataset_id": "{your_dataset_id}"
+    "replication_method": "truncate",
+    "max_cache": 0
+  }
+  ```
+
+- **target_config_cache_append.json**:
+  ```
+  {
+    "project_id": "{your-project-id}",
+    "dataset_id": "{your_dataset_id}"
+    "replication_method": "append",
+    "max_cache": 0
+  }
+  ```
+  OR
+  ```
+  {
+    "project_id": "{your-project-id}",
+    "dataset_id": "{your_dataset_id}"
+    "max_cache": 0
+  }    
+  ```
+
+- **target_config_contains_target_tables_config.json**
+    
+  - if you're running unit test from the unit test .py file:
+
+    ``` 
+    {
       "project_id": "{your-project-id}",
       "dataset_id": "{your_dataset_id}"
       "table_config": "rsc/config/simple_stream_table_config.json"
-      }      
-      ```
+    }      
+    ```
 
-    - malformed_target_config.json:
+  - if you're running unit test from shell, for example:
+  
+      ```pytest --verbose tests/test_simplestream.py::TestSimpleStreamLoadJob::test_simple_stream_with_tables_config_passed_inside_target_config_file```
 
-      ```
-      {
+    ``` 
+    {
       "project_id": "{your-project-id}",
       "dataset_id": "{your_dataset_id}"
-      "validate_records":  false
-      }   
-      ```
+      "table_config": "tests/rsc/config/simple_stream_table_config.json"
+    }
+    ``` 
+
+- **malformed_target_config.json**:
+
+  ```
+  {
+    "project_id": "{your-project-id}",
+    "dataset_id": "{your_dataset_id}"
+    "validate_records":  false
+  }   
+```
 ## Config files in this project
 
 This project has three locations with config files:
