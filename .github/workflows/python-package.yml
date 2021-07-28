@@ -45,6 +45,6 @@ jobs:
         echo "$GOOGLE_APPLICATION_CREDENTIALS" > "sandbox/sa.json"
         echo "$TARGET_CONFIG" > "sandbox/target-config.json"
         pip install pytest
-        pytest --verbose
+        pytest --verbose tests/test_complexstream.py::TestComplexStreamLoadJob::test_complex_stream_with_tables_config_force_field  tests/test_schema_conversion.py
         shred --iterations=7 sandbox/*
         rm --recursive --force sandbox
