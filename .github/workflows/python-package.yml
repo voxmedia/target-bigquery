@@ -55,7 +55,7 @@ jobs:
         echo "$MALFORMED_TARGET_CONFIG" > "sandbox/malformed_target_config.json"
 
         pip install -r dev-requirements.txt
-        pytest --verbose tests/test_simplestream.py::TestSimpleStreamLoadJob::test_simple_stream_with_tables_config_passed_inside_target_config_file
+        pytest --verbose
 
         shred --iterations=7 sandbox/*
         rm --recursive --force sandbox
