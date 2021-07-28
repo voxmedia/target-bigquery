@@ -436,8 +436,11 @@ Add the following files to *sandbox* directory under project root directory:
 
   - if you're running unit test from shell, for example:
   
-      ```pytest --verbose tests/test_simplestream.py::TestSimpleStreamLoadJob::test_simple_stream_with_tables_config_passed_inside_target_config_file```
+    ```bash
+    pytest --verbose tests/test_simplestream.py::TestSimpleStreamLoadJob::test_simple_stream_with_tables_config_passed_inside_target_config_file
+    ```
 
+    In this case, here's your config file, notice the difference in directory:
     ``` 
     {
       "project_id": "{your-project-id}",
@@ -454,7 +457,7 @@ Add the following files to *sandbox* directory under project root directory:
     "dataset_id": "{your_dataset_id}"
     "validate_records":  false
   }   
-```
+    ```
 ## Config files in this project
 
 This project has three locations with config files:
