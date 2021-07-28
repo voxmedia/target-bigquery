@@ -54,7 +54,7 @@ jobs:
         echo "MALFORMED_TARGET_CONFIG" > "sandbox/malformed_target_config.json"
 
         pip install pytest
-        pytest --verbose tests/test_complexstream.py::TestComplexStreamLoadJob::test_complex_stream_with_tables_config_force_field  tests/test_schema_conversion.py
+        pytest --verbose
 
         shred --iterations=7 sandbox/*
         rm --recursive --force sandbox
