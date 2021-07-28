@@ -317,9 +317,9 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         compare_old_vs_new_schema_conversion("rsc/schemas/input_json_schemas_klaviyo.json")
 
-    def test_several_nested_schemas_klaviyo_field_names_contain_spaces_and_dollar_signs(self):
+    def test_several_nested_schemas_klaviyo_field_names_contain_chars_not_valid_in_bigquery(self):
 
-        catalog_schema_file = ("rsc/schemas/input_json_schemas_klaviyo_field_names_contain_spaces_and_dollar_signs.json")
+        catalog_schema_file = ("rsc/schemas/input_json_schemas_klaviyo_field_names_contain_chars_invalid_in_bigquery.json")
 
         catalog = json.load(open(catalog_schema_file))
 
@@ -357,19 +357,15 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties,
                                                          add_metadata=True)
 
-
             assert schema_3_built_old_method[0].name == "$dollarsign"
             assert schema_3_built_old_method[1].name == "contains space"
             assert schema_3_built_old_method[2].name == "contains:colon"
+            assert schema_3_built_old_method[3].name == "contains&ampersand"
 
             assert schema_2_built_new_method[0].name  == "_dollarsign"
             assert schema_2_built_new_method[1].name == "contains_space"
             assert schema_2_built_new_method[2].name == "contains_colon"
-
-
-
-
-
+            assert schema_2_built_new_method[3].name == "contains_ampersand"
 
     def test_several_nested_schemas_mailchimp(self):
 
