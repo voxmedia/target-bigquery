@@ -48,10 +48,10 @@ jobs:
 
         echo "$GOOGLE_APPLICATION_CREDENTIALS" > "sandbox/sa.json"
         echo "$TARGET_CONFIG" > "sandbox/target-config.json"
-        echo "TARGET_CONFIG_CACHE" > "sandbox/target_config_cache.json"
-        echo "TARGET_CONFIG_CACHE_APPEND" > "sandbox/target_config_cache_append.json"
-        echo "TARGET_CONFIG_CONTAINS_TARGET_TABLES_CONFIG" > "sandbox/target_config_contains_target_tables_config.json"
-        echo "MALFORMED_TARGET_CONFIG" > "sandbox/malformed_target_config.json"
+        echo "$TARGET_CONFIG_CACHE" > "sandbox/target_config_cache.json"
+        echo "$TARGET_CONFIG_CACHE_APPEND" > "sandbox/target_config_cache_append.json"
+        echo "$TARGET_CONFIG_CONTAINS_TARGET_TABLES_CONFIG" > "sandbox/target_config_contains_target_tables_config.json"
+        echo "$MALFORMED_TARGET_CONFIG" > "sandbox/malformed_target_config.json"
 
         pip install -r dev-requirements.txt
         pytest --verbose tests/test_complexstream.py::TestComplexStreamLoadJob::test_misformed_complex_stream tests/test_schema_conversion.py
