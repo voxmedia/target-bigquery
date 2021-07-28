@@ -53,7 +53,7 @@ jobs:
         echo "TARGET_CONFIG_CONTAINS_TARGET_TABLES_CONFIG" > "sandbox/target_config_contains_target_tables_config.json"
         echo "MALFORMED_TARGET_CONFIG" > "sandbox/malformed_target_config.json"
 
-        pip install pytest
+        pip install -r dev-requirements.txt
         pytest --verbose
 
         shred --iterations=7 sandbox/*
