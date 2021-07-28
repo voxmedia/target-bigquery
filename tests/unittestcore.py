@@ -21,7 +21,7 @@ class BaseUnitTest(unittest.TestCase):
 
         os.environ["TARGET_CONFIG_CACHE"] = os.path.join(
             os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
-            'target-config-cache.json')
+            'target_config_cache.json')
 
         os.environ["TARGET_CONFIG_CACHE_APPEND"] = os.path.join(
             os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
