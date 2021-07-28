@@ -117,7 +117,7 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
                 logcapture.check(expected_log, )
 
 
-    def test_check_for_dupes_in_field_names(self):
+    def test_check_for_dupes_in_field_names_expected_to_fail(self):
         """
         this should raise an error: it has a dupe at the bottom level: "NAME"
         """
@@ -142,7 +142,7 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             with pytest.raises(ValueError): #TODO: check for exact error msg
                 check_stream_for_dupes_in_field_names(next_schema_input)
 
-    def test_check_for_dupes_in_field_names_input_fixed(self):
+    def test_check_for_dupes_in_field_names_input_has_no_dupes(self):
         """
         """
         catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_no_dupe_field_names.json"))

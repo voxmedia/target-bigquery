@@ -74,7 +74,7 @@ def check_stream_for_dupes_in_field_names(stream):
 
     try:
         check_schema_for_dupes_in_field_names(schema)
-    except Exception as e:
+    except Exception as e: # flag stream with dupe field names
         raise ValueError([ValueError("Duplicate fields in stream", str(stream_name)), e])
         # https://stackoverflow.com/questions/12826291/raise-two-errors-at-the-same-time/50414672
 
@@ -82,16 +82,9 @@ def check_stream_for_dupes_in_field_names(stream):
 
 def check_schema_for_dupes_in_field_names(schema):
 
-    # TODO: test diff edge cases
-
-    # TODO: integrate into processhandler
-
-    # TODO: unit test with a sync
+    # TODO: should we test more diff edge cases?
 
     # TODO: clean up error msg
-
-    #TODO: maybe also check that transformed column name meets BigQuery column naming conventions
-    # https://en.wikipedia.org/wiki/List_of_Unicode_characters
 
     fields = []
 
@@ -111,7 +104,7 @@ def check_schema_for_dupes_in_field_names(schema):
 
     fields_deduped = sorted(list(set(fields)))
 
-    if fields == fields_deduped:
+    if fields == fields_deduped: # there are no dupes in fields names
         pass
     else:
 
@@ -124,7 +117,7 @@ def check_schema_for_dupes_in_field_names(schema):
                 dupe_keys.append(key)
                 print(dupe_keys)
 
-        raise ValueError("Duplicate field", str(dupe_keys))
+        raise ValueError("Duplicate field", str(dupe_keys)) # flag dupe keys
 
 
 

@@ -15,7 +15,7 @@ from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.schema import build_schema, cleanup_record, format_record_to_schema
 from target_bigquery.state import State
 from target_bigquery.simplify_json_schema import simplify
-from target_bigquery.validate_json_schema import validate_json_schema_completeness
+from target_bigquery.validate_json_schema import validate_json_schema_completeness, check_schema_for_dupes_in_field_names
 
 class BaseProcessHandler(object):
 
@@ -79,6 +79,8 @@ class BaseProcessHandler(object):
         self.key_properties[msg.stream] = msg.key_properties
 
         validate_json_schema_completeness(self.schemas[msg.stream])
+
+        check_schema_for_dupes_in_field_names(self.schemas[msg.stream])
 
         schema_simplified = simplify(self.schemas[msg.stream])
         schema = build_schema(schema=schema_simplified,
