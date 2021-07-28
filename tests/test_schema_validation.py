@@ -2,6 +2,7 @@ import pytest
 import simplejson
 import singer
 import json
+import os
 
 import logging
 
@@ -105,7 +106,9 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
 
     @log_capture()
     def test_several_nested_schemas_mailchimp_validate_completenes(self, logcapture):
-        catalog = json.load(open("rsc/schemas/input_json_schemas_mailchimp_invalid_incomplete.json"))
+        catalog = json.load(open(os.path.join(os.path.join(
+            os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+            'schemas'), 'input_json_schemas_mailchimp_invalid_incomplete.json')))
 
         for next_schema_input in catalog['streams']:
             logcapture.records = []
