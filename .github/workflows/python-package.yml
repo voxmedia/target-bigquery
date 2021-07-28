@@ -1,5 +1,6 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+#TODO: idea: only run a few unit tests in one branch and run all of them in master and consolidated development branch? It takes a long time to run all unit tests on GitHub and locally
 
 name: Python package
 
@@ -54,7 +55,7 @@ jobs:
         echo "$MALFORMED_TARGET_CONFIG" > "sandbox/malformed_target_config.json"
 
         pip install -r dev-requirements.txt
-        pytest --verbose
+        pytest --verbose tests/test_simplestream.py::TestSimpleStreamLoadJob::test_simple_stream_with_tables_config_passed_inside_target_config_file
 
         shred --iterations=7 sandbox/*
         rm --recursive --force sandbox
