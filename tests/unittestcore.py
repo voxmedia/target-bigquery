@@ -15,6 +15,27 @@ class BaseUnitTest(unittest.TestCase):
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
             os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
 
+        os.environ["TARGET_CONFIG"] = os.path.join(
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+            'target-config.json')
+
+        os.environ["TARGET_CONFIG_CACHE"] = os.path.join(
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+            'target_config_cache.json')
+
+        os.environ["TARGET_CONFIG_CACHE_APPEND"] = os.path.join(
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+            'target_config_cache_append.json')
+
+        os.environ["TARGET_CONFIG_CONTAINS_TARGET_TABLES_CONFIG"] = os.path.join(
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+            'target_config_contains_target_tables_config.json')
+
+        os.environ["MALFORMED_TARGET_CONFIG"] = os.path.join(
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+            'malformed_target_config.json')
+        #TODO: make naming convention of target config files consistent "_" vs "-". Use "_" as it's easier to copy with a click
+        # I think we would just need to rename target-config.json to target_config.json (also update it in README)
         self.client = None
         self.project_id = None
         self.dataset_id = None
