@@ -38,8 +38,8 @@ def cleanup_record(schema, record):
     else:
         raise Exception(f"unhandled instance of record: {record}")
 
-def bigquery_transformed_key(key):
 
+def bigquery_transformed_key(key):
     """
     Clean up / prettify field names, make sure they match BigQuery naming conventions.
     
@@ -57,35 +57,35 @@ def bigquery_transformed_key(key):
     :return: cleaned up JSON field name
     """
     remove_list = [" ",
-                    "!",
-                    "\"",
-                    "#",
-                    "$",
-                    "%",
-                    "&",
-                    "'",
-                    "(",
-                    ")",
-                    "*",
-                    "+",
-                    ",",
-                    "-",
-                    ".",
-                    "/",
-                    ":",
-                    ";",
-                    "<",
-                    "=",
-                    ">",
-                    "?",
-                    "@",
-                    "\\",
-                    "]",
-                    "^",
-                    "`",
-                    "|",
-                    "}",
-                    "~"]
+                   "!",
+                   "\"",
+                   "#",
+                   "$",
+                   "%",
+                   "&",
+                   "'",
+                   "(",
+                   ")",
+                   "*",
+                   "+",
+                   ",",
+                   "-",
+                   ".",
+                   "/",
+                   ":",
+                   ";",
+                   "<",
+                   "=",
+                   ">",
+                   "?",
+                   "@",
+                   "\\",
+                   "]",
+                   "^",
+                   "`",
+                   "|",
+                   "}",
+                   "~"]
 
     for c in remove_list:
         key = key.replace(c, "_")
@@ -97,7 +97,6 @@ def bigquery_transformed_key(key):
 
 
 def prioritize_one_data_type_from_multiple_ones_in_any_of(field_property):
-
     """
     :param field_property: JSON field property, which has anyOf and multiple data types
     :return: one BigQuery SchemaField field_type, which is prioritized
@@ -151,7 +150,7 @@ def prioritize_one_data_type_from_multiple_ones_in_any_of(field_property):
     """
 
     prioritization_dict = {"string": 1,
-                            "number": 2,
+                           "number": 2,
                            "integer": 3,
                            "boolean": 4,
                            "object": 5,
@@ -161,7 +160,6 @@ def prioritize_one_data_type_from_multiple_ones_in_any_of(field_property):
     any_of_data_types = {}
 
     for i in range(0, len(field_property['anyOf'])):
-
         data_type = field_property['anyOf'][i]['type'][0]
 
         any_of_data_types.update({data_type: prioritization_dict[data_type]})
@@ -172,7 +170,6 @@ def prioritize_one_data_type_from_multiple_ones_in_any_of(field_property):
 
 
 def convert_field_type(field_property):
-
     """
     :param field_property: JSON field property
     :return: BigQuery SchemaField field_type
@@ -214,7 +211,6 @@ def convert_field_type(field_property):
 
 
 def determine_field_mode(field_name, field_property):
-
     """
     :param field_name: one nested JSON field name
     :param field_property: one nested JSON field property
@@ -232,7 +228,6 @@ def determine_field_mode(field_name, field_property):
 
 
 def replace_nullable_mode_with_required(schema_field_input):
-
     schema_field_updated = SchemaField(name=schema_field_input.name,
                                        field_type=schema_field_input.field_type,
                                        mode='REQUIRED',
@@ -244,14 +239,14 @@ def replace_nullable_mode_with_required(schema_field_input):
 
 
 def build_field(field_name, field_property):
-
     """
     :param field_name: one nested JSON field name
     :param field_property: one nested JSON field property
     :return: one BigQuery nested SchemaField
     """
 
-    if not ("items" in field_property and "properties" in field_property["items"]) and not ("properties" in field_property):
+    if not ("items" in field_property and "properties" in field_property["items"]) and not (
+            "properties" in field_property):
 
         return (SchemaField(name=bigquery_transformed_key(field_name),
                             field_type=convert_field_type(field_property),
@@ -269,7 +264,6 @@ def build_field(field_name, field_property):
         for subfield_name, subfield_property in field_property.get("properties",
                                                                    field_property.get("items", {}).get("properties")
                                                                    ).items():
-
             processed_subfields.append(build_field(subfield_name, subfield_property))
 
         return (SchemaField(name=bigquery_transformed_key(field_name),
@@ -282,7 +276,6 @@ def build_field(field_name, field_property):
 
 
 def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}):
-
     """
     :param schema: input simplified JSON schema
     :param key_properties: JSON schema fields which will become required BigQuery column
@@ -305,7 +298,8 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
         if field_name in force_fields:
 
             next_field = (
-                SchemaField(field_name, force_fields[field_name]["type"], force_fields[field_name].get("mode", "nullable"),
+                SchemaField(field_name, force_fields[field_name]["type"],
+                            force_fields[field_name].get("mode", "nullable"),
                             force_fields[field_name].get("description", None), ())
             )
 

@@ -6,13 +6,15 @@ import json
 import os
 
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 from testfixtures import log_capture
 
 from tests import unittestcore
 
-from target_bigquery.validate_json_schema import validate_json_schema_completeness, check_schema_for_dupes_in_field_names
+from target_bigquery.validate_json_schema import validate_json_schema_completeness, \
+    check_schema_for_dupes_in_field_names
 
 from tests.rsc.schemas.input_json_schemas import *
 
@@ -136,12 +138,14 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
 
             if stream_name == 'ordered_product':
                 # https://stackoverflow.com/questions/280435/escaping-regex-string
-                with pytest.raises(ValueError, match=re.escape("Duplicate field(s) ['NAME'] in stream ordered_product")):
+                with pytest.raises(ValueError,
+                                   match=re.escape("Duplicate field(s) ['NAME'] in stream ordered_product")):
                     check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
 
             elif stream_name == "expired_subscription":
                 with pytest.raises(ValueError,
-                                   match=re.escape("Duplicate field(s) ['_FIRST_NAME'] in stream expired_subscription")):
+                                   match=re.escape(
+                                       "Duplicate field(s) ['_FIRST_NAME'] in stream expired_subscription")):
                     check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
 
             else:
@@ -182,4 +186,3 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             stream_name = next_stream['stream']
             check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
             assert True
-

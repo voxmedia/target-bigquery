@@ -336,7 +336,8 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_klaviyo_field_names_contain_chars_not_valid_in_bigquery(self):
 
-        catalog_schema_file = ("rsc/schemas/input_json_schemas_klaviyo_field_names_contain_chars_invalid_in_bigquery.json")
+        catalog_schema_file = (
+            "rsc/schemas/input_json_schemas_klaviyo_field_names_contain_chars_invalid_in_bigquery.json")
 
         catalog = json.load(open(catalog_schema_file))
 
@@ -379,7 +380,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             assert schema_3_built_old_method[2].name == "contains:colon"
             assert schema_3_built_old_method[3].name == "contains&ampersand"
 
-            assert schema_2_built_new_method[0].name  == "_dollarsign"
+            assert schema_2_built_new_method[0].name == "_dollarsign"
             assert schema_2_built_new_method[1].name == "contains_space"
             assert schema_2_built_new_method[2].name == "contains_colon"
             assert schema_2_built_new_method[3].name == "contains_ampersand"

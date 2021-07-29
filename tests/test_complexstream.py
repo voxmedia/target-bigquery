@@ -47,8 +47,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         ret = main()
 
-        self.assertEqual(ret, 2, msg="Exit code is not 2!") #expected exit code is 2 - serious problem
-
+        self.assertEqual(ret, 2, msg="Exit code is not 2!")  # expected exit code is 2 - serious problem
 
     def test_recharge_stream(self):
         from target_bigquery import main
@@ -183,8 +182,8 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             build_schema function will force this field to NULLABLE DATE, according to target tables config file
         """
         target_config_file = json.load(open(os.path.join(os.path.join(
-                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
-                'config'), 'facebook_stream_tables_config.json')))
+            os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+            'config'), 'facebook_stream_tables_config.json')))
 
         assert target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['date_start'][
                    'type'] == 'DATE'
