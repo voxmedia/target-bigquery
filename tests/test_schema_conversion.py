@@ -336,8 +336,9 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
     def test_several_nested_schemas_klaviyo_field_names_contain_chars_not_valid_in_bigquery(self):
 
-        catalog_schema_file = (
-            "rsc/schemas/input_json_schemas_klaviyo_field_names_contain_chars_invalid_in_bigquery.json")
+        catalog_schema_file = os.path.join(os.path.join(
+            os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+            'schemas'), 'input_json_schemas_klaviyo_field_names_contain_chars_invalid_in_bigquery.json')
 
         catalog = json.load(open(catalog_schema_file))
 
