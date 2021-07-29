@@ -56,7 +56,9 @@ class BaseProcessHandler(object):
         """
         Handle schema message:
 
-            1) validate json schema completeness (make sure it doesn't have instances of empty objects {}
+            1) validate json schema
+                - make sure it doesn't have instances of empty objects {}
+                - make sure it doesn't have duplicate field names
 
             2) simplify schema (we borrowed it from target-postgres).
                 Make it more uniform and get rid of anyOf (for the most part)
@@ -80,7 +82,7 @@ class BaseProcessHandler(object):
 
         validate_json_schema_completeness(self.schemas[msg.stream])
 
-        check_schema_for_dupes_in_field_names(self.schemas[msg.stream])
+        check_schema_for_dupes_in_field_names(stream_name=msg.stream, schema=self.schemas[msg.stream])
 
         schema_simplified = simplify(self.schemas[msg.stream])
         schema = build_schema(schema=schema_simplified,

@@ -65,26 +65,18 @@ def validate_json_schema_completeness(schema_input):
             LOGGER.warning("the pipeline might fail because of undefined fields: {}")
 
 
+def check_schema_for_dupes_in_field_names(stream_name, schema):
+    """
+    Alerts user if there are duplicate field names in JSON schema.
 
-
-def check_stream_for_dupes_in_field_names(stream):
-    # TODO:  refactor: say singer.parse instead of stream['stream']
-    schema = stream['schema']
-    stream_name = stream['stream']
-
-    try:
-        check_schema_for_dupes_in_field_names(schema)
-    except Exception as e: # flag stream with dupe field names
-        raise ValueError([ValueError("Duplicate fields in stream", str(stream_name)), e])
-        # https://stackoverflow.com/questions/12826291/raise-two-errors-at-the-same-time/50414672
-
-
-
-def check_schema_for_dupes_in_field_names(schema):
-
-    # TODO: should we test more diff edge cases?
-
-    # TODO: clean up error msg
+    For example, if JSON schema contains:
+        "Name" and "name"
+        or
+        "first name" and "first_name" (this example is also a dupe because "first name" will be converted to "first_name" by schema.py)
+    :param stream_name: name of stream
+    :param schema: JSON schema of the stream
+    :return:
+    """
 
     fields = []
 
@@ -98,7 +90,7 @@ def check_schema_for_dupes_in_field_names(schema):
 
         elif ("items" in field_property and "properties" in field_property["items"]) or (
                 "properties" in field_property):
-            check_schema_for_dupes_in_field_names(field_property)
+            check_schema_for_dupes_in_field_names(stream_name, field_property)
 
     fields.sort()
 
@@ -107,7 +99,6 @@ def check_schema_for_dupes_in_field_names(schema):
     if fields == fields_deduped: # there are no dupes in fields names
         pass
     else:
-
         # https://stackoverflow.com/questions/23240969/python-count-repeated-elements-in-the-list
         field_names_and_counts = {i:fields.count(i) for i in fields}
         dupe_keys = []
@@ -117,7 +108,7 @@ def check_schema_for_dupes_in_field_names(schema):
                 dupe_keys.append(key)
                 print(dupe_keys)
 
-        raise ValueError("Duplicate field", str(dupe_keys)) # flag dupe keys
+        raise ValueError("Duplicate field(s) %s in stream %s" % (str(dupe_keys), stream_name))
 
 
 

@@ -1,8 +1,8 @@
+import re
 import pytest
 import simplejson
 import singer
 import json
-
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -11,7 +11,7 @@ from testfixtures import log_capture
 
 from tests import unittestcore
 
-from target_bigquery.validate_json_schema import validate_json_schema_completeness, check_stream_for_dupes_in_field_names
+from target_bigquery.validate_json_schema import validate_json_schema_completeness, check_schema_for_dupes_in_field_names
 
 from tests.rsc.schemas.input_json_schemas import *
 
@@ -124,10 +124,23 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
         catalog = json.load(open(
             "rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short_1_dupe_at_nested_level.json"))
 
-        for next_schema_input in catalog['streams']:
-            validate_json_schema_completeness(next_schema_input)
+        for next_stream in catalog['streams']:
 
-            check_stream_for_dupes_in_field_names(next_schema_input)
+            schema = next_stream['schema']
+            stream_name = next_stream['stream']
+
+            if stream_name == 'ordered_product':
+                # https://stackoverflow.com/questions/280435/escaping-regex-string
+                with pytest.raises(ValueError, match=re.escape("Duplicate field(s) ['NAME'] in stream ordered_product")):
+                    check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
+
+            elif stream_name == "expired_subscription":
+                with pytest.raises(ValueError,
+                                   match=re.escape("Duplicate field(s) ['_FIRST_NAME'] in stream expired_subscription")):
+                    check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
+
+            else:
+                check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
 
     def test_check_for_dupes_in_field_names_2(self):
         """
@@ -136,21 +149,25 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
         catalog = json.load(open(
             "rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short_2_dupe_at_top_level.json"))
 
-        for next_schema_input in catalog['streams']:
-            validate_json_schema_completeness(next_schema_input)
-            # check_stream_for_dupes_in_field_names(next_schema_input)
-            with pytest.raises(ValueError): #TODO: check for exact error msg
-                check_stream_for_dupes_in_field_names(next_schema_input)
+        for next_stream in catalog['streams']:
+            schema = next_stream['schema']
+            stream_name = next_stream['stream']
+
+            if stream_name == 'ordered_product':
+                # https://stackoverflow.com/questions/280435/escaping-regex-string
+                with pytest.raises(ValueError,
+                                   match=re.escape("Duplicate field(s) ['_ID'] in stream ordered_product")):
+                    check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
+            else:
+                check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
+
 
     def test_check_for_dupes_in_field_names_input_has_no_dupes(self):
-        """
-        """
         catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_no_dupe_field_names.json"))
 
-        for next_schema_input in catalog['streams']:
-            validate_json_schema_completeness(next_schema_input)
-
-            check_stream_for_dupes_in_field_names(next_schema_input)
-
+        for next_stream in catalog['streams']:
+            schema = next_stream['schema']
+            stream_name = next_stream['stream']
+            check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
             assert True
 
