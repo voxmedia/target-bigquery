@@ -33,6 +33,23 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
+    def test_klaviyo_stream_load_job_should_fail_due_to_dupes_in_fiels_names(self):
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'klaviyo_stream_contains_dupe_fields.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
+            processhandler="load-job"
+        )
+
+        ret = main()
+
+        self.assertEqual(ret, 2, msg="Exit code is not 2!") #expected exit code is 2 - serious problem
+
+
     def test_recharge_stream(self):
         from target_bigquery import main
 
