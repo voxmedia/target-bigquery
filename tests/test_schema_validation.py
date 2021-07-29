@@ -6,7 +6,6 @@ import json
 import os
 
 import logging
-
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 from testfixtures import log_capture
@@ -120,13 +119,15 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
 
                 logcapture.check(expected_log, )
 
-
-    def test_check_for_dupes_in_field_names_expected_to_fail(self):
+    def test_check_for_dupes_in_field_names_1_dupes_at_nested_level(self):
         """
         this should raise an error: it has a dupe at the bottom level: "NAME"
         """
         catalog = json.load(open(
-            "rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short_1_dupe_at_nested_level.json"))
+            os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'schemas'), 'input_json_schemas_klaviyo_dupe_field_names_short_1_dupe_at_nested_level.json')
+        ))
 
         for next_stream in catalog['streams']:
 
@@ -146,12 +147,15 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             else:
                 check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
 
-    def test_check_for_dupes_in_field_names_2(self):
+    def test_check_for_dupes_in_field_names_2_dupe_at_the_top_level(self):
         """
         this should raise an error: it has a dupe at the top level: "_ID"
         """
         catalog = json.load(open(
-            "rsc/schemas/input_json_schemas_klaviyo_dupe_field_names_short_2_dupe_at_top_level.json"))
+            os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'schemas'), 'input_json_schemas_klaviyo_dupe_field_names_short_2_dupe_at_top_level.json')
+        ))
 
         for next_stream in catalog['streams']:
             schema = next_stream['schema']
@@ -165,9 +169,13 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             else:
                 check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
 
-
     def test_check_for_dupes_in_field_names_input_has_no_dupes(self):
-        catalog = json.load(open("rsc/schemas/input_json_schemas_klaviyo_no_dupe_field_names.json"))
+
+        catalog = json.load(open(
+            os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'schemas'), 'input_json_schemas_klaviyo_no_dupe_field_names.json')
+        ))
 
         for next_stream in catalog['streams']:
             schema = next_stream['schema']
