@@ -139,17 +139,16 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             if stream_name == 'ordered_product':
                 # https://stackoverflow.com/questions/280435/escaping-regex-string
                 with pytest.raises(ValueError,
-                                   match=re.escape("Duplicate field(s) ['NAME'] in stream ordered_product")):
+                                   match=re.escape("Duplicate field(s) in stream ordered_product: person.name & person.Name are read as PERSON.NAME by BigQuery")):
                     check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
 
             elif stream_name == "expired_subscription":
                 with pytest.raises(ValueError,
-                                   match=re.escape(
-                                       "Duplicate field(s) ['_FIRST_NAME'] in stream expired_subscription")):
+                                   match=re.escape("Duplicate field(s) in stream expired_subscription: person.$first_name & person._FIRST NAME are read as PERSON._FIRST_NAME by BigQuery")):
                     check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
 
             else:
-                check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
+                check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)  # this fails other streams
 
     def test_check_for_dupes_in_field_names_2_dupe_at_the_top_level(self):
         """
@@ -168,7 +167,7 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             if stream_name == 'ordered_product':
                 # https://stackoverflow.com/questions/280435/escaping-regex-string
                 with pytest.raises(ValueError,
-                                   match=re.escape("Duplicate field(s) ['_ID'] in stream ordered_product")):
+                                   match=re.escape("Duplicate field(s) in stream ordered_product: _id & $id are read as _ID by BigQuery")):
                     check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)
             else:
                 check_schema_for_dupes_in_field_names(stream_name=stream_name, schema=schema)

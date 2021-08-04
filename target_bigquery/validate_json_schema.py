@@ -56,13 +56,13 @@ def validate_json_schema_completeness(schema_input):
     for schema_element, pattern_not_valid in completeness_validation_dict_exception.items():
 
         if pattern_not_valid.search(schema_input_no_spaces):
-            raise ValueError("JSON schema is invalid/incomplete. It has empty {}".format(schema_element))
+            raise ValueError(f"JSON schema is invalid/incomplete. It has empty {schema_element}")
 
     # give warning
     for schema_element, pattern_not_valid in completeness_validation_dict_warning.items():
 
         if pattern_not_valid.search(schema_input_no_spaces):
-            LOGGER.warning("the pipeline might fail because of undefined fields: {}")
+            LOGGER.warning(f"the pipeline might fail because of undefined fields: {schema_element} is defined as {{}}")
 
 
 def check_schema_for_dupes_in_field_names(stream_name, schema):
@@ -77,38 +77,36 @@ def check_schema_for_dupes_in_field_names(stream_name, schema):
     :param schema: JSON schema of the stream
     :return:
     """
+    def build_field_list(schema):
+        f_dict = {}
+        for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties", {})).items():
+            if not ("items" in field_property and "properties" in field_property["items"]) \
+                    and not ("properties" in field_property):
+                key = bigquery_transformed_key(field_name.upper())
+                if not f_dict.get(key):
+                    f_dict[key] = [field_name]
+                else:
+                    f_dict[key].append(field_name)
 
-    fields = []
+            elif ("items" in field_property and "properties" in field_property["items"]) \
+                    or ("properties" in field_property):
+                nd = build_field_list(field_property)
+                key = bigquery_transformed_key(field_name.upper())
+                for k, v in nd.items():
+                    if not f_dict.get(f"{key}.{k}"):
+                        f_dict[f"{key}.{k}"] = [f"{field_name}.{i}" for i in v]
+                    else:
+                        f_dict[f"{key}.{k}"].extend([f"{field_name}.{i}" for i in v])
 
-    for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties", {})).items():
+        # sample f_dict: {"BQ_FIELD_NAME.BQ_NESTED_FIELD": ["json_schema_field_name.$nested_name", "json_schema_field_name.nested name"]}
+        return f_dict
 
-        if not ("items" in field_property and "properties" in field_property["items"]) and not (
-                "properties" in field_property):
-            field_name_cleaned = bigquery_transformed_key(field_name.upper())
+    fields = build_field_list(schema)
+    dupes = {k: v for k, v in fields.items() if len(v) > 1}
+    if dupes:
+        errs = "; ".join([f"{' & '.join(v)} are read as {str(k)} by BigQuery" for k, v in dupes.items()])
+        raise ValueError(f"Duplicate field(s) in stream {stream_name}: {errs}")
 
-            fields.append(field_name_cleaned.upper())
-
-        elif ("items" in field_property and "properties" in field_property["items"]) or (
-                "properties" in field_property):
-            check_schema_for_dupes_in_field_names(stream_name, field_property)
-
-    fields.sort()
-
-    fields_deduped = sorted(list(set(fields)))
-
-    if fields == fields_deduped: # there are no dupes in fields names
-        pass
-    else:
-        # https://stackoverflow.com/questions/23240969/python-count-repeated-elements-in-the-list
-        field_names_and_counts = {i:fields.count(i) for i in fields}
-        dupe_keys = []
-
-        for key, value in field_names_and_counts.items():
-            if value > 1:
-                dupe_keys.append(key)
-                print(dupe_keys)
-
-        raise ValueError("Duplicate field(s) %s in stream %s" % (str(dupe_keys), stream_name))
 
 
 
