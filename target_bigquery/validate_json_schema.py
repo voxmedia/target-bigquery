@@ -62,7 +62,7 @@ def validate_json_schema_completeness(schema_input):
     for schema_element, pattern_not_valid in completeness_validation_dict_warning.items():
 
         if pattern_not_valid.search(schema_input_no_spaces):
-            LOGGER.warning(f"the pipeline might fail because of undefined fields: {schema_element} is defined as {{}}")
+            LOGGER.warning(f"the pipeline might fail because of undefined fields: an empty {schema_element} indicated as {{}}")
 
 
 def check_schema_for_dupes_in_field_names(stream_name, schema):

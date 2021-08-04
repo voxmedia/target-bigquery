@@ -102,7 +102,7 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
         for incomplete_schema in invalid_schemas:
             validate_json_schema_completeness(incomplete_schema)
 
-            expected_log = ('root', 'WARNING', "the pipeline might fail because of undefined fields: {}")
+            expected_log = ('root', 'WARNING', "the pipeline might fail because of undefined fields: an empty object/dictionary indicated as {}")
 
             logcapture.check(expected_log, )
 
@@ -117,7 +117,7 @@ class TestSchemaValidation(unittestcore.BaseUnitTest):
             if next_schema_input['tap_stream_id'] in ['list_segment_members', 'list_members', 'unsubscribes']:
                 validate_json_schema_completeness(next_schema_input)
 
-                expected_log = ('root', 'WARNING', "the pipeline might fail because of undefined fields: {}")
+                expected_log = ('root', 'WARNING', "the pipeline might fail because of undefined fields: an empty object/dictionary indicated as {}")
 
                 logcapture.check(expected_log, )
 
