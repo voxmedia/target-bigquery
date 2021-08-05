@@ -70,7 +70,7 @@ def check_schema_for_dupes_in_field_names(stream_name, schema):
     Alerts user if there are duplicate field names in JSON schema.
 
     For example, if JSON schema contains:
-        "Name" and "name"
+        "Name" and "name" (this will be considered a dupe field in BigQuery and it'll throw an error)
         or
         "first name" and "first_name" (this example is also a dupe because "first name" will be converted to "first_name" by schema.py)
     :param stream_name: name of stream
@@ -78,6 +78,31 @@ def check_schema_for_dupes_in_field_names(stream_name, schema):
     :return:
     """
     def build_field_list(schema):
+        """
+
+        :param schema:
+        :return: a dictionary, where:
+
+            every key is uppercase of BigQuery transformed key (uppercase of field name cleaned up to load into BigQuery)
+
+            every  value is original field names from JSON schema
+
+            This dictionary is flat, not nested.
+
+            JSON nested fields are represented in dictionary with a . dot.
+
+            This dict makes it easy to detect dupes and tell the user exactly where the dupe is located
+                (what its parent field is).
+
+        Sample output:
+
+            f_dict / fields = {'OBJECT': ['object'], 'ID': ['id'],
+                                'PERSON._SOURCE': ['person.$source'],
+                                'PERSON.NAME': ['person.name', 'person.Name']}
+
+            dupes = {'PERSON.NAME': ['person.name', 'person.Name']}
+
+        """
         f_dict = {}
         for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties", {})).items():
             if not ("items" in field_property and "properties" in field_property["items"]) \
@@ -98,7 +123,6 @@ def check_schema_for_dupes_in_field_names(stream_name, schema):
                     else:
                         f_dict[f"{key}.{k}"].extend([f"{field_name}.{i}" for i in v])
 
-        # sample f_dict: {"BQ_FIELD_NAME.BQ_NESTED_FIELD": ["json_schema_field_name.$nested_name", "json_schema_field_name.nested name"]}
         return f_dict
 
     fields = build_field_list(schema)
