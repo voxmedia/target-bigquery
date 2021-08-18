@@ -24,7 +24,7 @@ env:
 
 on:
   push:
-    branches: [ development-ci-cd-workflow, development, master ]
+    branches: [ development-ci-cd-workflow, development, master, development-refactor-bigquery-field-name-function ]
   pull_request:
     branches: [ master ]
 

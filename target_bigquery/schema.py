@@ -31,7 +31,7 @@ def cleanup_record(schema, record):
     elif isinstance(record, dict):
         nr = {}
         for key, value in record.items():
-            nkey = bigquery_transformed_key(key)
+            nkey = create_valid_bigquery_field_name(key)
             nr[nkey] = cleanup_record(schema, value)
         return nr
 
@@ -39,7 +39,7 @@ def cleanup_record(schema, record):
         raise Exception(f"unhandled instance of record: {record}")
 
 
-def bigquery_transformed_key(key):
+def create_valid_bigquery_field_name(field_name):
     """
     Clean up / prettify field names, make sure they match BigQuery naming conventions.
     
@@ -56,45 +56,22 @@ def bigquery_transformed_key(key):
     :param key: JSON field name
     :return: cleaned up JSON field name
     """
-    remove_list = [" ",
-                   "!",
-                   "\"",
-                   "#",
-                   "$",
-                   "%",
-                   "&",
-                   "'",
-                   "(",
-                   ")",
-                   "*",
-                   "+",
-                   ",",
-                   "-",
-                   ".",
-                   "/",
-                   ":",
-                   ";",
-                   "<",
-                   "=",
-                   ">",
-                   "?",
-                   "@",
-                   "\\",
-                   "]",
-                   "^",
-                   "`",
-                   "|",
-                   "}",
-                   "~"]
 
-    for c in remove_list:
-        key = key.replace(c, "_")
+    cleaned_up_field_name = ""
 
-    if re.match(r"^\d", key):
-        key = "_" + key
+    # if char is alphanumeric (either letters or numbers), append char to our string
+    for char in field_name:
+        if char.isalnum():
+            cleaned_up_field_name += char
+        else:
+            # otherwise, replace it with underscore
+            cleaned_up_field_name += "_"
 
-    return key
+    # if field starts with digit, prepend it with underscore
+    if cleaned_up_field_name[0].isdigit():
+        cleaned_up_field_name = "_%s" % cleaned_up_field_name
 
+    return cleaned_up_field_name[:300] # trim the string to the first x chars
 
 def prioritize_one_data_type_from_multiple_ones_in_any_of(field_property):
     """
@@ -248,7 +225,7 @@ def build_field(field_name, field_property):
     if not ("items" in field_property and "properties" in field_property["items"]) and not (
             "properties" in field_property):
 
-        return (SchemaField(name=bigquery_transformed_key(field_name),
+        return (SchemaField(name=create_valid_bigquery_field_name(field_name),
                             field_type=convert_field_type(field_property),
                             mode=determine_field_mode(field_name, field_property),
                             description=None,
@@ -266,7 +243,7 @@ def build_field(field_name, field_property):
                                                                    ).items():
             processed_subfields.append(build_field(subfield_name, subfield_property))
 
-        return (SchemaField(name=bigquery_transformed_key(field_name),
+        return (SchemaField(name=create_valid_bigquery_field_name(field_name),
                             field_type=convert_field_type(field_property),
                             mode=determine_field_mode(field_name, field_property),
                             description=None,
