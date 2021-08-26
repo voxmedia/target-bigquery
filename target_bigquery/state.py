@@ -36,3 +36,4 @@ class State(dict):
 class LiteralState(State):
     def merge(self, state):
         self = state
+        print('test')

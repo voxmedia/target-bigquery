@@ -131,9 +131,9 @@ class LoadJobProcessHandler(BaseProcessHandler):
         # self.table_configs = kwargs.get("table_configs", {}) or {}
         #
         # self.INIT_STATE = kwargs.get("initial_state") or {}
-        # TODO: pass the class
         # self.STATE = State(**self.INIT_STATE)
-        self.STATE = kwargs.get("state_handler")
+        self.STATE_HANDLER = kwargs.get("state_handler")
+        self.STATE = self.STATE_HANDLER(**self.INIT_STATE)
 
         self.bq_schema_dicts = {}
         self.rows = {}
@@ -200,7 +200,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
     def handle_state_message(self, msg):
         assert isinstance(msg, singer.StateMessage)
 
-        self.STATE.merge(self, state=msg.value)
+        self.STATE.merge(msg.value)
 
         yield from ()
 
@@ -300,7 +300,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
                 field=partition_field
             )
 
-        # clusteing
+        # clustering
         if cluster_fields:
             load_config.clustering_fields = cluster_fields
 
@@ -374,7 +374,8 @@ class BookmarksStatePartialLoadJobProcessHandler(PartialLoadJobProcessHandler):
     def __init__(self, logger, **kwargs):
         super(BookmarksStatePartialLoadJobProcessHandler, self).__init__(logger, **kwargs)
 
-        self.EMITTED_STATE = State(**self.INIT_STATE)
+        self.STATE_HANDLER = kwargs.get("state_handler")
+        self.EMITTED_STATE = self.STATE_HANDLER(**self.INIT_STATE)
 
     def handle_state_message(self, msg):
         assert isinstance(msg, singer.StateMessage)

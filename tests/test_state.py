@@ -15,7 +15,7 @@
 """
 
 from tests import unittestcore
-from target_bigquery.state import State
+from target_bigquery.state import State, LiteralState
 import os
 
 
@@ -44,6 +44,8 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
             {"bookmarks": {"stream_two": {"timestamp": "2020-01-11T00:00:00.000000Z"}}}
         )
         print(state)
+
+        assert state == {'bookmarks': {'stream_one': {'timestamp': '2020-01-11T00:00:00.000000Z'}, 'stream_two': {'timestamp': '2020-01-11T00:00:00.000000Z'}}}
 
     def test_state_but_no_data(self):
         from target_bigquery import main
@@ -82,3 +84,32 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
         self.assertDictEqual(state[-1], {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
+
+
+
+
+class TestSimpleStreamNoStateMerging(TestSimpleStream):
+
+
+    def test_init(self):
+        s = LiteralState(**{"a": 1})
+        print(s)
+
+    def test_flat_schema(self):
+        state = LiteralState()
+        state.merge(
+            {"bookmarks": {"stream_one": {"timestamp": "2020-01-10T00:00:00.000000Z"}}}
+        )
+        print(state)
+
+        state.merge(
+            {"bookmarks": {"stream_one": {"timestamp": "2020-01-11T00:00:00.000000Z"}}}
+        )
+        print(state)
+
+        state.merge(
+            {"bookmarks": {"stream_two": {"timestamp": "2020-01-11T00:00:00.000000Z"}}}
+        )
+        print(state)
+
+        assert state == {"bookmarks": {"stream_two": {"timestamp": "2020-01-11T00:00:00.000000Z"}}}
