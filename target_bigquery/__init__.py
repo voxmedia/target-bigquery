@@ -11,6 +11,7 @@ import singer
 from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.process import process
 from target_bigquery.utils import emit_state, ensure_dataset
+from target_bigquery.state import State, LiteralState
 
 logger = singer.get_logger()
 
@@ -21,6 +22,7 @@ def main():
     parser.add_argument("-c", "--config", help="Config file", required=True)
     parser.add_argument("-t", "--tables", help="Table configs file", required=False)
     parser.add_argument("-s", "--state", help="Initial state file", required=False)
+    parser.add_argument("-ms", "--merge-state", help="Initial state file", required=False, default=True)
     parser.add_argument("-ph", "--processhandler",
                         help="Defines the loading process. Partial loads by default.",
                         required=False,
@@ -35,6 +37,7 @@ def main():
         config = json.load(f)
 
     # target tables config (e.g, partitioning and clustering)
+    merge_state = flags.merge_state
     table_config = flags.tables or config.get("table_config")
     tables = {}
     if table_config:
@@ -87,6 +90,7 @@ def main():
             ph,
             tap_stream,
             initial_state=state,
+            state_handler=State if merge_state == True else LiteralState,
             project_id=project_id,
             dataset=dataset,
             location=location,

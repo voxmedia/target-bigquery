@@ -31,3 +31,8 @@ class State(dict):
 
             elif isinstance(m, Remove):
                 pass
+
+
+class LiteralState(State):
+    def merge(self, state):
+        self = state

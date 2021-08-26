@@ -13,7 +13,7 @@ from jsonschema import validate
 
 from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.schema import build_schema, cleanup_record, format_record_to_schema
-from target_bigquery.state import State
+
 from target_bigquery.simplify_json_schema import simplify
 from target_bigquery.validate_json_schema import validate_json_schema_completeness, \
     check_schema_for_dupes_in_field_names
@@ -131,7 +131,9 @@ class LoadJobProcessHandler(BaseProcessHandler):
         # self.table_configs = kwargs.get("table_configs", {}) or {}
         #
         # self.INIT_STATE = kwargs.get("initial_state") or {}
-        self.STATE = State(**self.INIT_STATE)
+        # TODO: pass the class
+        # self.STATE = State(**self.INIT_STATE)
+        self.STATE = kwargs.get("state_handler")
 
         self.bq_schema_dicts = {}
         self.rows = {}
@@ -198,7 +200,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
     def handle_state_message(self, msg):
         assert isinstance(msg, singer.StateMessage)
 
-        self.STATE.merge(msg.value)
+        self.STATE.merge(self, state=msg.value)
 
         yield from ()
 
