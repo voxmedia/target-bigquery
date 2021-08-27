@@ -24,9 +24,11 @@ def main():
     parser.add_argument("-s", "--state", help="Initial state file", required=False)
     parser.add_argument("-ms", "--merge_state",
                         help="Defines the state file. True means we want to merge state messages from different streams. False means we will pass state message without changes.",
+                        type=bool,
                         required=False,
-                        choices=['True', 'False'], # when it's passed in command line, it parsed as string, not boolean
-                        default=True)
+                        default=True) # TODO: using type=bool this reads merge_state=False command line option as True
+    # https://docs.python.org/3/library/argparse.html
+    # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
     parser.add_argument("-ph", "--processhandler",
                         help="Defines the loading process. Partial loads by default.",
                         required=False,
