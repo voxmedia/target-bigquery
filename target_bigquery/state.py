@@ -36,5 +36,7 @@ class State(dict):
 class LiteralState(State):
 
     def merge(self, state):
-        self.update(state)
+        if state:
+            self.clear()
+            self.update(state)
 

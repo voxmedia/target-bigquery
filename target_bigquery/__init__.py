@@ -25,7 +25,7 @@ def main():
     parser.add_argument("-ms", "--merge_state",
                         help="Defines the state file. True means we want to merge state messages from different streams. False means we will pass state message without changes.",
                         required=False,
-                        choices=['True', 'False'],
+                        choices=['True', 'False'], # when it's passed in command line, it parsed as string, not boolean
                         default=True)
     parser.add_argument("-ph", "--processhandler",
                         help="Defines the loading process. Partial loads by default.",
