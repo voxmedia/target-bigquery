@@ -24,11 +24,13 @@ def main():
     parser.add_argument("-s", "--state", help="Initial state file", required=False)
     parser.add_argument("-ms", "--merge_state",
                         help="Defines the state file. True means we want to merge state messages from different streams. False means we will pass state message without changes.",
-                        type=bool,
+                        type=lambda x: (str(x).lower() == 'true'),
                         required=False,
-                        default=True) # TODO: using type=bool this reads merge_state=False command line option as True
-    # https://docs.python.org/3/library/argparse.html
-    # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
+                        default=True)
+                        # how to pass boolean
+                        # using type=bool reads merge_state=False command line option as True
+                        # https://docs.python.org/3/library/argparse.html
+                        # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
     parser.add_argument("-ph", "--processhandler",
                         help="Defines the loading process. Partial loads by default.",
                         required=False,
@@ -96,7 +98,7 @@ def main():
             ph,
             tap_stream,
             initial_state=state,
-            state_handler=State if merge_state == True else LiteralState,
+            state_handler=State if merge_state else LiteralState,
             project_id=project_id,
             dataset=dataset,
             location=location,
