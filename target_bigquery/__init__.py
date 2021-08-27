@@ -22,7 +22,11 @@ def main():
     parser.add_argument("-c", "--config", help="Config file", required=True)
     parser.add_argument("-t", "--tables", help="Table configs file", required=False)
     parser.add_argument("-s", "--state", help="Initial state file", required=False)
-    parser.add_argument("-ms", "--merge-state", help="Initial state file", required=False, default=True)
+    parser.add_argument("-ms", "--merge_state",
+                        help="Defines the state file. True means we want to merge state messages from different streams. False means we will pass state message without changes.",
+                        required=False,
+                        choices=['True', 'False'],
+                        default=True)
     parser.add_argument("-ph", "--processhandler",
                         help="Defines the loading process. Partial loads by default.",
                         required=False,

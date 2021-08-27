@@ -24,7 +24,7 @@ env:
 
 on:
   push:
-    branches: [ development-ci-cd-workflow, development, master ]
+    branches: [ development-state-handling-command-line-option, development, master ]
   pull_request:
     branches: [ master ]
 
