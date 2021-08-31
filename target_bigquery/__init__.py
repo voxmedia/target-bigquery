@@ -22,21 +22,19 @@ def main():
     parser.add_argument("-c", "--config", help="Config file", required=True)
     parser.add_argument("-t", "--tables", help="Table configs file", required=False)
     parser.add_argument("-s", "--state", help="Initial state file", required=False)
-    parser.add_argument("-ms", "--merge_state",
-                        help="Defines the state file. True means we want to merge state messages from different streams. False means we will pass state message without changes.",
-                        type=lambda x: (str(x).lower() == 'true'),
-                        required=False,
-                        default=True)
-                        # how to pass boolean
-                        # using type=bool reads merge_state=False command line option as True
-                        # https://docs.python.org/3/library/argparse.html
-                        # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
+
+    # set boolean CLI arg [--merge-state | --no-merge-state]
+    # https://docs.python.org/3/library/argparse.html
+    # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
+    parser.add_argument('--merge-state', action=argparse.BooleanOptionalAction, required=False, default=True,
+                        help="Do we want to merge state messages into one state file or do we want to just keep the latest state message? Default is true")
+
     parser.add_argument("-ph", "--processhandler",
                         help="Defines the loading process. Partial loads by default.",
                         required=False,
                         choices=["load-job", "partial-load-job", "bookmarks-partial-load-job"],
                         default="partial-load-job"
-    )
+                        )
 
     flags = parser.parse_args()
 
@@ -44,8 +42,9 @@ def main():
     with open(flags.config) as f:
         config = json.load(f)
 
-    # target tables config (e.g, partitioning and clustering)
     merge_state = flags.merge_state
+
+    # target tables config (e.g, partitioning and clustering)
     table_config = flags.tables or config.get("table_config")
     tables = {}
     if table_config:
@@ -72,7 +71,7 @@ def main():
     project_id, dataset_id = config["project_id"], config["dataset_id"]
 
     table_configs = tables.get("streams", {})
-    max_cache = 1024 * 1024 * config.get("max_cache", 50) # this is needed for partial loads
+    max_cache = 1024 * 1024 * config.get("max_cache", 50)  # this is needed for partial loads
 
     tap_stream = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
 
