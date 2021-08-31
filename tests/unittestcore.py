@@ -48,17 +48,15 @@ class BaseUnitTest(unittest.TestCase):
     def set_cli_args(self, ds_delete=True, *args, **kwargs):
         arg = [arg for arg in args]
 
-        # if some flag is being passed, such as --merge-state or --no-merge-state:
-            # we want to add this flag to CLI arguments
-        if type(ds_delete) == str: # if it's string, then it means some args were passed
-            # search for args, such as --merge-state or --no-merge-state
-            m = re.search(r"\-\-[a-zA-Z]+|\-\-no\-[a-zA-Z]+", ds_delete)
-            if m:
-                arg.append("{}".format(m.string))
-
         for k, v in kwargs.items():
             if k == "stdin":
                 sys.stdin = open(v, "r")
+                continue
+
+            # if some flag is being passed, such as --merge-state or --no-merge-state:
+            # we want to add this flag to CLI arguments
+            if k == "flag":
+                arg.append(v)
                 continue
 
             arg.append("--{}".format(k))

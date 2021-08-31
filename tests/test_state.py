@@ -139,7 +139,7 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
         from target_bigquery import main
 
         self.set_cli_args(
-            "--no-merge-state",
+            flag="--no-merge-state",
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'partial_load_streams'), 'no_data_stream.json'),
@@ -159,7 +159,7 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
         from target_bigquery import main
 
         self.set_cli_args(
-            "--no-merge-state",
+            flag="--no-merge-state",
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'partial_load_streams'), 'no_data_stream.json'),
@@ -179,7 +179,7 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
         from target_bigquery import main
 
         self.set_cli_args(
-            "--no-merge-state",
+            flag="--no-merge-state",
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'facebook_stream.json'),
