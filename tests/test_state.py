@@ -139,13 +139,13 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
         from target_bigquery import main
 
         self.set_cli_args(
-            flag="--no-merge-state",
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'partial_load_streams'), 'no_data_stream.json'),
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target_config_cache.json'),
-            processhandler="partial-load-job"
+            processhandler="partial-load-job",
+            merge_state=False
         )
 
         ret = main()
@@ -159,13 +159,13 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
         from target_bigquery import main
 
         self.set_cli_args(
-            flag="--no-merge-state",
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'partial_load_streams'), 'no_data_stream.json'),
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target_config_cache.json'),
-            processhandler="bookmarks-partial-load-job"
+            processhandler="bookmarks-partial-load-job",
+            merge_state=False
         )
 
         ret = main()
@@ -179,13 +179,13 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
         from target_bigquery import main
 
         self.set_cli_args(
-            flag="--no-merge-state",
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
                 'data'), 'facebook_stream.json'),
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target-config.json'),
-            processhandler="load-job"
+            processhandler="load-job",
+            merge_state=False
 
         )
 
