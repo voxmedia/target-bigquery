@@ -27,7 +27,7 @@ def main():
     # https://docs.python.org/3/library/argparse.html
     # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
     parser.add_argument("-ms", "--merge_state_messages",
-                        help="Defines the state file. True means we want to merge state messages from different streams. False means we will pass the latest state message without changes.",
+                        help="Defines the state file. True means we want to merge state messages from different streams. False means we will pass the latest state message without changes. Default is None. This means we will also check the config file for this optional flag. In the config file, the default option is False.",
                         type=lambda x: (str(x).lower() == 'true'),
                         required=False,
                         default=None) # default needs to be None. If it's None, it means it's not supplied and we need to check the config file
