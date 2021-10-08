@@ -26,13 +26,15 @@ def main():
     # set boolean CLI arg [--merge-state | --no-merge-state]
     # https://docs.python.org/3/library/argparse.html
     # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
-    parser.add_argument("-ms", "--merge_state",
-                        help="Defines the state file. True means we want to merge state messages from different streams. False means we will pass state message without changes.",
+    parser.add_argument("-ms", "--merge_state_messages",
+                        help="Defines the state file. True means we want to merge state messages from different streams. False means we will pass the latest state message without changes.",
                         type=lambda x: (str(x).lower() == 'true'),
                         required=False,
-                        default=True)
+                        default=None) # default needs to be None. If it's None, it means it's not supplied and we need to check the config file
+                                    # if default is True here, then setting it in config file will not work
+                                    # in the config file, default will be True
     # how to pass boolean
-    # using type=bool reads merge_state=False command line option as True
+    # using type=bool reads merge_state_messages=False command line option as True
     # https://docs.python.org/3/library/argparse.html
     # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
 
@@ -48,8 +50,6 @@ def main():
     # read target-config file into a dict
     with open(flags.config) as f:
         config = json.load(f)
-
-    merge_state = flags.merge_state
 
     # target tables config (e.g, partitioning and clustering)
     table_config = flags.tables or config.get("table_config")
@@ -75,6 +75,18 @@ def main():
     location = config.get("location", "US")
     validate_records = config.get("validate_records", True)
     add_metadata_columns = config.get("add_metadata_columns", True)
+
+    # we can pass merge state option via CLI param
+    merge_state_messages_cli = flags.merge_state_messages
+
+    # we can pass merge state option via config file per Meltano request
+    merge_state_messages_config = config.get("merge_state_messages", True)
+
+
+    # merge state option via CLI trumps one passed via config file
+    # we need to check if CLI option was passed at all. if not, we check the config file
+    merge_state_messages = merge_state_messages_cli if type(merge_state_messages_cli) == bool else merge_state_messages_config
+
     project_id, dataset_id = config["project_id"], config["dataset_id"]
 
     table_configs = tables.get("streams", {})
@@ -104,7 +116,7 @@ def main():
             ph,
             tap_stream,
             initial_state=state,
-            state_handler=State if merge_state else LiteralState,
+            state_handler=State if merge_state_messages else LiteralState,
             project_id=project_id,
             dataset=dataset,
             location=location,

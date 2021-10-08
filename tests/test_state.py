@@ -109,6 +109,32 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
                                                "ads_insights": {"date_start": "2020-07-24T00:00:00+00:00"}}}
                          )
 
+    def test_state_facebook_stream_merge_state_cli_trumps_config(self):
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'facebook_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target_config_merge_state_false_flag.json'),
+            processhandler="load-job",
+            merge_state_messages=True
+
+        )
+
+        ret = main()
+
+        state = self.get_state()[-1]
+
+        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+
+        self.assertEqual(state, {"bookmarks": {"ads": {"updated_time": "2020-07-24T13:03:56-05:00"},
+                                               "adsets": {"updated_time": "2020-07-23T16:16:54-05:00"},
+                                               "campaigns": {"updated_time": "2020-07-23T16:16:52-05:00"},
+                                               "ads_insights": {"date_start": "2020-07-24T00:00:00+00:00"}}}
+                         )
+
 
 class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
 
@@ -145,7 +171,7 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target_config_cache.json'),
             processhandler="partial-load-job",
-            merge_state=False
+            merge_state_messages=False
         )
 
         ret = main()
@@ -165,7 +191,7 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target_config_cache.json'),
             processhandler="bookmarks-partial-load-job",
-            merge_state=False
+            merge_state_messages=False
         )
 
         ret = main()
@@ -185,7 +211,29 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target-config.json'),
             processhandler="load-job",
-            merge_state=False
+            merge_state_messages=False
+
+        )
+
+        ret = main()
+
+        state = self.get_state()[-1]
+
+        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+
+        self.assertEqual(state, {"bookmarks": {"ads_insights": {"date_start": "2020-07-24T00:00:00+00:00"}}}
+                         )
+
+    def test_state_facebook_stream_merge_state_config(self):
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'facebook_stream.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target_config_merge_state_false_flag.json'),
+            processhandler="load-job"
 
         )
 
