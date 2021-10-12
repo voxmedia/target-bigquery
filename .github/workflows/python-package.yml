@@ -21,6 +21,7 @@ env:
   TARGET_CONFIG_CACHE_APPEND: ${{ secrets.TARGET_CONFIG_CACHE_APPEND }}
   TARGET_CONFIG_CONTAINS_TARGET_TABLES_CONFIG: ${{ secrets.TARGET_CONFIG_CONTAINS_TARGET_TABLES_CONFIG }}
   MALFORMED_TARGET_CONFIG: ${{ secrets.MALFORMED_TARGET_CONFIG }}
+  TARGET_CONFIG_MERGE_STATE_FALSE_FLAG: ${{ secrets.TARGET_CONFIG_MERGE_STATE_FALSE_FLAG }}
 
 on:
   push:
@@ -63,6 +64,7 @@ jobs:
         echo "$TARGET_CONFIG_CACHE_APPEND" > "sandbox/target_config_cache_append.json"
         echo "$TARGET_CONFIG_CONTAINS_TARGET_TABLES_CONFIG" > "sandbox/target_config_contains_target_tables_config.json"
         echo "$MALFORMED_TARGET_CONFIG" > "sandbox/malformed_target_config.json"
+        echo "$TARGET_CONFIG_MERGE_STATE_FALSE_FLAG"  > "sandbox/target_config_merge_state_false_flag.json"
 
         pip install -r dev-requirements.txt
         pytest --verbose
