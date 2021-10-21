@@ -119,7 +119,7 @@ class TestSimpleStream(unittestcore.BaseUnitTest):
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target_config_merge_state_false_flag.json'),
             processhandler="load-job",
-            merge_state_messages=True
+            flag='--merge_state_messages'
 
         )
 
@@ -171,7 +171,7 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target_config_cache.json'),
             processhandler="partial-load-job",
-            merge_state_messages=False
+            flag='--no-merge_state_messages'
         )
 
         ret = main()
@@ -191,7 +191,7 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target_config_cache.json'),
             processhandler="bookmarks-partial-load-job",
-            merge_state_messages=False
+            flag='--no-merge_state_messages'
         )
 
         ret = main()
@@ -211,8 +211,7 @@ class TestSimpleStreamLiteralStateNoMerging(TestSimpleStream):
             config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
                                 'target-config.json'),
             processhandler="load-job",
-            merge_state_messages=False
-
+            flag='--no-merge_state_messages'
         )
 
         ret = main()
