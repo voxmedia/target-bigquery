@@ -23,9 +23,9 @@ def main():
     parser.add_argument("-t", "--tables", help="Table configs file", required=False)
     parser.add_argument("-s", "--state", help="Initial state file", required=False)
 
-    # set boolean CLI arg [--merge-state | --no-merge-state]
     # https://docs.python.org/3/library/argparse.html
     # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
+    # I tried using action=argparse.BooleanOptionalAction for the argument. This would allow us to supply a boolean flag [--merge_state_messages --no-merge_state_messages]. However, it will break the target for anyone below Python 3.9, it's not backwards compatible. So we had to resort to a solution below.
     parser.add_argument("-ms", "--merge_state_messages",
                         help="Defines the state file. True means we want to merge state messages from different streams. False means we will pass the latest state message without changes. Default is None. This means we will also check the config file for this optional flag. In the config file, the default option is False.",
                         type=lambda x: (str(x).lower() == 'true'),
@@ -33,10 +33,6 @@ def main():
                         default=None) # default needs to be None. If it's None, it means it's not supplied and we need to check the config file
                                     # if default is True here, then setting it in config file will not work
                                     # in the config file, default will be True
-    # how to pass boolean
-    # using type=bool reads merge_state_messages=False command line option as True
-    # https://docs.python.org/3/library/argparse.html
-    # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
 
     parser.add_argument("-ph", "--processhandler",
                         help="Defines the loading process. Partial loads by default.",
