@@ -456,7 +456,16 @@ Add the following files to *sandbox* directory under project root directory:
     "project_id": "{your-project-id}",
     "dataset_id": "{your_dataset_id}",
     "validate_records":  false
-  }   
+  }     
+    ```
+  
+- **target_config_merge_state_false_flag.json**:  
+  ```
+  {
+    "project_id": "{your-project-id}",
+    "dataset_id": "{your_dataset_id}",
+    "merge_state_messages": 0
+  }     
     ```
 ## Config files in this project
 

@@ -11,6 +11,7 @@ import singer
 from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.process import process
 from target_bigquery.utils import emit_state, ensure_dataset
+from target_bigquery.state import State, LiteralState
 
 logger = singer.get_logger()
 
@@ -21,12 +22,24 @@ def main():
     parser.add_argument("-c", "--config", help="Config file", required=True)
     parser.add_argument("-t", "--tables", help="Table configs file", required=False)
     parser.add_argument("-s", "--state", help="Initial state file", required=False)
+
+    # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
+    parser.add_argument('--merge_state_messages', help="Merge many state messages to construct a state file",
+                        dest='merge_state_messages', action='store_true')
+    parser.add_argument('--no-merge_state_messages',
+                        help="Don't merge many state messages into one message. The latest state message becomes the state file.",
+                        dest='merge_state_messages', action='store_false')
+    parser.set_defaults(merge_state_messages=None)
+    # default needs to be None. If it's None, it means it's not supplied and we need to check the config file
+    # if default is True here, then setting it in config file will not work
+    # in the config file, default will be True
+
     parser.add_argument("-ph", "--processhandler",
                         help="Defines the loading process. Partial loads by default.",
                         required=False,
                         choices=["load-job", "partial-load-job", "bookmarks-partial-load-job"],
                         default="partial-load-job"
-    )
+                        )
 
     flags = parser.parse_args()
 
@@ -58,10 +71,22 @@ def main():
     location = config.get("location", "US")
     validate_records = config.get("validate_records", True)
     add_metadata_columns = config.get("add_metadata_columns", True)
+
+    # we can pass merge state option via CLI param
+    merge_state_messages_cli = flags.merge_state_messages
+
+    # we can pass merge state option via config file per Meltano request
+    merge_state_messages_config = config.get("merge_state_messages", True)
+
+    # merge state option via CLI trumps one passed via config file
+    # we need to check if CLI option was passed at all. if not, we check the config file
+    merge_state_messages = merge_state_messages_cli if type(
+        merge_state_messages_cli) == bool else merge_state_messages_config
+
     project_id, dataset_id = config["project_id"], config["dataset_id"]
 
     table_configs = tables.get("streams", {})
-    max_cache = 1024 * 1024 * config.get("max_cache", 50) # this is needed for partial loads
+    max_cache = 1024 * 1024 * config.get("max_cache", 50)  # this is needed for partial loads
 
     tap_stream = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
 
@@ -87,6 +112,7 @@ def main():
             ph,
             tap_stream,
             initial_state=state,
+            state_handler=State if merge_state_messages else LiteralState,
             project_id=project_id,
             dataset=dataset,
             location=location,
