@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 from target_bigquery.schema import build_schema, prioritize_one_data_type_from_multiple_ones_in_any_of, \
-    convert_field_type
+    convert_field_type, build_field
 
 from tests.schema_old import build_schema_old
 
@@ -81,6 +81,9 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
             elif f.name == "geo":
                 self.assertEqual(f.field_type.upper(), "GEOGRAPHY")
+
+            elif f.name == "amount":
+                self.assertEqual(f.field_type.upper(), "DECIMAL")
 
     def test_prioritize_one_data_type_from_multiple_ones_in_any_of_string(self):
 
@@ -452,3 +455,16 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         compare_old_vs_new_schema_conversion(os.path.join(os.path.join(
             os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"), "rsc"),
             "schemas"), "input_json_schemas_shopify.json"))
+
+    def test_decimal_schema(self):
+
+        field = build_field("foo", {
+            "multipleOf": 0.01,
+            "type": [
+              "number",
+              "null",
+            ]
+          })
+
+        assert field.field_type == "DECIMAL"
+        assert field.name == "foo"

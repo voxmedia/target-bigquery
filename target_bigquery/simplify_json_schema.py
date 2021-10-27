@@ -243,6 +243,15 @@ def is_bq_decimal(schema):
 
     return STRING in get_type(schema) and schema.get('format') == BQ_DECIMAL
 
+def is_bq_decimal_inferred(schema):
+    """
+    Given a JSON Schema compatible dict, returns True when schema's type allows being a bq-decimal
+    :param schema: dict, JSON Schema
+    :return: Boolean
+    """
+
+    return NUMBER in get_type(schema) and schema.get('multipleOf')
+
 def is_bq_bigdecimal(schema):
     """
     Given a JSON Schema compatible dict, returns True when schema's type allows being a bq-decimal
@@ -411,10 +420,18 @@ def _simplify__implicit_anyof(root_schema, schema):
     if is_bq_decimal(schema):
         schemas.append(Cachable({
             'type': [STRING],
-            'format': BQ_DECIMAL
+            'format': BQ_DECIMAL,
         }))
 
         types.remove(STRING)
+
+    if is_bq_decimal_inferred(schema):
+        schemas.append(Cachable({
+            'type': [STRING],
+            'format': BQ_DECIMAL,
+        }))
+
+        types.remove(NUMBER)
 
     if is_bq_bigdecimal(schema):
         schemas.append(Cachable({

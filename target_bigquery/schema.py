@@ -184,6 +184,9 @@ def convert_field_type(field_property):
 
         field_type_bigquery = conversion_dict[field_property["type"][0]]
 
+        if field_type_bigquery == "FLOAT" and field_property.get('multipleOf'):
+            field_type_bigquery = "DECIMAL"
+
     return field_type_bigquery
 
 
