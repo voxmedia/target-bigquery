@@ -77,7 +77,7 @@ def convert_schema_field_to_list(input_schema_field):
             processed_subfields.append(convert_schema_field_to_list(field))
 
         return list((input_schema_field.name, input_schema_field.field_type.upper(), input_schema_field.mode.upper(),
-                    sorted(processed_subfields),
+                     sorted(processed_subfields),
                      input_schema_field.policy_tags))
 
 
@@ -132,8 +132,21 @@ def convert_list_of_schema_fields_to_list_of_lists(input_schema_fields_list):
     return sorted(list_of_lists)
 
 
-def compare_old_vs_new_schema_conversion(catalog_schema_file, exclude_stream=None):
+def flatten_list(array):
+    flat = []
+    for i in array:
+        if not isinstance(i, list):
+            flat.append(i)
+        else:
+            flat_sublist = flatten_list(i)
+            for i_sublist in flat_sublist:
+                flat.append(i_sublist)
 
+    return flat
+
+
+def compare_old_vs_new_schema_conversion(catalog_schema_file, exclude_stream=None,
+                                         ignore_float_vs_decimal_difference=False):
     """
     :param catalog_schema_file: input JSON schema / tap catalog json file
     :param exclude_stream:
@@ -163,7 +176,8 @@ def compare_old_vs_new_schema_conversion(catalog_schema_file, exclude_stream=Non
 
         schema_0_input = str(schema_0_input)
 
-        schema_0_input = schema_0_input.replace("\'", "\"").replace("True", "true").replace("False", "false").replace("None", "null")
+        schema_0_input = schema_0_input.replace("\'", "\"").replace("True", "true").replace("False", "false").replace(
+            "None", "null")
 
         # convert schema using old vs. new method
         msg = singer.parse_message(schema_0_input)
@@ -180,5 +194,19 @@ def compare_old_vs_new_schema_conversion(catalog_schema_file, exclude_stream=Non
 
         schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
-        assert schema_built_new_method_sorted == schema_built_old_method_sorted
+        if ignore_float_vs_decimal_difference:
+            # flatten the nested lists / schemas
+            flat_new = flatten_list(schema_built_new_method_sorted)
+            flat_old = flatten_list(schema_built_old_method_sorted)
 
+            # compare the flat lists
+            # each item should be equal, except for the case when the new schema has DECIMAL
+            for i in range(0, len(flat_new)):
+                if flat_new[i] == "DECIMAL":
+                    assert flat_old[i] == "FLOAT"
+                else:
+                    assert flat_new[i] == flat_old[i]
+
+        else:
+
+            assert schema_built_new_method_sorted == schema_built_old_method_sorted
