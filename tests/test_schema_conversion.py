@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 from target_bigquery.schema import build_schema, prioritize_one_data_type_from_multiple_ones_in_any_of, \
-    convert_field_type, build_field
+    convert_field_type
 
 from tests.schema_old import build_schema_old
 

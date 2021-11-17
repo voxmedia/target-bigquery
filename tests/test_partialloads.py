@@ -210,7 +210,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
         state = self.get_state()
         self.assertEqual(5, len(state))  # 5 states + last
 
-        self.assertEqual(ret, 2, msg="Exit code is not 0!")
+        self.assertEqual(ret, 2, msg="Exit code is not 2!")
         self.assertDictEqual(state[-1], {"bookmarks": {"stream_one": {"timestamp": "2020-01-11T00:00:00.000000Z"},
                                                        "stream_two": {"timestamp": "2020-01-10T00:00:00.000000Z"}}})
 
@@ -240,7 +240,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
         self.assertEqual(0, len(state))
 
-        self.assertEqual(ret, 2, msg="Exit code is not 0!")
+        self.assertEqual(ret, 2, msg="Exit code is not 2!")
 
         try:
             table = self.client.get_table("{}.stream_one".format(self.dataset_id))
@@ -450,7 +450,7 @@ class TestPartialLoadsBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
         state = self.get_state()
         self.assertEqual(5, len(state))  # 5 states + last
 
-        self.assertEqual(ret, 2, msg="Exit code is not 0!")
+        self.assertEqual(ret, 2, msg="Exit code is not 2!")
         self.assertDictEqual(state[-1], {"bookmarks": {"stream_one": {"timestamp": "2020-01-11T00:00:00.000000Z"},
                                                        "stream_two": {"timestamp": "2020-01-10T00:00:00.000000Z"}}})
 
@@ -476,7 +476,7 @@ class TestPartialLoadsBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
         state = self.get_state()
         self.assertEqual(1, len(state))  # 1 last
 
-        self.assertEqual(ret, 2, msg="Exit code is not 0!")
+        self.assertEqual(ret, 2, msg="Exit code is not 2!")
         self.assertDictEqual(state[-1], {"bookmarks": {"stream_one": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
 
         table = self.client.get_table("{}.stream_one".format(self.dataset_id))

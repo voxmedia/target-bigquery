@@ -147,6 +147,64 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         # self.assertIsNone(table.clustering_fields)
         # self.assertIsNone(table.partitioning_type)
 
+    def test_complex_stream_decimal_schema_valid(self):
+        file = os.path.join(os.path.join(
+            os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+            'data'), 'facebook_stream_decimal_test_schema_valid.json')
+
+        data = []
+        with open(file) as f:
+            for line in f:
+                data.append(json.loads(line))
+
+        assert data[0]['schema']['properties']["budget_remaining"]["multipleOf"] == 1e-03
+        assert data[1]['record']["budget_remaining"] == 5000000.1
+        assert data[2]['record']["budget_remaining"] == 5000000.12
+        assert data[3]['record']["budget_remaining"] == 57573500.123
+
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin=file,
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
+            processhandler="load-job"
+        )
+
+        ret = main()
+        state = self.get_state()[-1]
+        print(state)
+        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+
+    def test_complex_stream_decimal_schema_invalid(self):
+        file = os.path.join(os.path.join(
+            os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+            'data'), 'facebook_stream_decimal_test_schema_invalid.json')
+
+        data = []
+        with open(file) as f:
+            for line in f:
+                data.append(json.loads(line))
+
+        assert data[0]['schema']['properties']["budget_remaining"]["multipleOf"] == 1e-02
+        assert data[1]['record']["budget_remaining"] == 5000000.1
+        assert data[2]['record']["budget_remaining"] == 5000000.12
+        assert data[3]['record']["budget_remaining"] == 57573500.123
+
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin=file,
+            config=os.path.join(
+                os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                'target-config.json'),
+            processhandler="load-job"
+        )
+        ret = main()
+        self.assertEqual(ret, 2, msg="Exit code is not 2!")  # load must fail
+        # weird error: Failed validating 'type' in schema['properties']['daily_budget']:
+        # I changed nothing about daily_budget, I made budget_remaining invalid
+
     def test_complex_stream_with_tables_config(self):
         from target_bigquery import main
 
