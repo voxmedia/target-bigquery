@@ -1,4 +1,5 @@
 singer-python~=5.12.1
 google-cloud-bigquery==2.26.0
+scalesec-gcp-workload-identity==1.0.7
 jsonschema~=2.6.0
 setuptools~=57.4.0
