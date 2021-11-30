@@ -12,6 +12,7 @@ from target_bigquery.encoders import DecimalEncoder
 from target_bigquery.process import process
 from target_bigquery.utils import emit_state, ensure_dataset
 from target_bigquery.state import State, LiteralState
+from target_bigquery.get_token import getToken
 
 logger = singer.get_logger()
 
@@ -67,6 +68,33 @@ def main():
         truncate = True
     elif config.get("replication_method", "append").lower() == "incremental":
         incremental = True
+
+    # Get parameters and generate token when using gcp workload identity federation
+    use_gcp = config.get("gcp_workload_identity_federation")
+    if use_gcp:
+        gcp_project_number = config.get("gcp_project_number")
+        if gcp_project_number is None:
+            raise Exception("gcp_project_number not specified")
+        gcp_workload_id = config.get("gcp_workload_id")
+        if gcp_workload_id is None:
+            raise Exception("gcp_workload_id not specified")
+        gcp_workload_provider = config.get("gcp_workload_provider")
+        if gcp_workload_provider is None:
+            raise Exception("gcp_workload_provider not specified")
+        gcp_service_account_email = config.get("gcp_service_account_email")
+        if gcp_service_account_email is None:
+            raise Exception("gcp_service_account_email not specified")
+        aws_account_id = config.get("aws_account_id")
+        if aws_account_id is None:
+            raise Exception("aws_account_id not specified")
+        aws_role_name = config.get("aws_role_name")
+        if aws_role_name is None:
+            raise Exception("aws_role_name not specified")
+        aws_region = config.get("aws_region")
+        gcp_token_lifetime = config.get("gcp_token_lifetime")
+        gcp_token_scopes = config.get("gcp_token_scopes")
+        getToken(gcp_project_number, gcp_workload_id, gcp_workload_provider, gcp_service_account_email,
+                 aws_account_id, aws_role_name, aws_region, gcp_token_lifetime, gcp_token_scopes)
 
     # arguments supplied in target config
     table_prefix = config.get("table_prefix", "")
