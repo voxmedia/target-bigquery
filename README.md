@@ -140,6 +140,11 @@ Create a file called **target-config.json** in your working directory, following
 - The data will be written to the dataset specified in your **target-config.json**. 
 - If you do not have the dataset with this name yet, it will be created. 
 - The table will be created. 
+- There's an optional parameter `replication_method` that can either be:
+  * `append`: Adding new rows to the table (Default value)
+  * `truncate`: Deleting all previous rows and uploading the new ones to the table
+  * `incremental`: **Upserting** new rows into the table, using the **primary key** given by the tap connector
+    (if it finds an old row with same key, updates it. Otherwise it inserts the new row)
 
 Sample **target-config.json** file:
 ```
