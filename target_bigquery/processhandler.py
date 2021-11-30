@@ -1,11 +1,9 @@
 import json
-import os
 import uuid
 from datetime import datetime
 from tempfile import TemporaryFile
 
 import singer
-import google.oauth2.credentials
 from google.api_core import exceptions as google_exceptions
 from google.cloud import bigquery
 from google.cloud.bigquery import LoadJobConfig, CopyJobConfig, QueryJobConfig
@@ -142,19 +140,10 @@ class LoadJobProcessHandler(BaseProcessHandler):
         self.bq_schema_dicts = {}
         self.rows = {}
 
-        token = os.getenv('GCP_AUTH_TOKEN')
-        if token is not None:
-            credentials = google.oauth2.credentials.Credentials(token)
-            self.client = bigquery.Client(
-                credentials=credentials,
-                project=self.project_id,
-                location=kwargs.get("location", "US")
-            )
-        else:
-            self.client = bigquery.Client(
-                project=self.project_id,
-                location=kwargs.get("location", "US")
-            )
+        self.client = bigquery.Client(
+            project=self.project_id,
+            location=kwargs.get("location", "US")
+        )
 
     def handle_schema_message(self, msg):
         for s in super(LoadJobProcessHandler, self).handle_schema_message(msg):

@@ -3,7 +3,6 @@ import os
 import sys
 
 import singer
-import google.oauth2.credentials
 from google.api_core import exceptions
 from google.cloud import bigquery
 from google.cloud.bigquery import Dataset
@@ -41,12 +40,8 @@ def ensure_dataset(project_id, dataset_id, location):
     :return: client (BigQuery Client Object) and Dataset (BigQuery dataset)
     """
     from google.cloud.bigquery import DatasetReference
-    token = os.environ.get('GCP_AUTH_TOKEN', None)
-    if token is not None:
-        credentials = google.oauth2.credentials.Credentials(token)
-        client = bigquery.Client(credentials=credentials, project=project_id, location=location)
-    else:
-        client = bigquery.Client(project=project_id, location=location)
+    client = bigquery.Client(project=project_id, location=location)
+
     dataset_ref = DatasetReference(project_id, dataset_id)
     try:
         client.create_dataset(dataset_ref)

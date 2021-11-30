@@ -128,15 +128,6 @@ Create a service account credential:
 - [Creating an environment variable on a Windows 10 machine](https://www.architectryan.com/2018/08/31/how-to-change-environment-variables-on-windows-10/)
 - [Creating an environment variable on a Mac machine](https://medium.com/@himanshuagarwal1395/setting-up-environment-variables-in-macos-sierra-f5978369b255)
 
-There's also the possibility of using [GCP Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation) as authentication method. To use it you have to:
-  * Set as `True` the optional parameter `gcp_workload_identity_federation`
-  * Specify the following parameters in the config file:
-    * gcp_project_number
-    * gcp_workload_id
-    * gcp_workload_provider
-    * gcp_service_account_email
-    * aws_account_id
-    * aws_role_name
 ### Step 3: Configure
 
 #### Target config file
