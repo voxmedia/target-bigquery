@@ -33,6 +33,7 @@ class BaseProcessHandler(object):
 
         # LoadJobProcessHandler kwargs
         self.truncate = kwargs.get("truncate", False)
+        self.incremental = kwargs.get("incremental", False)
         self.add_metadata_columns = kwargs.get("add_metadata_columns", True)
         self.validate_records = kwargs.get("validate_records", True)
         self.table_configs = kwargs.get("table_configs", {}) or {}
