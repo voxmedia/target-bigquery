@@ -6,9 +6,10 @@ from tempfile import TemporaryFile
 import singer
 from google.api_core import exceptions as google_exceptions
 from google.cloud import bigquery
-from google.cloud.bigquery import LoadJobConfig, CopyJobConfig
+from google.cloud.bigquery import LoadJobConfig, CopyJobConfig, QueryJobConfig
 from google.cloud.bigquery import WriteDisposition
 from google.cloud.bigquery.job import SourceFormat
+from google.cloud.exceptions import NotFound
 from jsonschema import validate
 
 from target_bigquery.encoders import DecimalEncoder
@@ -32,6 +33,7 @@ class BaseProcessHandler(object):
 
         # LoadJobProcessHandler kwargs
         self.truncate = kwargs.get("truncate", False)
+        self.incremental = kwargs.get("incremental", False)
         self.add_metadata_columns = kwargs.get("add_metadata_columns", True)
         self.validate_records = kwargs.get("validate_records", True)
         self.table_configs = kwargs.get("table_configs", {}) or {}
@@ -208,6 +210,13 @@ class LoadJobProcessHandler(BaseProcessHandler):
         self._do_temp_table_based_load(self.rows)
         yield self.STATE
 
+    def primary_key_condition(self, stream):
+        self.logger.info(f"Primary keys: {', '.join(self.key_properties[stream])}")
+        keys = [f"t.{k}=s.{k}" for k in self.key_properties[stream]]
+        if len(keys) < 1:
+            raise Exception(f"No primary keys specified from the tap and Incremental option selected")
+        return " and ".join(keys)
+
     def _do_temp_table_based_load(self, rows):
         assert isinstance(rows, dict)
 
@@ -232,21 +241,52 @@ class LoadJobProcessHandler(BaseProcessHandler):
 
             # copy tables to production tables
             for stream, tmp_table_name in loaded_tmp_tables:
-                truncate = self.truncate if stream not in self.partially_loaded_streams else False
+                incremental_success = False
+                if self.incremental:
+                    self.logger.info(f"Copy {tmp_table_name} to {self.tables[stream]} by INCREMENTAL")
+                    table_id = f"{self.project_id}.{self.dataset.dataset_id}.{self.tables[stream]}"
+                    try:
+                        self.client.get_table(table_id)
+                        column_names = [x.name for x in self.bq_schemas[stream]]
 
-                copy_config = CopyJobConfig()
-                if truncate:
-                    copy_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
-                    self.logger.info(f"Copy {tmp_table_name} to {self.tables[stream]} by FULL_TABLE")
-                else:
-                    copy_config.write_disposition = WriteDisposition.WRITE_APPEND
-                    self.logger.info(f"Copy {tmp_table_name} to {self.tables[stream]} by APPEND")
+                        query ="""MERGE `{table}` t
+                            USING `{temp_table}` s
+                            ON {primary_key_condition}
+                            WHEN MATCHED THEN
+                                UPDATE SET {set_values}
+                            WHEN NOT MATCHED THEN
+                                INSERT ({new_cols}) VALUES ({cols})
+                            """.format(table=table_id,
+                                       temp_table=f"{self.project_id}.{self.dataset.dataset_id}.{tmp_table_name}",
+                                       primary_key_condition=self.primary_key_condition(stream),
+                                       set_values=', '.join(f'{c}=s.{c}' for c in column_names),
+                                       new_cols=', '.join(column_names),
+                                       cols=', '.join(f's.{c}' for c in column_names))
 
-                self.client.copy_table(
-                    sources=self.dataset.table(tmp_table_name),
-                    destination=self.dataset.table(self.tables[stream]),
-                    job_config=copy_config
-                ).result()
+                        job_config = QueryJobConfig()
+                        query_job = self.client.query(query, job_config=job_config)
+                        query_job.result()
+                        self.logger.info(f'LOADED {query_job.num_dml_affected_rows} rows')
+                        incremental_success = True
+
+                    except NotFound:
+                        self.logger.info(f"Table {table_id} is not found, proceeding to upload with TRUNCATE")
+                        self.truncate = True
+                if not incremental_success:
+                    truncate = self.truncate if stream not in self.partially_loaded_streams else False
+                    copy_config = CopyJobConfig()
+                    if truncate:
+                        copy_config.write_disposition = WriteDisposition.WRITE_TRUNCATE
+                        self.logger.info(f"Copy {tmp_table_name} to {self.tables[stream]} by FULL_TABLE")
+                    else:
+                        copy_config.write_disposition = WriteDisposition.WRITE_APPEND
+                        self.logger.info(f"Copy {tmp_table_name} to {self.tables[stream]} by APPEND")
+
+                    self.client.copy_table(
+                        sources=self.dataset.table(tmp_table_name),
+                        destination=self.dataset.table(self.tables[stream]),
+                        job_config=copy_config
+                    ).result()
 
                 self.partially_loaded_streams.add(stream)
                 self.rows[stream].close()  # erase the file
