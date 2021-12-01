@@ -3,7 +3,8 @@ the purpose of this module is to convert JSON schema to BigQuery schema.
 """
 import re
 
-from target_bigquery.simplify_json_schema import bq_decimal_scale_max, bq_bigdecimal_scale_max
+from target_bigquery.simplify_json_schema import bq_decimal_scale_max, bq_bigdecimal_scale_max, \
+    bq_decimal_max_precision_increment, bq_bigdecimal_max_precision_increment
 
 from google.cloud.bigquery import SchemaField
 
@@ -189,7 +190,8 @@ def convert_field_type(field_property):
 
     if field_type_bigquery == "FLOAT" and field_property.get('multipleOf'):
 
-        if determine_scale_for_decimal_or_bigdecimal(field_property) <= bq_decimal_scale_max:
+        # if scale exceeds 9, then it's BIGDECIMAL
+        if determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[1] <= bq_decimal_scale_max:
             field_type_bigquery = "DECIMAL"
         else:
             field_type_bigquery = "BIGDECIMAL"
@@ -225,7 +227,7 @@ def replace_nullable_mode_with_required(schema_field_input):
     return schema_field_updated
 
 
-def determine_scale_for_decimal_or_bigdecimal(field_property):
+def determine_precision_and_scale_for_decimal_or_bigdecimal(field_property):
     """
     For NUMERIC/DECIMAL and BIGNUMERIC/BIGDECIMAL fields, we can determine scale, which is how many digits are
     after the decimal point.
@@ -240,22 +242,41 @@ def determine_scale_for_decimal_or_bigdecimal(field_property):
 
     Scale for DECIMAL & BIGDECIMAL cannot be more than 38.
 
+    If we supply scale, we must also supply precision (or else data load job will fail).
+
+    DECIMAL max precision = scale + 29
+    BIGDECIMAL max precision = scale + 38
     """
     if "multipleOf" in field_property.keys():
 
-        # if it's written as a regular human-readable float
+        # if "multipleOf" is written as a regular human-readable float
         match = re.search(r'\.(.*?)$', str(field_property.get('multipleOf')))
         if match:
             match = match.group(1)
-            return min(len(match), bq_bigdecimal_scale_max)
+            scale = min(len(match), bq_bigdecimal_scale_max)
 
-        else:  # if it's written in scientific notation
+        else:  # if "multipleOf" is written in scientific notation
             match = re.search(r'(?i)1e\-(.*?)$', str(field_property.get('multipleOf')))
             # (?i) ignores case sensitivity
             # https://stackoverflow.com/questions/9655164/regex-ignore-case-sensitivity
             match = match.group(1)
             if match:
-                return min(int(match), bq_bigdecimal_scale_max)
+                scale = min(int(match), bq_bigdecimal_scale_max)
+
+            # if "multipleOf" is not a human-readbale float or scientific notation or Decimal,
+            # but for example, it is an integer
+            else:
+                scale = None
+                precision = None
+
+        # if we're dealing with a DECIMAL
+        if scale <= bq_decimal_scale_max:
+            precision = scale + bq_decimal_max_precision_increment
+        # if we're dealing with a BIGDECIMAL
+        else:
+            precision = scale + bq_bigdecimal_max_precision_increment
+
+        return precision, scale
 
 
 def build_field(field_name, field_property):
@@ -270,16 +291,18 @@ def build_field(field_name, field_property):
 
         field_type = convert_field_type(field_property)
 
+        precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property) if field_type in [
+            "DECIMAL", "BIGDECIMAL"] else (None, None)
+
         return (SchemaField(name=create_valid_bigquery_field_name(field_name),
                             field_type=field_type,
                             mode=determine_field_mode(field_property),
                             description=None,
                             fields=(),
                             policy_tags=None,
-                            precision=None,
-                            scale=determine_scale_for_decimal_or_bigdecimal(
-                                field_property) if field_type in [
-                                "DECIMAL", "BIGDECIMAL"] else None)
+                            precision=precision,
+                            scale=scale
+                            )
                 )
 
     elif ("items" in field_property and "properties" in field_property["items"]) or ("properties" in field_property):
@@ -287,6 +310,9 @@ def build_field(field_name, field_property):
         processed_subfields = []
 
         field_type = convert_field_type(field_property)
+
+        precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property) if field_type in [
+            "DECIMAL", "BIGDECIMAL"] else (None, None)
 
         # https://www.w3schools.com/python/ref_dictionary_get.asp
         for subfield_name, subfield_property in field_property.get("properties",
@@ -300,10 +326,8 @@ def build_field(field_name, field_property):
                             description=None,
                             fields=processed_subfields,
                             policy_tags=None,
-                            precision=None,
-                            scale=determine_scale_for_decimal_or_bigdecimal(
-                                field_property) if field_type in [
-                                "DECIMAL", "BIGDECIMAL"] else None
+                            precision=precision,
+                            scale=scale
                             )
                 )
 

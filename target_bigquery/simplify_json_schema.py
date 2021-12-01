@@ -29,6 +29,11 @@ BQ_BIGDECIMAL = 'bq-bigdecimal'
 bq_decimal_scale_max = 9
 bq_bigdecimal_scale_max = 38
 
+# DECIMAL max precision = scale + 29
+# BIGDECIMAL max precision = scale + 38
+bq_decimal_max_precision_increment = 29
+bq_bigdecimal_max_precision_increment = 38
+
 _PYTHON_TYPE_TO_JSON_SCHEMA = {
     int: INTEGER,
     float: NUMBER,
@@ -267,6 +272,7 @@ def is_number(schema):
     """
 
     return NUMBER in get_type(schema)
+
 
 def make_nullable(schema):
     """

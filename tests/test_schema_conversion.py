@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 from target_bigquery.schema import build_schema, prioritize_one_data_type_from_multiple_ones_in_any_of, \
-    convert_field_type, determine_scale_for_decimal_or_bigdecimal
+    convert_field_type, determine_precision_and_scale_for_decimal_or_bigdecimal
 
 from tests.schema_old import build_schema_old
 
@@ -152,10 +152,13 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
 
         assert converted_data_type == "INTEGER"
 
+    # TODO: fix errors
     # TODO: write a more detailed unit test (e.g., google search console), which checks inputs and outputs
     # TODO: what if the multipleOf has no decimal point (if it's an integer???). if multipleOf is integer Scale is None.
     # TODO: test if we just use our own custom decimal bigdecimal json data types
     # TODO: load data and compare data before and after
+    #TODO: in schema.py, we're calling determine_precision_and_scale_for_decimal_or_bigdecimal twice.
+    # Optimize it, so we only call it once
 
     def test_scale_decimal_1(self):
         input = {"daily_budget": {
@@ -165,10 +168,11 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
             ],
             "multipleOf": 0.01
         }}
+        field_property = list(input.values())[0]
+        precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)
 
-        output = determine_scale_for_decimal_or_bigdecimal(list(input.values())[0])
-
-        assert output == 2
+        assert scale == 2
+        assert precision == 31
 
     def test_scale_decimal_2(self):
         input = {"daily_budget": {
@@ -179,9 +183,11 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
             "multipleOf": 0.00001
         }}
 
-        output = determine_scale_for_decimal_or_bigdecimal(list(input.values())[0])
+        field_property = list(input.values())[0]
+        precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)
 
-        assert output == 5
+        assert scale == 5
+        assert precision == 34
 
     def test_scale_decimal_3(self):
         input = {"daily_budget": {
@@ -192,9 +198,11 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
             "multipleOf": 1e-06
         }}
 
-        output = determine_scale_for_decimal_or_bigdecimal(list(input.values())[0])
+        field_property = list(input.values())[0]
+        precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)
 
-        assert output == 6
+        assert scale == 6
+        assert precision == 35
 
     def test_scale_decimal_4(self):
         input = {"daily_budget": {
@@ -205,10 +213,11 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
             "multipleOf": 1e-040
         }}
 
-        output = determine_scale_for_decimal_or_bigdecimal(list(input.values())[0])
+        field_property = list(input.values())[0]
+        precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)
 
-        assert output == 38  # scale cannot exceed max
-
+        assert scale == 38
+        assert precision == 76
 
     def test_scale_decimal_5(self):
         input = {"daily_budget": {
@@ -216,12 +225,14 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
                 "null",
                 "number"
             ],
-            "multipleOf": 1E-010 # uppercase E
+            "multipleOf": 1E-010  # uppercase E
         }}
 
-        output = determine_scale_for_decimal_or_bigdecimal(list(input.values())[0])
+        field_property = list(input.values())[0]
+        precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)
 
-        assert output == 10  # scale cannot exceed max
+        assert scale == 10
+        assert precision == 48
 
 
 class TestSchemaConversion(unittestcore.BaseUnitTest):
@@ -277,13 +288,13 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
             elif f.name == "amount":
                 self.assertEqual(f.field_type.upper(), "DECIMAL")
+                self.assertEqual(f.precision, 31)
                 self.assertEqual(f.scale, 2)
 
             elif f.name == "big_amount":
                 self.assertEqual(f.field_type.upper(), "BIGDECIMAL")
+                self.assertEqual(f.precision, 68)
                 self.assertEqual(f.scale, 30)
-
-
 
     def test_one_nested_schema_1(self):
 
@@ -351,7 +362,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             # compare the flat lists
             # each item should be equal, except for the case when the new schema has DECIMAL
             for i in range(0, len(flat_new)):
-                if flat_new[i] in ( "DECIMAL", "BIGDECIMAL"):
+                if flat_new[i] in ("DECIMAL", "BIGDECIMAL"):
                     assert flat_old[i] == "FLOAT"
                 else:
                     assert flat_new[i] == flat_old[i]
@@ -429,7 +440,8 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         compare_old_vs_new_schema_conversion(os.path.join(os.path.join(
             os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"), "rsc"),
-            "schemas"), "input_json_schemas_google_search_console.json"), ignore_float_vs_decimal_bigdecimal_difference=True)
+            "schemas"), "input_json_schemas_google_search_console.json"),
+            ignore_float_vs_decimal_bigdecimal_difference=True)
 
     def test_several_nested_schemas_hubspot(self):
 
