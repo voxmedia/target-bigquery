@@ -276,8 +276,12 @@ def determine_precision_and_scale_for_decimal_or_bigdecimal(field_property):
         else:
             precision = scale + bq_bigdecimal_max_precision_increment
 
-        return precision, scale
+    # if there is no "multipleOf"
+    else:
+        scale = None
+        precision = None
 
+    return precision, scale
 
 def build_field(field_name, field_property):
     """
