@@ -1,9 +1,11 @@
 """
 the purpose of this module is to convert JSON schema to BigQuery schema.
 """
+import re
+
+from target_bigquery.simplify_json_schema import bq_decimal_scale_max, bq_bigdecimal_scale_max
 
 from google.cloud.bigquery import SchemaField
-import re
 
 METADATA_FIELDS = {
     "_time_extracted": {"type": ["null", "string"], "format": "date-time", "bq_type": "timestamp"},
@@ -71,7 +73,8 @@ def create_valid_bigquery_field_name(field_name):
     if cleaned_up_field_name[0].isdigit():
         cleaned_up_field_name = "_%s" % cleaned_up_field_name
 
-    return cleaned_up_field_name[:300] # trim the string to the first x chars
+    return cleaned_up_field_name[:300]  # trim the string to the first x chars
+
 
 def prioritize_one_data_type_from_multiple_ones_in_any_of(field_property):
     """
@@ -184,10 +187,17 @@ def convert_field_type(field_property):
 
         field_type_bigquery = conversion_dict[field_property["type"][0]]
 
+    if field_type_bigquery == "FLOAT" and field_property.get('multipleOf'):
+
+        if determine_scale_for_decimal_or_bigdecimal(field_property) <= bq_decimal_scale_max:
+            field_type_bigquery = "DECIMAL"
+        else:
+            field_type_bigquery = "BIGDECIMAL"
+
     return field_type_bigquery
 
 
-def determine_field_mode(field_name, field_property):
+def determine_field_mode(field_property):
     """
     :param field_name: one nested JSON field name
     :param field_property: one nested JSON field property
@@ -215,6 +225,39 @@ def replace_nullable_mode_with_required(schema_field_input):
     return schema_field_updated
 
 
+def determine_scale_for_decimal_or_bigdecimal(field_property):
+    """
+    For NUMERIC/DECIMAL and BIGNUMERIC/BIGDECIMAL fields, we can determine scale, which is how many digits are
+    after the decimal point.
+
+    # https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#decimal_types
+
+    scale (number of digits after the decimal point) for DECIMAL/NUMERIC should be <=9
+    Maximum scale range: 0 ≤ S ≤ 9
+
+    Scale (number of digits after the decimal point) for BIGDECIMAL/BIGNUMERIC can be above 9
+    Maximum scale range: 0 ≤ S ≤ 38
+
+    Scale for DECIMAL & BIGDECIMAL cannot be more than 38.
+
+    """
+    if "multipleOf" in field_property.keys():
+
+        # if it's written as a regular human-readable float
+        match = re.search(r'\.(.*?)$', str(field_property.get('multipleOf')))
+        if match:
+            match = match.group(1)
+            return min(len(match), bq_bigdecimal_scale_max)
+
+        else:  # if it's written in scientific notation
+            match = re.search(r'(?i)1e\-(.*?)$', str(field_property.get('multipleOf')))
+            # (?i) ignores case sensitivity
+            # https://stackoverflow.com/questions/9655164/regex-ignore-case-sensitivity
+            match = match.group(1)
+            if match:
+                return min(int(match), bq_bigdecimal_scale_max)
+
+
 def build_field(field_name, field_property):
     """
     :param field_name: one nested JSON field name
@@ -225,17 +268,25 @@ def build_field(field_name, field_property):
     if not ("items" in field_property and "properties" in field_property["items"]) and not (
             "properties" in field_property):
 
+        field_type = convert_field_type(field_property)
+
         return (SchemaField(name=create_valid_bigquery_field_name(field_name),
-                            field_type=convert_field_type(field_property),
-                            mode=determine_field_mode(field_name, field_property),
+                            field_type=field_type,
+                            mode=determine_field_mode(field_property),
                             description=None,
                             fields=(),
-                            policy_tags=None)
+                            policy_tags=None,
+                            precision=None,
+                            scale=determine_scale_for_decimal_or_bigdecimal(
+                                field_property) if field_type in [
+                                "DECIMAL", "BIGDECIMAL"] else None)
                 )
 
     elif ("items" in field_property and "properties" in field_property["items"]) or ("properties" in field_property):
 
         processed_subfields = []
+
+        field_type = convert_field_type(field_property)
 
         # https://www.w3schools.com/python/ref_dictionary_get.asp
         for subfield_name, subfield_property in field_property.get("properties",
@@ -244,11 +295,16 @@ def build_field(field_name, field_property):
             processed_subfields.append(build_field(subfield_name, subfield_property))
 
         return (SchemaField(name=create_valid_bigquery_field_name(field_name),
-                            field_type=convert_field_type(field_property),
-                            mode=determine_field_mode(field_name, field_property),
+                            field_type=field_type,
+                            mode=determine_field_mode(field_property),
                             description=None,
                             fields=processed_subfields,
-                            policy_tags=None)
+                            policy_tags=None,
+                            precision=None,
+                            scale=determine_scale_for_decimal_or_bigdecimal(
+                                field_property) if field_type in [
+                                "DECIMAL", "BIGDECIMAL"] else None
+                            )
                 )
 
 

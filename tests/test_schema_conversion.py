@@ -1,9 +1,3 @@
-# TODO:
-# add a way for this test not to fail
-# flatten lists
-# find mismatches
-# if the mismatches are FLOAT and DECIMAL, pass the test
-
 import singer
 import json
 import copy
@@ -15,7 +9,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 from target_bigquery.schema import build_schema, prioritize_one_data_type_from_multiple_ones_in_any_of, \
-    convert_field_type
+    convert_field_type, determine_scale_for_decimal_or_bigdecimal
 
 from tests.schema_old import build_schema_old
 
@@ -49,10 +43,7 @@ list_of_schema_inputs = [test_schema_collection_anyOf_problem_column,
                          ]
 
 
-class TestSchemaConversion(unittestcore.BaseUnitTest):
-
-    def setUp(self):
-        super(TestSchemaConversion, self).setUp()
+class TestHelpersFunctions(unittestcore.BaseUnitTest):
 
     def test_utils_flatten_list(self):
         list_nested = [[1, 2], [1, 2, 3, 4, [3, 1, 3]]]
@@ -61,54 +52,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         assert flat == [1, 2, 1, 2, 3, 4, 3, 1, 3]
 
-    def test_flat_schema(self):
-
-        schema_0_input = schema_simple_1
-
-        msg = singer.parse_message(schema_0_input)
-
-        schema_1_simplified = simplify(msg.schema)
-
-        schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
-                                                 add_metadata=True)
-
-        schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
-
-        for f in schema_3_built_old_method:
-
-            if f.name == "geo":
-                self.assertEqual(f.field_type.upper(), "STRING")
-
-            elif f.name == "amount":
-                self.assertEqual(f.field_type.upper(), "FLOAT")
-
-        for f in schema_2_built_new_method:
-            if f.name == "id":
-                self.assertEqual(f.field_type.upper(), "STRING")
-
-            elif f.name == "name":
-                self.assertEqual(f.field_type.upper(), "STRING")
-
-            elif f.name == "value":
-                self.assertEqual(f.field_type.upper(), "INTEGER")
-
-            elif f.name == "ratio":
-                self.assertEqual(f.field_type.upper(), "FLOAT")
-
-            elif f.name == "timestamp":
-                self.assertEqual(f.field_type.upper(), "TIMESTAMP")
-
-            elif f.name == "date":
-                self.assertEqual(f.field_type.upper(), "DATE")
-
-            elif f.name == "geo":
-                self.assertEqual(f.field_type.upper(), "GEOGRAPHY")
-
-            elif f.name == "amount":
-                self.assertEqual(f.field_type.upper(), "DECIMAL")
-
     def test_prioritize_one_data_type_from_multiple_ones_in_any_of_string(self):
-
         test_input = {
             'anyOf': [
                 {
@@ -148,7 +92,6 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         assert converted_data_type == "STRING"
 
     def test_prioritize_one_data_type_from_multiple_ones_in_any_of_float(self):
-
         test_input = {
             'anyOf': [
                 {
@@ -182,7 +125,6 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         assert converted_data_type == "FLOAT"
 
     def test_prioritize_one_data_type_from_multiple_ones_in_any_of_integer(self):
-
         test_input = {
             'anyOf': [
 
@@ -209,6 +151,139 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         converted_data_type = convert_field_type(test_input)
 
         assert converted_data_type == "INTEGER"
+
+    # TODO: write a more detailed unit test (e.g., google search console), which checks inputs and outputs
+    # TODO: what if the multipleOf has no decimal point (if it's an integer???). if multipleOf is integer Scale is None.
+    # TODO: test if we just use our own custom decimal bigdecimal json data types
+    # TODO: load data and compare data before and after
+
+    def test_scale_decimal_1(self):
+        input = {"daily_budget": {
+            "type": [
+                "null",
+                "number"
+            ],
+            "multipleOf": 0.01
+        }}
+
+        output = determine_scale_for_decimal_or_bigdecimal(list(input.values())[0])
+
+        assert output == 2
+
+    def test_scale_decimal_2(self):
+        input = {"daily_budget": {
+            "type": [
+                "null",
+                "number"
+            ],
+            "multipleOf": 0.00001
+        }}
+
+        output = determine_scale_for_decimal_or_bigdecimal(list(input.values())[0])
+
+        assert output == 5
+
+    def test_scale_decimal_3(self):
+        input = {"daily_budget": {
+            "type": [
+                "null",
+                "number"
+            ],
+            "multipleOf": 1e-06
+        }}
+
+        output = determine_scale_for_decimal_or_bigdecimal(list(input.values())[0])
+
+        assert output == 6
+
+    def test_scale_decimal_4(self):
+        input = {"daily_budget": {
+            "type": [
+                "null",
+                "number"
+            ],
+            "multipleOf": 1e-040
+        }}
+
+        output = determine_scale_for_decimal_or_bigdecimal(list(input.values())[0])
+
+        assert output == 38  # scale cannot exceed max
+
+
+    def test_scale_decimal_5(self):
+        input = {"daily_budget": {
+            "type": [
+                "null",
+                "number"
+            ],
+            "multipleOf": 1E-010 # uppercase E
+        }}
+
+        output = determine_scale_for_decimal_or_bigdecimal(list(input.values())[0])
+
+        assert output == 10  # scale cannot exceed max
+
+
+class TestSchemaConversion(unittestcore.BaseUnitTest):
+
+    def setUp(self):
+        super(TestSchemaConversion, self).setUp()
+
+    def test_flat_schema(self):
+
+        schema_0_input = schema_simple_1
+
+        msg = singer.parse_message(schema_0_input)
+
+        schema_1_simplified = simplify(msg.schema)
+
+        schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                 add_metadata=True)
+
+        schema_3_built_old_method = build_schema_old(msg.schema, key_properties=msg.key_properties, add_metadata=True)
+
+        for f in schema_3_built_old_method:
+
+            if f.name == "geo":
+                self.assertEqual(f.field_type.upper(), "STRING")
+
+            elif f.name == "amount":
+                self.assertEqual(f.field_type.upper(), "FLOAT")
+
+            elif f.name == "big_amount":
+                self.assertEqual(f.field_type.upper(), "FLOAT")
+
+        for f in schema_2_built_new_method:
+            if f.name == "id":
+                self.assertEqual(f.field_type.upper(), "STRING")
+
+            elif f.name == "name":
+                self.assertEqual(f.field_type.upper(), "STRING")
+
+            elif f.name == "value":
+                self.assertEqual(f.field_type.upper(), "INTEGER")
+
+            elif f.name == "ratio":
+                self.assertEqual(f.field_type.upper(), "FLOAT")
+
+            elif f.name == "timestamp":
+                self.assertEqual(f.field_type.upper(), "TIMESTAMP")
+
+            elif f.name == "date":
+                self.assertEqual(f.field_type.upper(), "DATE")
+
+            elif f.name == "geo":
+                self.assertEqual(f.field_type.upper(), "GEOGRAPHY")
+
+            elif f.name == "amount":
+                self.assertEqual(f.field_type.upper(), "DECIMAL")
+                self.assertEqual(f.scale, 2)
+
+            elif f.name == "big_amount":
+                self.assertEqual(f.field_type.upper(), "BIGDECIMAL")
+                self.assertEqual(f.scale, 30)
+
+
 
     def test_one_nested_schema_1(self):
 
@@ -276,7 +351,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             # compare the flat lists
             # each item should be equal, except for the case when the new schema has DECIMAL
             for i in range(0, len(flat_new)):
-                if flat_new[i] == "DECIMAL":
+                if flat_new[i] in ( "DECIMAL", "BIGDECIMAL"):
                     assert flat_old[i] == "FLOAT"
                 else:
                     assert flat_new[i] == flat_old[i]
@@ -348,13 +423,13 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         compare_old_vs_new_schema_conversion(os.path.join(os.path.join(
             os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"), "rsc"),
-            "schemas"), "input_json_schemas_facebook.json"), ignore_float_vs_decimal_difference=True)
+            "schemas"), "input_json_schemas_facebook.json"), ignore_float_vs_decimal_bigdecimal_difference=True)
 
     def test_several_nested_schemas_google_search_console(self):
 
         compare_old_vs_new_schema_conversion(os.path.join(os.path.join(
             os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"), "rsc"),
-            "schemas"), "input_json_schemas_google_search_console.json"), ignore_float_vs_decimal_difference=True)
+            "schemas"), "input_json_schemas_google_search_console.json"), ignore_float_vs_decimal_bigdecimal_difference=True)
 
     def test_several_nested_schemas_hubspot(self):
 
@@ -436,7 +511,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         compare_old_vs_new_schema_conversion(os.path.join(os.path.join(
             os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"), "rsc"),
             "schemas"), "input_json_schemas_recharge.json"), exclude_stream='products',
-            ignore_float_vs_decimal_difference=True)
+            ignore_float_vs_decimal_bigdecimal_difference=True)
 
     def test_several_nested_schemas_recharge_products_new_method(self):
 
@@ -486,4 +561,4 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
 
         compare_old_vs_new_schema_conversion(os.path.join(os.path.join(
             os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"), "rsc"),
-            "schemas"), "input_json_schemas_shopify.json"), ignore_float_vs_decimal_difference=True)
+            "schemas"), "input_json_schemas_shopify.json"), ignore_float_vs_decimal_bigdecimal_difference=True)

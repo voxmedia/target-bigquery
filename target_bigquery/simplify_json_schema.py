@@ -5,7 +5,7 @@ https://github.com/datamill-co/target-postgres/blob/master/target_postgres/json_
 
 from copy import deepcopy
 import decimal
-import json
+import simplejson
 import re
 
 from jsonschema import Draft4Validator
@@ -24,6 +24,10 @@ DATE_FORMAT = 'date'
 BQ_GEOGRAPHY = 'bq-geography'
 BQ_DECIMAL = 'bq-decimal'
 BQ_BIGDECIMAL = 'bq-bigdecimal'
+
+# https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#decimal_types
+bq_decimal_scale_max = 9
+bq_bigdecimal_scale_max = 38
 
 _PYTHON_TYPE_TO_JSON_SCHEMA = {
     int: INTEGER,
@@ -86,7 +90,6 @@ def simple_type(schema):
     if is_datetime(schema):
         return {'type': t,
                 'format': DATE_TIME_FORMAT}
-
 
     if is_date(schema):
         return {'type': t,
@@ -225,14 +228,16 @@ def is_date(schema):
 
     return STRING in get_type(schema) and schema.get('format') == DATE_FORMAT
 
+
 def is_bq_geography(schema):
     """
-    Given a JSON Schema compatible dict, returns True when schema's type allows being a bq-geograaphy
+    Given a JSON Schema compatible dict, returns True when schema's type allows being a bq-geography
     :param schema: dict, JSON Schema
     :return: Boolean
     """
 
     return STRING in get_type(schema) and schema.get('format') == BQ_GEOGRAPHY
+
 
 def is_bq_decimal(schema):
     """
@@ -243,23 +248,25 @@ def is_bq_decimal(schema):
 
     return STRING in get_type(schema) and schema.get('format') == BQ_DECIMAL
 
-def is_bq_decimal_inferred(schema):
-    """
-    Given a JSON Schema compatible dict, returns True when schema's type allows being a bq-decimal
-    :param schema: dict, JSON Schema
-    :return: Boolean
-    """
-
-    return NUMBER in get_type(schema) and schema.get('multipleOf')
 
 def is_bq_bigdecimal(schema):
     """
-    Given a JSON Schema compatible dict, returns True when schema's type allows being a bq-decimal
+    Given a JSON Schema compatible dict, returns True when schema's type allows being a bq-bigdecimal
     :param schema: dict, JSON Schema
     :return: Boolean
     """
 
     return STRING in get_type(schema) and schema.get('format') == BQ_BIGDECIMAL
+
+
+def is_number(schema):
+    """
+    Given a JSON Schema compatible dict, returns True when schema's type is number
+    :param schema: dict, JSON Schema
+    :return: Boolean
+    """
+
+    return NUMBER in get_type(schema)
 
 def make_nullable(schema):
     """
@@ -282,6 +289,7 @@ class Cachable(dict):
     json_schema, it will return the same thing. We wrap the `dict` object with a few
     helpers which extend it so that we avoid recursion in some instances.
     '''
+
     def __init__(self, raw_dict, simplified=True):
         self._c = None
         super(Cachable, self).__init__(self, **raw_dict)
@@ -295,8 +303,12 @@ class Cachable(dict):
         return s
 
     def _comparator(self):
+        # https://stackoverflow.com/questions/1960516/python-json-serialize-a-decimal-object
+        # Simplejson 2.1 and higher has native support for Decimal type
+        # use_decimal is True by default
+        # if we use json instead of simplejson, we will have a Decimal serialization error
         if not self._c:
-            self._c = json.dumps(self, sort_keys=True)
+            self._c = simplejson.dumps(self, sort_keys=True)
 
         return self._c
 
@@ -425,11 +437,22 @@ def _simplify__implicit_anyof(root_schema, schema):
 
         types.remove(STRING)
 
-    if is_bq_decimal_inferred(schema):
-        schemas.append(Cachable({
-            'type': [STRING],
-            'format': BQ_DECIMAL,
-        }))
+    # We need to preserve "multipleOf" key-value pair, because
+    # we will later use it to determine precision and scale for
+    # DECIMAL and BIGDECIMAL\
+    if is_number(schema):
+        if schema.get("multipleOf"):
+            schemas.append(Cachable({
+                'type': [STRING],
+                'format': NUMBER,
+                'multipleOf': schema["multipleOf"]
+            }))
+
+        else:
+            schemas.append(Cachable({
+                'type': [STRING],
+                'format': NUMBER
+            }))
 
         types.remove(NUMBER)
 
@@ -466,7 +489,6 @@ def _simplify__implicit_anyof(root_schema, schema):
     if is_nullable(schema):
         schemas = [make_nullable(s) for s in schemas]
 
-
     return _helper_simplify(root_schema, {'anyOf': [Cachable(s) for s in schemas]})
 
 
@@ -483,8 +505,8 @@ def _simplify__anyof(root_schema, schema):
     '''
 
     schemas = [
-            _helper_simplify(root_schema, schema)
-            for schema in schema['anyOf']]
+        _helper_simplify(root_schema, schema)
+        for schema in schema['anyOf']]
 
     literals = set()
     any_nullable = False

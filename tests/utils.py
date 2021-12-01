@@ -146,7 +146,7 @@ def flatten_list(array):
 
 
 def compare_old_vs_new_schema_conversion(catalog_schema_file, exclude_stream=None,
-                                         ignore_float_vs_decimal_difference=False):
+                                         ignore_float_vs_decimal_bigdecimal_difference=False):
     """
     :param catalog_schema_file: input JSON schema / tap catalog json file
     :param exclude_stream:
@@ -194,7 +194,7 @@ def compare_old_vs_new_schema_conversion(catalog_schema_file, exclude_stream=Non
 
         schema_built_old_method_sorted = convert_list_of_schema_fields_to_list_of_lists(schema_3_built_old_method)
 
-        if ignore_float_vs_decimal_difference:
+        if ignore_float_vs_decimal_bigdecimal_difference:
             # flatten the nested lists / schemas
             flat_new = flatten_list(schema_built_new_method_sorted)
             flat_old = flatten_list(schema_built_old_method_sorted)
@@ -202,7 +202,7 @@ def compare_old_vs_new_schema_conversion(catalog_schema_file, exclude_stream=Non
             # compare the flat lists
             # each item should be equal, except for the case when the new schema has DECIMAL
             for i in range(0, len(flat_new)):
-                if flat_new[i] == "DECIMAL":
+                if flat_new[i] in ("DECIMAL", "BIGDECIMAL"):
                     assert flat_old[i] == "FLOAT"
                 else:
                     assert flat_new[i] == flat_old[i]
