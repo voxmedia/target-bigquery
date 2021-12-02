@@ -45,14 +45,14 @@ def cleanup_record(schema, record):
 def create_valid_bigquery_field_name(field_name):
     """
     Clean up / prettify field names, make sure they match BigQuery naming conventions.
-    
+
     Fields must:
-        • contain only 
-            -letters, 
-            -numbers, and 
-            -underscores, 
-        • start with a 
-            -letter or 
+        • contain only
+            -letters,
+            -numbers, and
+            -underscores,
+        • start with a
+            -letter or
             -underscore, and
         • be at most 300 characters long
 
@@ -190,9 +190,16 @@ def convert_field_type(field_property):
 
     if field_type_bigquery == "FLOAT" and field_property.get('multipleOf'):
 
-        # if scale exceeds 9, then it's BIGDECIMAL
-        if determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[1]:
-            if determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[1] <= bq_decimal_scale_max:
+        # edge case, taken from this documentation:
+        # https://json-schema.org/understanding-json-schema/reference/numeric.html
+        if type(field_property.get('multipleOf')) == int:
+            field_type_bigquery = "INTEGER"
+
+        # if scale has been determined
+        elif determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[1]:
+            # if scale exceeds 9, then it's BIGDECIMAL
+            if determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[
+                1] <= bq_decimal_scale_max:
                 field_type_bigquery = "DECIMAL"
             else:
                 field_type_bigquery = "BIGDECIMAL"
@@ -284,6 +291,7 @@ def determine_precision_and_scale_for_decimal_or_bigdecimal(field_property):
         precision = None
 
     return precision, scale
+
 
 def build_field(field_name, field_property):
     """

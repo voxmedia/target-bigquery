@@ -285,7 +285,7 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
                 # we can only conclude that we need to output DECIMAL or BIGDECIMAL, if "multipleOf" is a float or decimal
                 assert msg.schema["properties"][f.name] == {'type': ['number', 'null'], 'multipleOf': 1}
 
-                self.assertEqual(f.field_type.upper(), "FLOAT")
+                self.assertEqual(f.field_type.upper(), "INTEGER")
                 self.assertEqual(f.precision, None)
                 self.assertEqual(f.scale, None)
 
