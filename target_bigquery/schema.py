@@ -191,10 +191,11 @@ def convert_field_type(field_property):
     if field_type_bigquery == "FLOAT" and field_property.get('multipleOf'):
 
         # if scale exceeds 9, then it's BIGDECIMAL
-        if determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[1] <= bq_decimal_scale_max:
-            field_type_bigquery = "DECIMAL"
-        else:
-            field_type_bigquery = "BIGDECIMAL"
+        if determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[1]:
+            if determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[1] <= bq_decimal_scale_max:
+                field_type_bigquery = "DECIMAL"
+            else:
+                field_type_bigquery = "BIGDECIMAL"
 
     return field_type_bigquery
 
@@ -259,8 +260,8 @@ def determine_precision_and_scale_for_decimal_or_bigdecimal(field_property):
             match = re.search(r'(?i)1e\-(.*?)$', str(field_property.get('multipleOf')))
             # (?i) ignores case sensitivity
             # https://stackoverflow.com/questions/9655164/regex-ignore-case-sensitivity
-            match = match.group(1)
             if match:
+                match = match.group(1)
                 scale = min(int(match), bq_bigdecimal_scale_max)
 
             # if "multipleOf" is not a human-readbale float or scientific notation or Decimal,
@@ -268,6 +269,7 @@ def determine_precision_and_scale_for_decimal_or_bigdecimal(field_property):
             else:
                 scale = None
                 precision = None
+                return precision, scale
 
         # if we're dealing with a DECIMAL
         if scale <= bq_decimal_scale_max:

@@ -2,6 +2,7 @@ import singer
 import json
 import copy
 import os
+from decimal import Decimal
 
 import logging
 
@@ -152,13 +153,8 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
 
         assert converted_data_type == "INTEGER"
 
-    # TODO: fix errors
-    # TODO: write a more detailed unit test (e.g., google search console), which checks inputs and outputs
-    # TODO: what if the multipleOf has no decimal point (if it's an integer???). if multipleOf is integer Scale is None.
-    # TODO: test if we just use our own custom decimal bigdecimal json data types
     # TODO: load data and compare data before and after
-    #TODO: in schema.py, we're calling determine_precision_and_scale_for_decimal_or_bigdecimal twice.
-    # Optimize it, so we only call it once
+    # TODO: in schema.py, we're calling determine_precision_and_scale_for_decimal_or_bigdecimal twice. Optimize it, so we only call it once
 
     def test_scale_decimal_1(self):
         input = {"daily_budget": {
@@ -210,7 +206,7 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
                 "null",
                 "number"
             ],
-            "multipleOf": 1e-040
+            "multipleOf": 1e-040  # lowercase e
         }}
 
         field_property = list(input.values())[0]
@@ -286,15 +282,55 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             elif f.name == "geo":
                 self.assertEqual(f.field_type.upper(), "GEOGRAPHY")
 
-            elif f.name == "amount":
+            elif f.name == "amount_0":
+                # we can only conclude that we need to output DECIMAL or BIGDECIMAL, if "multipleOf" is a float or decimal
+                assert msg.schema["properties"][f.name] == {'type': ['number', 'null'], 'multipleOf': 1}
+
+                self.assertEqual(f.field_type.upper(), "FLOAT")
+                self.assertEqual(f.precision, None)
+                self.assertEqual(f.scale, None)
+
+            elif f.name == "amount_1":
+                assert msg.schema["properties"][f.name] == {'type': ['number', 'null'], 'multipleOf': Decimal('0.01')}
+
                 self.assertEqual(f.field_type.upper(), "DECIMAL")
                 self.assertEqual(f.precision, 31)
                 self.assertEqual(f.scale, 2)
 
-            elif f.name == "big_amount":
+            elif f.name == "amount_2":
+                assert msg.schema["properties"][f.name] == {'type': ['number', 'null'], 'multipleOf': Decimal('1E-9')}
+
+                self.assertEqual(f.field_type.upper(), "DECIMAL")
+                self.assertEqual(f.precision, 38)
+                self.assertEqual(f.scale, 9)
+
+            elif f.name == "big_amount_1":
+                assert msg.schema["properties"][f.name] == {'type': ['number', 'null'], 'multipleOf': Decimal('1E-10')}
+
                 self.assertEqual(f.field_type.upper(), "BIGDECIMAL")
-                self.assertEqual(f.precision, 68)
-                self.assertEqual(f.scale, 30)
+                self.assertEqual(f.precision, 48)
+                self.assertEqual(f.scale, 10)
+
+            elif f.name == "big_amount_2":
+                assert msg.schema["properties"][f.name] == {'type': ['number', 'null'], 'multipleOf': Decimal('1E-50')}
+
+                self.assertEqual(f.field_type.upper(), "BIGDECIMAL")
+                self.assertEqual(f.precision, 76)
+                self.assertEqual(f.scale, 38)
+
+            elif f.name == "bq_deci":
+                assert msg.schema["properties"][f.name] == {'type': 'string', 'format': 'bq-decimal'}
+
+                self.assertEqual(f.field_type.upper(), "DECIMAL")
+                self.assertEqual(f.precision, None)
+                self.assertEqual(f.scale, None)
+
+            elif f.name == "bq_bigdeci":
+                assert msg.schema["properties"][f.name] == {'type': 'string', 'format': 'bq-bigdecimal'}
+
+                self.assertEqual(f.field_type.upper(), "BIGDECIMAL")
+                self.assertEqual(f.precision, None)
+                self.assertEqual(f.scale, None)
 
     def test_one_nested_schema_1(self):
 
@@ -367,6 +403,26 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
                 else:
                     assert flat_new[i] == flat_old[i]
 
+    def test_decimal_nested_field(self):
+        schema_0_input = test_schema_collection_anyOf_problem_column
+
+        msg = singer.parse_message(schema_0_input)
+
+        schema_1_simplified = simplify(msg.schema)
+
+        schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                 add_metadata=True)
+
+        assert msg.schema["properties"]["line_items"]["anyOf"][0]["items"]["properties"]["price"] == {
+            'type': ['null', 'number'], 'multipleOf': Decimal('1E-8')}
+
+        output_field = schema_2_built_new_method[4].fields[2]
+
+        assert output_field.name == "price"
+        assert output_field.field_type == "DECIMAL"
+        assert output_field.precision == 37
+        assert output_field.scale == 8
+
     def test_several_nested_schemas_amazon(self):
 
         compare_old_vs_new_schema_conversion(os.path.join(os.path.join(
@@ -436,12 +492,117 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
             os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"), "rsc"),
             "schemas"), "input_json_schemas_facebook.json"), ignore_float_vs_decimal_bigdecimal_difference=True)
 
+    def test_facebook_decimal(self):
+
+        catalog = json.load(open((os.path.join(os.path.join(
+            os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"), "rsc"),
+            "schemas"), "input_json_schemas_facebook.json"))))
+
+        for next_schema_input in catalog['streams']:
+
+            if next_schema_input['tap_stream_id'] == "adsets":
+
+                validate_json_schema_completeness(next_schema_input)
+
+                # clean up schema formatting
+                schema_0_input = copy.deepcopy(next_schema_input)
+
+                if "type" not in schema_0_input.keys():
+                    schema_0_input.update({"type": "SCHEMA"})
+
+                if "key_properties" not in schema_0_input.keys():
+                    schema_0_input.update({"key_properties": "Id"})
+
+                schema_0_input = str(schema_0_input)
+
+                schema_0_input = schema_0_input.replace("\'", "\"").replace("True", "true").replace("False",
+                                                                                                    "false").replace(
+                    "None", "null")
+
+                # convert schema using new method
+                msg = singer.parse_message(schema_0_input)
+
+                schema_1_simplified = simplify(msg.schema)
+
+                schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+                # check input
+                assert next_schema_input["schema"]["properties"]["daily_budget"] == {'type': ['null', 'number'],
+                                                                                     'maximum': 100000000000000000000000000000000,
+                                                                                     'minimum': -100000000000000000000000000000000,
+                                                                                     'multipleOf': 1e-06,
+                                                                                     'exclusiveMaximum': False,
+                                                                                     'exclusiveMinimum': False}
+
+                # check intermediate step
+                assert schema_1_simplified["properties"]["daily_budget"] == {'type': ['string', 'null'],
+                                                                             'format': 'number',
+                                                                             'multipleOf': Decimal('0.000001')}
+                # check output
+                test_field = schema_2_built_new_method[6]
+                assert test_field.name == "daily_budget"
+                assert test_field.field_type == "DECIMAL"
+                assert test_field.precision == 35
+                assert test_field.scale == 6
+
     def test_several_nested_schemas_google_search_console(self):
 
         compare_old_vs_new_schema_conversion(os.path.join(os.path.join(
             os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"), "rsc"),
             "schemas"), "input_json_schemas_google_search_console.json"),
             ignore_float_vs_decimal_bigdecimal_difference=True)
+
+    def test_google_search_console_bigdecimal(self):
+
+        catalog = json.load(open((os.path.join(os.path.join(
+            os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests"), "rsc"),
+            "schemas"), "input_json_schemas_google_search_console.json"))))
+
+        for next_schema_input in catalog['streams']:
+
+            if next_schema_input['tap_stream_id'] == "performance_report_page":
+
+                validate_json_schema_completeness(next_schema_input)
+
+                # clean up schema formatting
+                schema_0_input = copy.deepcopy(next_schema_input)
+
+                if "type" not in schema_0_input.keys():
+                    schema_0_input.update({"type": "SCHEMA"})
+
+                if "key_properties" not in schema_0_input.keys():
+                    schema_0_input.update({"key_properties": "Id"})
+
+                schema_0_input = str(schema_0_input)
+
+                schema_0_input = schema_0_input.replace("\'", "\"").replace("True", "true").replace("False",
+                                                                                                    "false").replace(
+                    "None", "null")
+
+                # convert schema using new method
+                msg = singer.parse_message(schema_0_input)
+
+                schema_1_simplified = simplify(msg.schema)
+
+                schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
+                                                         add_metadata=True)
+
+                # check input
+                assert next_schema_input["schema"]["properties"]["ctr"] == {'multipleOf': 1e-25,
+                                                                            'type': ['null', 'number']}
+
+                # check intermediate step
+
+                assert schema_1_simplified["properties"]["ctr"] == {'type': ['string', 'null'], 'format': 'number',
+                                                                    'multipleOf': Decimal('1E-25')}
+
+                # check outputs
+                test_field = schema_2_built_new_method[6]
+                assert test_field.name == "ctr"
+                assert test_field.field_type == "BIGDECIMAL"
+                assert test_field.precision == 63
+                assert test_field.scale == 25
 
     def test_several_nested_schemas_hubspot(self):
 
