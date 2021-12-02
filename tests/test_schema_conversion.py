@@ -153,7 +153,6 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
 
         assert converted_data_type == "INTEGER"
 
-    # TODO: load data and compare data before and after
     # TODO: in schema.py, we're calling determine_precision_and_scale_for_decimal_or_bigdecimal twice. Optimize it, so we only call it once
 
     def test_scale_decimal_1(self):
@@ -404,6 +403,8 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
                     assert flat_new[i] == flat_old[i]
 
     def test_decimal_nested_field(self):
+        """confirm that DECIMAL data type gets inferred correctly from "multipleOf" when you field is nested"""
+        # convert schema
         schema_0_input = test_schema_collection_anyOf_problem_column
 
         msg = singer.parse_message(schema_0_input)
@@ -413,9 +414,11 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
         schema_2_built_new_method = build_schema(schema_1_simplified, key_properties=msg.key_properties,
                                                  add_metadata=True)
 
+        # check input
         assert msg.schema["properties"]["line_items"]["anyOf"][0]["items"]["properties"]["price"] == {
             'type': ['null', 'number'], 'multipleOf': Decimal('1E-8')}
 
+        # check output
         output_field = schema_2_built_new_method[4].fields[2]
 
         assert output_field.name == "price"
@@ -593,7 +596,6 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
                                                                             'type': ['null', 'number']}
 
                 # check intermediate step
-
                 assert schema_1_simplified["properties"]["ctr"] == {'type': ['string', 'null'], 'format': 'number',
                                                                     'multipleOf': Decimal('1E-25')}
 
