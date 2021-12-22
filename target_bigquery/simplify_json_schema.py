@@ -26,13 +26,13 @@ BQ_DECIMAL = 'bq-decimal'
 BQ_BIGDECIMAL = 'bq-bigdecimal'
 
 # https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#decimal_types
-bq_decimal_scale_max = 9
-bq_bigdecimal_scale_max = 38
+BQ_DECIMAL_SCALE_MAX = 9
+BQ_BIGDECIMAL_SCALE_MAX = 38
 
 # DECIMAL max precision = scale + 29
 # BIGDECIMAL max precision = scale + 38
-bq_decimal_max_precision_increment = 29
-bq_bigdecimal_max_precision_increment = 38
+BQ_DECIMAL_MAX_PRECISION_INCREMENT = 29
+BQ_BIGDECIMAL_MAX_PRECISION_INCREMENT = 38
 
 _PYTHON_TYPE_TO_JSON_SCHEMA = {
     int: INTEGER,

@@ -3,8 +3,8 @@ the purpose of this module is to convert JSON schema to BigQuery schema.
 """
 import re
 
-from target_bigquery.simplify_json_schema import bq_decimal_scale_max, bq_bigdecimal_scale_max, \
-    bq_decimal_max_precision_increment, bq_bigdecimal_max_precision_increment
+from target_bigquery.simplify_json_schema import BQ_DECIMAL_SCALE_MAX, BQ_BIGDECIMAL_SCALE_MAX, \
+    BQ_DECIMAL_MAX_PRECISION_INCREMENT, BQ_BIGDECIMAL_MAX_PRECISION_INCREMENT
 
 from google.cloud.bigquery import SchemaField
 
@@ -184,11 +184,9 @@ def convert_field_type(field_property):
 
         field_type_bigquery = conversion_dict[field_property['items']['type'][0]]
 
-    else:
+    elif field_property["type"][0] == "number" and field_property.get('multipleOf'):
 
-        field_type_bigquery = conversion_dict[field_property["type"][0]]
-
-    if field_type_bigquery == "FLOAT" and field_property.get('multipleOf'):
+        scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[1]
 
         # edge case, taken from this documentation:
         # https://json-schema.org/understanding-json-schema/reference/numeric.html
@@ -196,13 +194,16 @@ def convert_field_type(field_property):
             field_type_bigquery = "INTEGER"
 
         # if scale has been determined
-        elif determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[1]:
+        elif scale:
             # if scale exceeds 9, then it's BIGDECIMAL
-            if determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[
-                1] <= bq_decimal_scale_max:
+            if scale <= BQ_DECIMAL_SCALE_MAX:
                 field_type_bigquery = "DECIMAL"
             else:
                 field_type_bigquery = "BIGDECIMAL"
+
+    else:
+
+        field_type_bigquery = conversion_dict[field_property["type"][0]]
 
     return field_type_bigquery
 
@@ -255,40 +256,29 @@ def determine_precision_and_scale_for_decimal_or_bigdecimal(field_property):
     DECIMAL max precision = scale + 29
     BIGDECIMAL max precision = scale + 38
     """
+
+    # if there is no "multipleOf" or
+    # if "multipleOf" is not a human-readbale float or scientific notation or Decimal,
+    # but for example, it is an integer
+    scale = None
+    precision = None
+
     if "multipleOf" in field_property.keys():
 
-        # if "multipleOf" is written as a regular human-readable float
-        match = re.search(r'\.(.*?)$', str(field_property.get('multipleOf')))
-        if match:
-            match = match.group(1)
-            scale = min(len(match), bq_bigdecimal_scale_max)
+        match_1 = re.search(r'\.(.*?)$', str(field_property.get('multipleOf')))
+        match_2 = re.search(r'(?i)1e\-(.*?)$', str(field_property.get('multipleOf')))
+        # (?i) ignores case sensitivity
+        # https://stackoverflow.com/questions/9655164/regex-ignore-case-sensitivity
 
-        else:  # if "multipleOf" is written in scientific notation
-            match = re.search(r'(?i)1e\-(.*?)$', str(field_property.get('multipleOf')))
-            # (?i) ignores case sensitivity
-            # https://stackoverflow.com/questions/9655164/regex-ignore-case-sensitivity
-            if match:
-                match = match.group(1)
-                scale = min(int(match), bq_bigdecimal_scale_max)
+        if match_1:  # if "multipleOf" is written as a regular human-readable float
+            match = match_1.group(1)
+            scale = min(len(match), BQ_BIGDECIMAL_SCALE_MAX)
+            precision = scale + BQ_DECIMAL_MAX_PRECISION_INCREMENT if scale <= BQ_DECIMAL_SCALE_MAX else scale + BQ_BIGDECIMAL_MAX_PRECISION_INCREMENT
 
-            # if "multipleOf" is not a human-readbale float or scientific notation or Decimal,
-            # but for example, it is an integer
-            else:
-                scale = None
-                precision = None
-                return precision, scale
-
-        # if we're dealing with a DECIMAL
-        if scale <= bq_decimal_scale_max:
-            precision = scale + bq_decimal_max_precision_increment
-        # if we're dealing with a BIGDECIMAL
-        else:
-            precision = scale + bq_bigdecimal_max_precision_increment
-
-    # if there is no "multipleOf"
-    else:
-        scale = None
-        precision = None
+        elif match_2:  # if "multipleOf" is written in scientific notation
+            match = match_2.group(1)
+            scale = min(int(match), BQ_BIGDECIMAL_SCALE_MAX)
+            precision = scale + BQ_DECIMAL_MAX_PRECISION_INCREMENT if scale <= BQ_DECIMAL_SCALE_MAX else scale + BQ_BIGDECIMAL_MAX_PRECISION_INCREMENT
 
     return precision, scale
 
