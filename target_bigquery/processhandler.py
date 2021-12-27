@@ -174,9 +174,15 @@ class LoadJobProcessHandler(BaseProcessHandler):
             raise Exception(f"A record for stream {msg.stream} was encountered before a corresponding schema")
 
         schema = self.schemas[stream]
-
+        bq_schema = self.bq_schema_dicts[stream]
         nr = cleanup_record(schema, msg.record)
-        nr = format_record_to_schema(nr, self.bq_schema_dicts[stream])
+
+        try:
+            nr = format_record_to_schema(nr, self.bq_schema_dicts[stream])
+        except Exception as e:
+            extra={"record" : msg.record, "schema": schema, "bq_schema": bq_schema}
+            self.logger.info(f"Cannot format a record for stream {msg.stream} to its corresponding BigQuery schema. Details: {extra}")
+            raise e
 
         # schema validation may fail if data doesn't match schema in terms of data types
         # in this case, we validate schema again on data which has been forced to match schema
