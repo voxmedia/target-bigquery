@@ -94,6 +94,8 @@ class BaseProcessHandler(object):
         self.bq_schema_dicts[msg.stream] = self._build_bq_schema_dict(schema)
         self.bq_schemas[msg.stream] = schema
 
+        self.logger.info(f"{msg.stream} BigQuery schema {schema}")
+
         yield from ()
 
     def on_stream_end(self):
