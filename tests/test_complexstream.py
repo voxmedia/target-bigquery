@@ -206,22 +206,27 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         # verify schema
         stream = "adsets"
-        test_field = bq_schemas_dict[stream][7]
+        try:
+            test_field = bq_schemas_dict[stream][7]
+        except:
+            stream = stream+"_dev"
+            test_field = bq_schemas_dict[stream][7]
+
 
         assert test_field.name == "budget_remaining"
-        assert test_field.field_type in ["NUMERIC", "DECIMAL"] # NUMERIC is the same as DECIMAL
+        assert test_field.field_type in ["NUMERIC", "DECIMAL"]  # NUMERIC is the same as DECIMAL
         assert test_field.precision == 32
         assert test_field.scale == 3
 
         # verify data
 
-        query_string = "SELECT budget_remaining FROM " + project_id + "." + dataset_id + "." + stream
+        query_string = f"SELECT budget_remaining FROM `{project_id}.{dataset_id}.{stream}`"
 
         dataframe = (
             bq_client.query(query_string)
             .result()
-            .to_dataframe(
-        ))
+            .to_dataframe()
+        )
         actual = dataframe["budget_remaining"]
         expected = pd.Series([Decimal('2450980'), Decimal('2450980'), Decimal('5000000.1'),
                               Decimal('5000000.12'), Decimal('57573500.123')])

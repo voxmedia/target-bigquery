@@ -176,15 +176,7 @@ def convert_field_type(field_property):
 
         field_type_bigquery = conversion_dict[prioritized_data_type]
 
-    elif field_property["type"][0] == "string" and "format" in field_property:
-
-        field_type_bigquery = conversion_dict[field_property["format"]]
-
-    elif (("items" in field_property) and ("properties" not in field_property["items"])):
-
-        field_type_bigquery = conversion_dict[field_property['items']['type'][0]]
-
-    elif field_property["type"][0] == "number" and field_property.get('multipleOf'):
+    elif field_property.get('multipleOf') and conversion_dict[field_property["format"]] == "FLOAT":
 
         scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property)[1]
 
@@ -200,6 +192,14 @@ def convert_field_type(field_property):
                 field_type_bigquery = "DECIMAL"
             else:
                 field_type_bigquery = "BIGDECIMAL"
+
+    elif field_property["type"][0] == "string" and "format" in field_property:
+
+        field_type_bigquery = conversion_dict[field_property["format"]]
+
+    elif (("items" in field_property) and ("properties" not in field_property["items"])):
+
+        field_type_bigquery = conversion_dict[field_property['items']['type'][0]]
 
     else:
 
