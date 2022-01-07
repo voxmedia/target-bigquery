@@ -3,3 +3,4 @@
 .spyproject/*
 venv/*
 __pycache__
+target_bigquery.egg-info
