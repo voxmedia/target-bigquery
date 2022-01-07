@@ -25,7 +25,7 @@ env:
 
 on:
   push:
-    branches: [development, master]
+    branches: [development, master, feature/incremental_sync]
   pull_request:
     branches: [ master ]
 
