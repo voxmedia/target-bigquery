@@ -29,11 +29,24 @@
                     "dataset_id": "{your_dataset_id}"
                     "max_cache": 0
                 }
+
+
+            - target_config_incremental.json:
+
+              {
+                "project_id": "{your-project-id}",
+                "dataset_id": "{your_dataset_id}",
+                "replication_method": "incremental"
+              }
+
 """
 
 from tests import unittestcore
+from google.cloud.bigquery import Client
+import json
 import os
-
+from decimal import Decimal
+import pandas as pd
 
 class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
@@ -327,6 +340,114 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
             self.assertIsNone(table.clustering_fields)
             self.assertIsNone(table.partitioning_type)
             self.delete_temp_state()
+
+
+    def test_simple_stream_load_incremental(self):
+
+        from target_bigquery import main
+
+        for i in range(2):
+            self.set_cli_args(
+                stdin=os.path.join(os.path.join(
+                    os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'),
+                                 'rsc'),
+                    'partial_load_streams'), 'simple_stream_incremental_load_1.json'),
+                config=os.path.join(
+                    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                    'target_config_incremental.json'),
+                processhandler="partial-load-job",
+                ds_delete=i == 0
+            )
+
+            ret = main()
+            state = self.get_state()
+            self.assertEqual(1, len(state))
+
+            self.assertEqual(ret, 0, msg="Exit code is not 0!")
+            self.assertDictEqual(state[-1],
+                                 {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
+
+            table = self.client.get_table("{}.simple_stream".format(self.dataset_id))
+
+            self.assertEqual(3, table.num_rows, msg="Number of rows mismatch")
+
+            self.delete_temp_state()
+
+            # verify data
+
+            config_file = os.path.join(
+                os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                'target-config.json')
+
+            config = json.load(open(config_file))
+            project_id = config["project_id"]
+            dataset_id = config["dataset_id"]
+            stream = "simple_stream"
+
+            bq_client = Client(project=project_id)
+
+            query_string = f"SELECT id, name FROM `{project_id}.{dataset_id}.{stream}`"
+
+            df_actual = (
+                bq_client.query(query_string)
+                    .result()
+                    .to_dataframe()
+            )
+
+            data_expected = {
+                'id': ['001', '002', '003'],
+                'name': ["LOAD_1","LOAD_1","LOAD_1"]
+            }
+
+            # creating a Dataframe object
+            df_expected = pd.DataFrame(data_expected)
+
+            assert df_expected.equals(df_actual)
+
+
+        self.set_cli_args(
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'),
+                             'rsc'),
+                'partial_load_streams'), 'simple_stream_incremental_load_2.json'),
+            config=os.path.join(
+                os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                'target_config_incremental.json'),
+            processhandler="partial-load-job",
+            ds_delete=False
+        )
+
+        ret = main()
+        state = self.get_state()
+        self.assertEqual(1, len(state))
+
+        self.assertEqual(ret, 0, msg="Exit code is not 0!")
+        self.assertDictEqual(state[-1],
+                             {"bookmarks": {"simple_stream": {"timestamp": "2020-01-12T00:00:00.000000Z"}}})
+
+        table = self.client.get_table("{}.simple_stream".format(self.dataset_id))
+
+        self.assertEqual(4, table.num_rows, msg="Number of rows mismatch")
+
+        self.assertIsNone(table.clustering_fields)
+        self.assertIsNone(table.partitioning_type)
+        self.delete_temp_state()
+
+        df_actual = (
+            bq_client.query(query_string)
+                .result()
+                .to_dataframe()
+        )
+
+        data_expected = {
+            'id': ['001', '002', '003', '004'],
+            'name': ["UPDATED", "UPDATED", "UPDATED","INSERTED"]
+        }
+
+        # creating a Dataframe object
+        df_expected = pd.DataFrame(data_expected)
+
+        assert df_expected.equals(df_actual)
 
 
 class TestPartialLoadsBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
