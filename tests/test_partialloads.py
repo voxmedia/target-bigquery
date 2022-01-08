@@ -346,6 +346,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
         from target_bigquery import main
 
+        # LOAD same data twice
         for i in range(2):
             self.set_cli_args(
                 stdin=os.path.join(os.path.join(
@@ -404,7 +405,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
             assert df_expected.equals(df_actual)
 
-
+        # Load new data with MERGE statement
         self.set_cli_args(
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'),
@@ -433,6 +434,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
         self.assertIsNone(table.partitioning_type)
         self.delete_temp_state()
 
+        # verify data
         df_actual = (
             bq_client.query(query_string)
                 .result()
