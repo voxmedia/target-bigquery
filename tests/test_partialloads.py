@@ -387,7 +387,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
             bq_client = Client(project=project_id)
 
-            query_string = f"SELECT id, name FROM `{project_id}.{dataset_id}.{stream}`"
+            query_string = f"SELECT id, name FROM `{project_id}.{dataset_id}.{stream}` ORDER BY 1, 2"
 
             df_actual = (
                 bq_client.query(query_string)
