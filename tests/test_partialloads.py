@@ -46,6 +46,7 @@ from google.cloud.bigquery import Client
 import json
 import os
 import pandas as pd
+import pytest
 
 
 class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
@@ -506,6 +507,57 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
         df_expected = pd.DataFrame(data_expected)
 
         assert df_expected.equals(df_actual)
+
+    def test_simple_stream_load_incremental_error_expected(self):
+
+        from target_bigquery import main
+
+        # LOAD 1
+
+        self.set_cli_args(
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'),
+                             'rsc'),
+                'partial_load_streams'), 'simple_stream_incremental_load_1.json'),
+            config=os.path.join(
+                os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                'target_config_incremental.json'),
+            processhandler="partial-load-job",
+            ds_delete=True
+        )
+
+        ret = main()
+
+        # LOAD 2
+        # Load new data with MERGE statement
+        self.set_cli_args(
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'),
+                             'rsc'),
+                'partial_load_streams'), 'simple_stream_incremental_load_3.json'),
+            config=os.path.join(
+                os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                'target_config_incremental.json'),
+            processhandler="partial-load-job",
+            ds_delete=False
+        )
+        # with pytest.raises(ValueError, match="JSON schema is invalid/incomplete. It has empty properties"):
+        ret = main()
+
+        # destination table can have dupe ids used in MERGE statement
+        # new data which being appended should have no dupes
+
+        # if new data has dupes, then MERGE will fail with a similar error:
+        # INFO Primary keys: id
+        # CRITICAL 400 UPDATE/MERGE must match at most one source row for each target row
+
+        # https://stackoverflow.com/questions/50504504/bigquery-error-update-merge-must-match-at-most-one-source-row-for-each-target-r
+        # https://cloud.google.com/bigquery/docs/reference/standard-sql/dml-syntax
+
+        # If a row in the table to be updated joins with more than one row from the FROM clause,
+        # then the query generates the following runtime error: UPDATE/MERGE must match at most one source row for each target row.
+
+        self.assertEqual(ret, 2, msg="Exit code is not 2!")  # expected exit code is 2 - serious problem
 
 
 class TestPartialLoadsBookmarksPartialLoadJob(unittestcore.BaseUnitTest):

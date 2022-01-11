@@ -240,7 +240,18 @@ class LoadJobProcessHandler(BaseProcessHandler):
                 loaded_tmp_tables.append((stream, tmp_table_name))
 
             # copy tables to production tables
-            #TODO: what happens if MERGE fails because of dupe ids?
+            # destination table can have dupe ids used in MERGE statement
+            # new data which being appended should have no dupes
+
+            # if new data has dupes, then MERGE will fail with a similar error:
+            # INFO Primary keys: id
+            # CRITICAL 400 UPDATE/MERGE must match at most one source row for each target row
+
+            # https://stackoverflow.com/questions/50504504/bigquery-error-update-merge-must-match-at-most-one-source-row-for-each-target-r
+            # https://cloud.google.com/bigquery/docs/reference/standard-sql/dml-syntax
+
+            # If a row in the table to be updated joins with more than one row from the FROM clause,
+            # then the query generates the following runtime error: UPDATE/MERGE must match at most one source row for each target row.
             for stream, tmp_table_name in loaded_tmp_tables:
                 incremental_success = False
                 if self.incremental:
