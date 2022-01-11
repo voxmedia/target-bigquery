@@ -240,6 +240,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
                 loaded_tmp_tables.append((stream, tmp_table_name))
 
             # copy tables to production tables
+            #TODO: what happens if MERGE fails because of dupe ids?
             for stream, tmp_table_name in loaded_tmp_tables:
                 incremental_success = False
                 if self.incremental:

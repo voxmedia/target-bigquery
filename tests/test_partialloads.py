@@ -46,11 +46,6 @@ from google.cloud.bigquery import Client
 import json
 import os
 import pandas as pd
-import logging
-
-# logging.basicConfig(level=logging.DEBUG)
-# logger = logging.getLogger(__name__)
-from testfixtures import log_capture
 
 
 class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
@@ -403,15 +398,9 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
         assert df_expected.equals(df_actual)
 
-    @log_capture()
-    def test_simple_stream_load_incremental(self, logcapture):
+    def test_simple_stream_load_incremental(self):
 
         from target_bigquery import main
-        # logger.warning("test")
-
-        config_file = os.path.join(
-            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
-            'target-config.json')
 
         # LOAD same data twice
         for i in range(2):
@@ -420,7 +409,9 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
                     os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'),
                                  'rsc'),
                     'partial_load_streams'), 'simple_stream_incremental_load_1.json'),
-                config=config_file,
+                config=os.path.join(
+                    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                    'target_config_incremental.json'),
                 processhandler="partial-load-job",
                 ds_delete=i == 0
             )
@@ -515,16 +506,6 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
         df_expected = pd.DataFrame(data_expected)
 
         assert df_expected.equals(df_actual)
-
-        # expected_log = ('root', 'INFO',
-        #                 "LOADED 4 rows")
-        #
-        # logcapture.check_present(expected_log, )
-        # TODO: logging is not being captured in data load tests
-
-    def verify_data(self):
-        pass
-        # TODO: use a function to avoid repetition
 
 
 class TestPartialLoadsBookmarksPartialLoadJob(unittestcore.BaseUnitTest):
