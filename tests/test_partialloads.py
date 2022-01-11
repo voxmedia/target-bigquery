@@ -513,7 +513,6 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
         from target_bigquery import main
 
         # LOAD 1
-
         self.set_cli_args(
             stdin=os.path.join(os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'),
@@ -528,7 +527,7 @@ class TestPartialLoadsPartialLoadJob(unittestcore.BaseUnitTest):
 
         ret = main()
 
-        # LOAD 2
+        # LOAD 2: data has dupes, which cause MERGE query to break
         # Load new data with MERGE statement
         self.set_cli_args(
             stdin=os.path.join(os.path.join(
