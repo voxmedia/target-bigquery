@@ -371,3 +371,26 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         print(state)
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
+
+
+    def test_schema_logging(self):
+
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'stream_format_record_to_schema_fails.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
+            processhandler="load-job",
+        )
+
+        ret = main()
+
+        self.assertEqual(ret, 2, msg="Exit code is not 2!")
+        #TODO: test logging.
+        # I had an issue trying to do that with pytest logcapture - no logging was captured in a data load test
+
+
+
