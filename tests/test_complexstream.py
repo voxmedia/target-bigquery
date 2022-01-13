@@ -14,6 +14,12 @@ import os
 from decimal import Decimal
 import pandas as pd
 
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+from testfixtures import log_capture
+
 class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
     def test_klaviyo_stream(self):
@@ -355,6 +361,8 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             }
 
         """
+        logging.info("jake test")
+
         from target_bigquery import main
 
         self.set_cli_args(
@@ -372,10 +380,12 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
 
-
-    def test_schema_logging(self):
+    @log_capture()
+    def test_schema_logging(self, logcapture):
 
         from target_bigquery import main
+
+        logger.info("Jake test")
 
         self.set_cli_args(
             stdin=os.path.join(os.path.join(
@@ -389,6 +399,11 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         ret = main()
 
         self.assertEqual(ret, 2, msg="Exit code is not 2!")
+
+        expected_log = ('root', 'INFO', "Jake test")
+
+        logcapture.check_present(expected_log, )
+
         #TODO: test logging.
         # I had an issue trying to do that with pytest logcapture - no logging was captured in a data load test
 
