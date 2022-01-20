@@ -224,6 +224,8 @@ class LoadJobProcessHandler(BaseProcessHandler):
         if len(keys) < 1:
             raise Exception(f"No primary keys specified from the tap and Incremental option selected")
         return " and ".join(keys)
+    #TODO: test it with multiple ids
+
 
     def _do_temp_table_based_load(self, rows):
         assert isinstance(rows, dict)
