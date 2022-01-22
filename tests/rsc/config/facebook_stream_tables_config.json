@@ -33,7 +33,9 @@
         "cluster_fields": ["age", "gender","account_id", "campaign_id"],
         "force_fields": {
           "date_start": {"type": "DATE", "mode":  "NULLABLE"},
-          "date_stop": {"type": "DATE", "mode":  "NULLABLE"}
+          "date_stop": {"type": "DATE", "mode":  "NULLABLE"},
+          "1d_click":{"bq_field_name": "lower_level_field_renamed"},
+          "unique_actions":{"bq_field_name": "parent_field_renamed"}
         }
       },
       "ads_insights_platform_and_device": {

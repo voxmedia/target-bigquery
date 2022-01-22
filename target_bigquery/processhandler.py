@@ -175,7 +175,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
 
         schema = self.schemas[stream]
 
-        nr = cleanup_record(schema, msg.record)
+        nr = cleanup_record(schema, msg.record, force_fields=self.table_configs.get(msg.stream, {}).get("force_fields", {}))
         nr = format_record_to_schema(nr, self.bq_schema_dicts[stream])
 
         # schema validation may fail if data doesn't match schema in terms of data types

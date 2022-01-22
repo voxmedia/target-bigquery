@@ -14,7 +14,7 @@ METADATA_FIELDS = {
 }
 
 
-def cleanup_record(schema, record):
+def cleanup_record(schema, record, force_fields={}):
     """
     Clean up / prettify field names, make sure they match BigQuery naming conventions.
 
@@ -28,21 +28,21 @@ def cleanup_record(schema, record):
     elif isinstance(record, list):
         nr = []
         for item in record:
-            nr.append(cleanup_record(schema, item))
+            nr.append(cleanup_record(schema, item, force_fields))
         return nr
 
     elif isinstance(record, dict):
         nr = {}
         for key, value in record.items():
-            nkey = create_valid_bigquery_field_name(key)
-            nr[nkey] = cleanup_record(schema, value)
+            nkey = create_valid_bigquery_field_name(key, force_fields)
+            nr[nkey] = cleanup_record(schema, value, force_fields)
         return nr
 
     else:
         raise Exception(f"unhandled instance of record: {record}")
 
 
-def create_valid_bigquery_field_name(field_name):
+def create_valid_bigquery_field_name(field_name, force_fields={}):
     """
     Clean up / prettify field names, make sure they match BigQuery naming conventions.
 
@@ -59,6 +59,8 @@ def create_valid_bigquery_field_name(field_name):
     :param key: JSON field name
     :return: cleaned up JSON field name
     """
+    if field_name in force_fields and force_fields[field_name].get("bq_field_name"):
+        return force_fields[field_name]["bq_field_name"]
 
     cleaned_up_field_name = ""
 
@@ -150,12 +152,11 @@ def prioritize_one_data_type_from_multiple_ones_in_any_of(field_property):
     return min(any_of_data_types, key=any_of_data_types.get)
 
 
-def convert_field_type(field_property):
+def convert_field_type(field_name, field_property, force_fields={}):
     """
     :param field_property: JSON field property
     :return: BigQuery SchemaField field_type
     """
-
     conversion_dict = {"string": "STRING",
                        "number": "FLOAT",
                        "integer": "INTEGER",
@@ -170,7 +171,10 @@ def convert_field_type(field_property):
                        "bq-bigdecimal": "BIGDECIMAL"
                        }
 
-    if "anyOf" in field_property:
+    if field_name in force_fields and force_fields[field_name].get("type"):
+        return force_fields[field_name]["type"]
+
+    elif "anyOf" in field_property:
 
         prioritized_data_type = prioritize_one_data_type_from_multiple_ones_in_any_of(field_property)
 
@@ -208,13 +212,16 @@ def convert_field_type(field_property):
     return field_type_bigquery
 
 
-def determine_field_mode(field_property):
+def determine_field_mode(field_name, field_property, force_fields={}):
     """
     :param field_name: one nested JSON field name
     :param field_property: one nested JSON field property
     :return: BigQuery SchemaField mode
     """
-    if "items" in field_property:
+    if field_name in force_fields and force_fields[field_name].get("mode"):
+        return force_fields[field_name]["mode"]
+
+    elif "items" in field_property:
 
         field_mode = 'REPEATED'
 
@@ -226,6 +233,7 @@ def determine_field_mode(field_property):
 
 
 def replace_nullable_mode_with_required(schema_field_input):
+
     schema_field_updated = SchemaField(name=schema_field_input.name,
                                        field_type=schema_field_input.field_type,
                                        mode='REQUIRED',
@@ -283,7 +291,7 @@ def determine_precision_and_scale_for_decimal_or_bigdecimal(field_property):
     return precision, scale
 
 
-def build_field(field_name, field_property):
+def build_field(field_name, field_property, force_fields):
     """
     :param field_name: one nested JSON field name
     :param field_property: one nested JSON field property
@@ -293,14 +301,14 @@ def build_field(field_name, field_property):
     if not ("items" in field_property and "properties" in field_property["items"]) and not (
             "properties" in field_property):
 
-        field_type = convert_field_type(field_property)
+        field_type = convert_field_type(field_name, field_property, force_fields)
 
         precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property) if field_type in [
             "DECIMAL", "BIGDECIMAL"] else (None, None)
 
-        return (SchemaField(name=create_valid_bigquery_field_name(field_name),
+        return (SchemaField(name=create_valid_bigquery_field_name(field_name,force_fields) ,
                             field_type=field_type,
-                            mode=determine_field_mode(field_property),
+                            mode=determine_field_mode(field_name, field_property, force_fields),
                             description=None,
                             fields=(),
                             policy_tags=None,
@@ -313,7 +321,7 @@ def build_field(field_name, field_property):
 
         processed_subfields = []
 
-        field_type = convert_field_type(field_property)
+        field_type = convert_field_type(field_name, field_property, force_fields)
 
         precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property) if field_type in [
             "DECIMAL", "BIGDECIMAL"] else (None, None)
@@ -322,11 +330,11 @@ def build_field(field_name, field_property):
         for subfield_name, subfield_property in field_property.get("properties",
                                                                    field_property.get("items", {}).get("properties")
                                                                    ).items():
-            processed_subfields.append(build_field(subfield_name, subfield_property))
+            processed_subfields.append(build_field(subfield_name, subfield_property, force_fields))
 
-        return (SchemaField(name=create_valid_bigquery_field_name(field_name),
+        return (SchemaField(name=create_valid_bigquery_field_name(field_name, force_fields),
                             field_type=field_type,
-                            mode=determine_field_mode(field_property),
+                            mode=determine_field_mode(field_name, field_property, force_fields),
                             description=None,
                             fields=processed_subfields,
                             policy_tags=None,
@@ -356,20 +364,10 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
 
     for field_name, field_property in schema.get("properties", schema.get("items", {}).get("properties", {})).items():
 
-        if field_name in force_fields:
+        next_field = build_field(field_name, field_property, force_fields)
 
-            next_field = (
-                SchemaField(field_name, force_fields[field_name]["type"],
-                            force_fields[field_name].get("mode", "nullable"),
-                            force_fields[field_name].get("description", None), ())
-            )
-
-        else:
-
-            next_field = build_field(field_name, field_property)
-
-            if field_name in required_fields:
-                next_field = replace_nullable_mode_with_required(next_field)
+        if field_name in required_fields and field_name not in force_fields:
+            next_field = replace_nullable_mode_with_required(next_field)
 
         schema_bigquery.append(next_field)
 
