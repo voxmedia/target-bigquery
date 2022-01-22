@@ -88,7 +88,7 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
 
         assert prioritized_data_type == "string"
 
-        converted_data_type = convert_field_type(test_input)
+        converted_data_type =convert_field_type(field_name="test", field_property=test_input)
 
         assert converted_data_type == "STRING"
 
@@ -121,7 +121,7 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
 
         assert prioritized_data_type == "number"
 
-        converted_data_type = convert_field_type(test_input)
+        converted_data_type =convert_field_type(field_name="test", field_property=test_input)
 
         assert converted_data_type == "FLOAT"
 
@@ -149,7 +149,7 @@ class TestHelpersFunctions(unittestcore.BaseUnitTest):
 
         assert prioritized_data_type == "integer"
 
-        converted_data_type = convert_field_type(test_input)
+        converted_data_type =convert_field_type(field_name="test", field_property=test_input)
 
         assert converted_data_type == "INTEGER"
 
