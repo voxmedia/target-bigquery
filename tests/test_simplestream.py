@@ -197,7 +197,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         # Exit statuses:
         # 0 if OK,
-        # 1 if minor problems
+        # 1 if minor problem
         # 2 if serious problem
         self.assertEqual(ret, 2, msg="Exit code is not 2!")  # expected exit code is 2 - serious problem
 

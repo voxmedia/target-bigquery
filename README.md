@@ -20,7 +20,8 @@ A [Singer](https://singer.io) target that writes data to Google BigQuery.
         - [Partitioning background](#partitioning-background)
         - [Clustering background](#clustering-background)
         - [Setting up partitioning and clustering](#setting-up-partitioning-and-clustering)
-    - [Step 6: target-tables-config file: force data types and modes](#step-6-target-tables-config-file-force-data-types-and-modes)
+    - [Step 6 (Optional): target-tables-config file: force data types and modes](#step-6-optional-target-tables-config-file-force-data-types-and-modes)
+    - [Step 7 (Optional): target-tables-config file: rename a field](#step-7-optional-target-tables-config-file-rename-a-field)
 - [Unit tests set up](#unit-tests-set-up)
 - [Config files in this project](#config-files-in-this-project)
 
@@ -350,18 +351,18 @@ You can only set up partitioning.
 <img src="readme_screenshots/14_Partitioned_Table.png" width="650" alt="Download the service account credential JSON file">
 
 
-### Step 6: target-tables-config file: force data types and modes
+### Step 6 (Optional): target-tables-config file: force data types and modes
 
 #### Problem:
 - Normally, tap catalog file governs schema of data which will be loaded into target-bigquery.
 - However, sometimes you can get a column of an undesired data type, which is not following your tap-catalog file.
   
 #### Solution:
-- You can force that column to the desired data type by using `force_fields` flag inside your *target-tables-config.json* file.
+- You can force that column to the desired data type by using the `force_fields` flag inside your *target-tables-config.json* file.
   
 #### Example:
 - We used this solution to fix `"date_start"` field from `"ads_insights_age_and_gender"` stream from tap-facebook. 
-- In tap catalog file, we said we wanted this column to be a **date**. 
+- In the tap catalog file, we said we wanted this column to be a **date**. 
 - However, the tap generates schema where this column is a **string**, despite our tap catalog file. 
 - Therefore, we used `force_fields` flag in target-tables-config.json to override what the tap generates and force the column to be a date.
 - Example of *target-tables-config.json* file:
@@ -378,6 +379,23 @@ You can only set up partitioning.
       }
     }
 }
+```
+
+### Step 7 (Optional): target-tables-config file: rename a field
+
+#### Problem and solution:
+- You can rename a field, using the `force_fields` flag inside your *target-tables-config.json* file.
+  
+#### Example:
+- Example of *target-tables-config.json* file where we renamed a field::
+```
+      "ads_insights_age_and_gender": {
+        "partition_field": "date_start",
+        "cluster_fields": ["age", "gender","account_id", "campaign_id"],
+        "force_fields": {
+          "old_name":{"bq_field_name": "new_name"}
+        }
+      }
 ```
 
 ## Unit tests set up

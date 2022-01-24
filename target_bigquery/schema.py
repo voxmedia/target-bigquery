@@ -353,6 +353,7 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
             Use case example:
             tap facebook field "date_start" from stream ads_insights_age_and_gender is being passed as string to BQ,
             which contradicts tap catalog file, where we said it's a date. force_fields fixes this issue.
+            You can also rename the field using the force_fields flag.
     :return: a list of BigQuery SchemaFields, which represents one BigQuery table
     """
 
