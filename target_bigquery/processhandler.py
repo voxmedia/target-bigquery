@@ -266,8 +266,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
                 incremental_success = False
                 if self.incremental:
                     self.logger.info(f"Copy {tmp_table_name} to {self.tables[stream]} by INCREMENTAL")
-                    #TODO: reword the warning about this replication method
-                    self.logger.warning(f"INCREMENTAL replication method might result in data loss because we are editing the production data during the sync operation. We recommend that you use APPEND target-bigquery replication instead.")
+                    self.logger.warning(f"INCREMENTAL replication method (MERGE SQL statement) is not recommended. It might result in loss of production data, because historical records get updated during the sync operation. Instead, we recommend using the APPEND replication method, which will preserve historical data.")
                     table_id = f"{self.project_id}.{self.dataset.dataset_id}.{self.tables[stream]}"
                     try:
                         self.client.get_table(table_id)
