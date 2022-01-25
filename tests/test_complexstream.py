@@ -411,10 +411,14 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
 
         with LogCapture() as actual_logs:
             # make sure logs are displayed during local testing in console
-            logFormatter = logging.Formatter("%(levelname)s %(message)s")
-            consoleHandler = logging.StreamHandler()
-            consoleHandler.setFormatter(logFormatter)
-            logger.addHandler(consoleHandler)
+            # make sure unit test logs are in the same format as what we see during the sync
+            log_formatter = logging.Formatter("%(levelname)s %(message)s")
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(log_formatter)
+            logger.addHandler(console_handler)
+
+            # set level
+            console_handler.setLevel(logging.INFO)
 
             # test log
             logger.info("unit test starts")
