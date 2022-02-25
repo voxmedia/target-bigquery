@@ -6,6 +6,7 @@ import singer
 from google.api_core import exceptions
 from google.cloud import bigquery
 from google.cloud.bigquery import Dataset
+from google.cloud.exceptions import NotFound
 
 logger = singer.get_logger()
 
@@ -30,7 +31,7 @@ def emit_state(state):
 
 def ensure_dataset(project_id, dataset_id, location):
     """
-    Given a project id, dataset id and location, creates BigQuery dataset
+    Given a project id, dataset id and location, creates BigQuery dataset if not exists
 
     https://googleapis.dev/python/bigquery/latest/generated/google.cloud.bigquery.client.Client.html
 
@@ -43,13 +44,18 @@ def ensure_dataset(project_id, dataset_id, location):
     client = bigquery.Client(project=project_id, location=location)
 
     dataset_ref = DatasetReference(project_id, dataset_id)
-    try:
-        client.create_dataset(dataset_ref)
-    except exceptions.GoogleAPICallError as e:
-        if e.response.status_code == 409:  # dataset exists
-            pass
-        else:
-            logger.critical(f"unable to create dataset {dataset_id} in project {project_id}; Exception {e}")
-            return 2  # sys.exit(2)
 
-    return client, Dataset(dataset_ref)
+    try:
+        dataset = client.get_dataset(dataset_ref)
+        return client, dataset
+    except NotFound:
+        try:
+            client.create_dataset(dataset_ref)
+        except exceptions.GoogleAPICallError as e:
+            if e.response.status_code == 409:  # dataset exists
+                pass
+            else:
+                logger.critical(f"unable to create dataset {dataset_id} in project {project_id}; Exception {e}")
+                return 2  # sys.exit(2)
+
+        return client, Dataset(dataset_ref)
