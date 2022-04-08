@@ -189,8 +189,8 @@ def is_iterable(schema):
     """
 
     return not _is_ref(schema) \
-           and ARRAY in get_type(schema) \
-           and 'items' in schema
+           and ARRAY in get_type(schema)
+           # and 'items' in schema  # commented out to allow "members": {"type": "array"}
 
 
 def is_nullable(schema):
@@ -217,21 +217,31 @@ def is_literal(schema):
 def is_datetime(schema):
     """
     Given a JSON Schema compatible dict, returns True when schema's type allows being a date-time
+    Two cases make a datetime type:
+        a) string in type and format date-time (this is per JSON schema standards)
+        b) date-time is in type (this is for simplicity)
     :param schema: dict, JSON Schema
     :return: Boolean
     """
 
-    return STRING in get_type(schema) and schema.get('format') == DATE_TIME_FORMAT
+    return \
+        (STRING in get_type(schema) and schema.get('format') == DATE_TIME_FORMAT) \
+        or (DATE_TIME_FORMAT in get_type(schema) and schema.get('format') is None)
 
 
 def is_date(schema):
     """
-    Given a JSON Schema compatible dict, returns True when schema's type allows being a date-time
+    Given a JSON Schema compatible dict, returns True when schema's type allows being a date
+    Two cases make a date type:
+        a) string in type and format date (this is per JSON schema standards)
+        b) date is in type (this is for simplicity)
     :param schema: dict, JSON Schema
     :return: Boolean
     """
 
-    return STRING in get_type(schema) and schema.get('format') == DATE_FORMAT
+    return \
+        (STRING in get_type(schema) and schema.get('format') == DATE_FORMAT) \
+        or (DATE_FORMAT in get_type(schema) and schema.get('format') is None)
 
 
 def is_bq_geography(schema):
@@ -417,7 +427,10 @@ def _simplify__implicit_anyof(root_schema, schema):
             'format': DATE_TIME_FORMAT
         }))
 
-        types.remove(STRING)
+        if DATE_TIME_FORMAT in types:
+            types.remove(DATE_TIME_FORMAT)
+        else:
+            types.remove(STRING)
 
     if is_date(schema):
         schemas.append(Cachable({
@@ -425,7 +438,10 @@ def _simplify__implicit_anyof(root_schema, schema):
             'format': DATE_FORMAT
         }))
 
-        types.remove(STRING)
+        if DATE_FORMAT in types:
+            types.remove(DATE_FORMAT)
+        else:
+            types.remove(STRING)
 
     if is_bq_geography(schema):
         schemas.append(Cachable({
@@ -485,7 +501,7 @@ def _simplify__implicit_anyof(root_schema, schema):
     if is_iterable(schema):
         schemas.append({
             'type': [ARRAY],
-            'items': _helper_simplify(root_schema, schema.get('items', {}))
+            'items': _helper_simplify(root_schema, schema.get('items', {"type": STRING}))
         })
 
         types.remove(ARRAY)

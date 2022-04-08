@@ -235,6 +235,59 @@ class TestSchemaConversion(unittestcore.BaseUnitTest):
     def setUp(self):
         super(TestSchemaConversion, self).setUp()
 
+    def test_flat_simplify_and_build(self):
+        schema = {
+          "properties": {
+            "new_status": {
+              "type": ["string", "null"]
+            },
+            "previous_status": {
+              "type": ["number", "null"]
+            },
+            "new_assignee": {
+              "type": ["integer", "null"]
+            },
+            "previous_assignee": {
+              "type": ["boolean", "null"]
+            },
+            "new_due_date": {
+              "type": ["date", "null"]
+            },
+            "previous_due_date": {
+              "type": ["date-time", "null"]
+            },
+            "members": {
+                "type": "array"  # shorted array definition, by default we treat this as array of strings
+            }
+          }
+        }
+
+        schema_simplified = simplify(schema)
+        schema_bq = build_schema(schema_simplified, key_properties={}, add_metadata=False)
+
+        for f in schema_bq:
+            if f.name == "new_status":
+                self.assertEqual(f.field_type.upper(), "STRING")
+
+            elif f.name == "previous_status":
+                self.assertEqual(f.field_type.upper(), "FLOAT")
+
+            elif f.name == "new_assignee":
+                self.assertEqual(f.field_type.upper(), "INTEGER")
+
+            elif f.name == "previous_assignee":
+                self.assertEqual(f.field_type.upper(), "BOOLEAN")
+
+            elif f.name == "new_due_date":
+                self.assertEqual(f.field_type.upper(), "DATE")
+
+            elif f.name == "previous_due_date":
+                self.assertEqual(f.field_type.upper(), "TIMESTAMP")
+
+            elif f.name == "members":
+                self.assertEqual(f.field_type.upper(), "STRING")
+                self.assertEqual(f.mode, "REPEATED")
+
     def test_flat_schema(self):
 
         schema_0_input = schema_simple_1
