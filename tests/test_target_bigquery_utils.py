@@ -2,9 +2,15 @@ import os
 import json
 from google.cloud.bigquery import Dataset
 from google.cloud import bigquery
+from google.cloud.exceptions import NotFound
+import pytest
+import logging
 
 from tests import unittestcore
 from target_bigquery.utils import ensure_dataset
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 class TestTargetBigQueryUtils(unittestcore.BaseUnitTest):
@@ -30,6 +36,14 @@ class TestTargetBigQueryUtils(unittestcore.BaseUnitTest):
         the purpose of this test is to show that the dataset is obtained, if it already exists
         if it doesn't exist then it's created and then it is obtained
         """
+
+        # make sure dataset doesn't exist yet
+        logger.info("Dataset doesn't exist yet")
+        self.delete_dataset()
+
+        # assert that dataset doesn't exist yet
+        with pytest.raises(NotFound):
+            self.client.get_dataset(self.dataset_id)  # Make an API request.
 
         # PART 1
         # create dataset and get dataset
