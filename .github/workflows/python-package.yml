@@ -26,7 +26,7 @@ env:
 
 on:
   push:
-    branches: [development, master, hotfix/requirements-update]
+    branches: [development, master]
   pull_request:
     branches: [ master ]
 
