@@ -387,7 +387,7 @@ You can only set up partitioning.
 - You can rename a field, using the `force_fields` flag inside your *target-tables-config.json* file.
   
 #### Example:
-- Example of *target-tables-config.json* file where we renamed a field::
+- Example of *target-tables-config.json* file where we renamed a field from `old_name` to `new_name`:
 ```
       "ads_insights_age_and_gender": {
         "partition_field": "date_start",
