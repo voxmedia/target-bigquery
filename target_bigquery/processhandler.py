@@ -179,7 +179,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
 
         schema = self.schemas[stream]
         bq_schema = self.bq_schema_dicts[stream]
-        nr = cleanup_record(schema, msg.record)
+        nr = cleanup_record(schema, msg.record, force_fields=self.table_configs.get(msg.stream, {}).get("force_fields", {}))
 
         try:
             nr = format_record_to_schema(nr, self.bq_schema_dicts[stream])
@@ -187,6 +187,8 @@ class LoadJobProcessHandler(BaseProcessHandler):
             extra={"record" : msg.record, "schema": schema, "bq_schema": bq_schema}
             self.logger.critical(f"Cannot format a record for stream {msg.stream} to its corresponding BigQuery schema. Details: {extra}")
             raise e
+
+
 
         # schema validation may fail if data doesn't match schema in terms of data types
         # in this case, we validate schema again on data which has been forced to match schema
