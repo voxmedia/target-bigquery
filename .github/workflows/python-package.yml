@@ -26,7 +26,7 @@ env:
 
 on:
   push:
-    branches: [development, master, feature/incremental_sync_and_schema_logging]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
