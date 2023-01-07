@@ -303,11 +303,17 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
             os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
             'config'), 'facebook_stream_tables_config.json')))
 
+        # CHECK INPUTS
         assert target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['date_start'][
                    'type'] == 'DATE'
         assert target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['date_start'][
                    'mode'] == 'NULLABLE'
+        self.assertEqual({'bq_field_name': 'lower_level_field_renamed'}, target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['1d_click'] )
 
+        self.assertEqual({'bq_field_name': 'parent_field_renamed'},
+                         target_config_file['streams']['ads_insights_age_and_gender']['force_fields']['unique_actions'])
+
+        # LOAD DATA
         from target_bigquery import main
 
         self.set_cli_args(
@@ -329,6 +335,7 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
         self.assertEqual(ret, 0, msg="Exit code is not 0!")
         # self.assertDictEqual(state, {"bookmarks": {"simple_stream": {"timestamp": "2020-01-11T00:00:00.000000Z"}}})
 
+        # CHECK OUTPUTS
         table = self.client.get_table("{}.ads_insights_age_and_gender".format(self.dataset_id))
         self.assertEqual(15, table.num_rows, msg="Number of rows mismatch")
         self.assertIsNotNone(table.clustering_fields)
@@ -343,7 +350,25 @@ class TestComplexStreamLoadJob(unittestcore.BaseUnitTest):
                                fields=(),
                                policy_tags=None)
 
-        assert actual == expected
+        self.assertEqual(expected,actual)
+
+        actual = table.schema[0].fields[0]
+
+        expected = SchemaField(name='lower_level_field_renamed',
+                               field_type='FLOAT',
+                               mode='NULLABLE',
+                               description=None,
+                               fields=(),
+                               policy_tags=None)
+
+        self.assertEqual(expected,actual)
+
+        actual = table.schema[0]
+
+        self.assertEqual('parent_field_renamed',actual.name)
+        self.assertEqual('RECORD', actual.field_type)
+        self.assertEqual('REPEATED', actual.mode)
+
 
     def test_misformed_complex_stream(self):
         """

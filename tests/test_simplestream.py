@@ -77,6 +77,24 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
         self.assertIsNone(table.clustering_fields)
         self.assertIsNone(table.partitioning_type)
 
+
+    def test_simple_stream_dupe_fields_error(self):
+        from target_bigquery import main
+
+        self.set_cli_args(
+            stdin=os.path.join(os.path.join(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tests'), 'rsc'),
+                'data'), 'simple_stream_dupe_field_names_in_bq.json'),
+            config=os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sandbox'),
+                                'target-config.json'),
+            processhandler="load-job"
+        )
+
+        ret = main()
+
+        self.assertEqual(ret, 2, msg="Exit code is not 2!")
+
+
     def test_simple_stream_with_tables_config(self):
         from target_bigquery import main
 
@@ -179,7 +197,7 @@ class TestSimpleStreamLoadJob(unittestcore.BaseUnitTest):
 
         # Exit statuses:
         # 0 if OK,
-        # 1 if minor problems
+        # 1 if minor problem
         # 2 if serious problem
         self.assertEqual(ret, 2, msg="Exit code is not 2!")  # expected exit code is 2 - serious problem
 

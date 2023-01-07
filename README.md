@@ -22,7 +22,8 @@ and [Hubspot] to Google BigQuery.
         - [Partitioning background](#partitioning-background)
         - [Clustering background](#clustering-background)
         - [Setting up partitioning and clustering](#setting-up-partitioning-and-clustering)
-    - [Step 6: target-tables-config file: force data types and modes](#step-6-target-tables-config-file-force-data-types-and-modes)
+    - [Step 6 (Optional): target-tables-config file: force data types and modes](#step-6-optional-target-tables-config-file-force-data-types-and-modes)
+    - [Step 7 (Optional): target-tables-config file: rename a field](#step-7-optional-target-tables-config-file-rename-a-field)
 - [Unit tests set up](#unit-tests-set-up)
 - [Config files in this project](#config-files-in-this-project)
 
@@ -363,14 +364,11 @@ You can only set up partitioning.
 }}
 ```
 
-3. Clear you **state.json**, so it's an empty JSON `{}`, because we want to load all data again. Skip this step, if you
-   didn't previously load this data in **Step 4** above.
+3. Clear you **state.json**, so it's an empty JSON `{}`, because we want to load all data again. Skip this step, if you didn't previously load this data in **Step 4** above.
 
-4. Delete your BigQuery destination table **exchangeratesapi**, because we want to re-load it again from scratch. Skip
-   this step, if you didn't previously load this data in **Step 4** above.
+4. Delete your BigQuery destination table **exchangeratesapi**, because we want to re-load it again from scratch. Skip this step, if you didn't previously load this data in **Step 4** above.
 
-3. Load data data into BigQuery, while configuring target tables. Pass **target-tables-config.json** as a command line
-   argument.
+3. Load data data into BigQuery, while configuring target tables. Pass **target-tables-config.json** as a command line argument.
 
 ```bash
 {project_root_dir}\tap\Scripts\tap-exchangeratesapi --config sample_config/tap-config-exchange-rates-api.json | ^
@@ -379,17 +377,16 @@ You can only set up partitioning.
 ```
 
 - "^" indicates a new line in Windows Command Prompt. In Mac terminal, use "\\".
-- If you don't want to pass **target-tables-config.json** file as a CLI argument, you can
-  add ```"table_config": "target-tables-config.json"``` to your **target-config.json** file. See **Step 3: Configure**
-  above.
+- If you don't want to pass **target-tables-config.json** file as a CLI argument, you can add ```"table_config": "target-tables-config.json"``` to your **target-config.json** file. See **Step 3: Configure** above.
 
 
-6. Verify in BigQuery web UI that partitioning and clustering worked (in our example below, we only set up
-   partitioning):
+6. Verify in BigQuery web UI that partitioning and clustering worked (in our example below, we only set up partitioning):
+
 
 <img src="readme_screenshots/14_Partitioned_Table.png" width="650" alt="Download the service account credential JSON file">
 
-### Step 6: target-tables-config file: force data types and modes
+
+### Step 6 (Optional): target-tables-config file: force data types and modes
 
 #### Problem:
 
@@ -397,17 +394,13 @@ You can only set up partitioning.
 - However, sometimes you can get a column of an undesired data type, which is not following your tap-catalog file.
 
 #### Solution:
-
-- You can force that column to the desired data type by using `force_fields` flag inside your *
-  target-tables-config.json* file.
+- You can force that column to the desired data type by using the `force_fields` flag inside your *target-tables-config.json* file.
 
 #### Example:
-
-- We used this solution to fix `"date_start"` field from `"ads_insights_age_and_gender"` stream from tap-facebook.
-- In tap catalog file, we said we wanted this column to be a **date**.
-- However, the tap generates schema where this column is a **string**, despite our tap catalog file.
-- Therefore, we used `force_fields` flag in target-tables-config.json to override what the tap generates and force the
-  column to be a date.
+- We used this solution to fix `"date_start"` field from `"ads_insights_age_and_gender"` stream from tap-facebook. 
+- In the tap catalog file, we said we wanted this column to be a **date**. 
+- However, the tap generates schema where this column is a **string**, despite our tap catalog file. 
+- Therefore, we used `force_fields` flag in target-tables-config.json to override what the tap generates and force the column to be a date.
 - Example of *target-tables-config.json* file:
 
 ```
@@ -423,6 +416,23 @@ You can only set up partitioning.
       }
     }
 }
+```
+
+### Step 7 (Optional): target-tables-config file: rename a field
+
+#### Problem and solution:
+- You can rename a field, using the `force_fields` flag inside your *target-tables-config.json* file.
+  
+#### Example:
+- Example of *target-tables-config.json* file where we renamed a field from `old_name` to `new_name`:
+```
+      "ads_insights_age_and_gender": {
+        "partition_field": "date_start",
+        "cluster_fields": ["age", "gender","account_id", "campaign_id"],
+        "force_fields": {
+          "old_name":{"bq_field_name": "new_name"}
+        }
+      }
 ```
 
 ## Unit tests set up
