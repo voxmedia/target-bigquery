@@ -179,16 +179,16 @@ class LoadJobProcessHandler(BaseProcessHandler):
 
         schema = self.schemas[stream]
         bq_schema = self.bq_schema_dicts[stream]
-        nr = cleanup_record(schema, msg.record, force_fields=self.table_configs.get(msg.stream, {}).get("force_fields", {}))
+        nr = cleanup_record(schema, msg.record,
+                            force_fields=self.table_configs.get(msg.stream, {}).get("force_fields", {}))
 
         try:
             nr = format_record_to_schema(nr, self.bq_schema_dicts[stream])
         except Exception as e:
-            extra={"record" : msg.record, "schema": schema, "bq_schema": bq_schema}
-            self.logger.critical(f"Cannot format a record for stream {msg.stream} to its corresponding BigQuery schema. Details: {extra}")
+            extra = {"record": msg.record, "schema": schema, "bq_schema": bq_schema}
+            self.logger.critical(
+                f"Cannot format a record for stream {msg.stream} to its corresponding BigQuery schema. Details: {extra}")
             raise e
-
-
 
         # schema validation may fail if data doesn't match schema in terms of data types
         # in this case, we validate schema again on data which has been forced to match schema
@@ -226,8 +226,9 @@ class LoadJobProcessHandler(BaseProcessHandler):
         if len(keys) < 1:
             raise Exception(f"No primary keys specified from the tap and Incremental option selected")
         return " and ".join(keys)
-    #TODO: test it with multiple ids (an array of ids, if there are multiple key_properties in JSON schema)
-    #TODO: test it with dupe ids in the data
+
+    # TODO: test it with multiple ids (an array of ids, if there are multiple key_properties in JSON schema)
+    # TODO: test it with dupe ids in the data
 
     def _do_temp_table_based_load(self, rows):
         assert isinstance(rows, dict)
@@ -268,13 +269,14 @@ class LoadJobProcessHandler(BaseProcessHandler):
                 incremental_success = False
                 if self.incremental:
                     self.logger.info(f"Copy {tmp_table_name} to {self.tables[stream]} by INCREMENTAL")
-                    self.logger.warning(f"INCREMENTAL replication method (MERGE SQL statement) is not recommended. It might result in loss of production data, because historical records get updated during the sync operation. Instead, we recommend using the APPEND replication method, which will preserve historical data.")
+                    self.logger.warning(
+                        f"INCREMENTAL replication method (MERGE SQL statement) is not recommended. It might result in loss of production data, because historical records get updated during the sync operation. Instead, we recommend using the APPEND replication method, which will preserve historical data.")
                     table_id = f"{self.project_id}.{self.dataset.dataset_id}.{self.tables[stream]}"
                     try:
                         self.client.get_table(table_id)
                         column_names = [x.name for x in self.bq_schemas[stream]]
 
-                        query ="""MERGE `{table}` t
+                        query = """MERGE `{table}` t
                             USING `{temp_table}` s
                             ON {primary_key_condition}
                             WHEN MATCHED THEN
@@ -348,8 +350,16 @@ class LoadJobProcessHandler(BaseProcessHandler):
         """
         logger = self.logger
         partition_field = table_config.get("partition_field", None)
+        partition_type = table_config.get("partition_type", bigquery.table.TimePartitioningType.DAY)
         cluster_fields = table_config.get("cluster_fields", None)
         force_fields = table_config.get("force_fields", {})
+
+        if partition_type not in [bigquery.table.TimePartitioningType.DAY,
+                                  bigquery.table.TimePartitioningType.HOUR,
+                                  bigquery.table.TimePartitioningType.MONTH,
+                                  bigquery.table.TimePartitioningType.YEAR]:
+            raise NotImplementedError(
+                f"Table name '{dataset.dataset_id}.{table_name}' was set to partition by '{partition_type}' which is not supported! Use one of [DAY, HOUR, MONTH, YEAR]. If empty, DAY will be used as default if partition_field is set.")
 
         # schema_simplified = simplify(table_schema)
         # schema = build_schema(schema_simplified, key_properties=key_props, add_metadata=metadata_columns,
@@ -361,7 +371,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
         # partitioning
         if partition_field:
             load_config.time_partitioning = bigquery.table.TimePartitioning(
-                type_=bigquery.table.TimePartitioningType.DAY,
+                type_=partition_type,
                 field=partition_field
             )
 

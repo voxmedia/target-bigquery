@@ -8,5 +8,5 @@ suite = loader.discover(tests_dir)
 
 runner = unittest.TextTestRunner()
 
-if __name__ == "__main__": # this line prevents tests from running twice
+if __name__ == "__main__":  # this line prevents tests from running twice
     runner.run(suite)
