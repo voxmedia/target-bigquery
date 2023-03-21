@@ -323,6 +323,7 @@ To configure partitioning and clustering in BigQuery destination tables, we crea
     "streams": {
       "charges": {
         "partition_field": "updated_at",
+        "partition_type": "DAY",  // optional, DAY by default, must be one of [DAY, HOUR, MONTH, YEAR]
         "cluster_fields": ["type", "status", "customer_id", "transaction_id"]
       }
     }

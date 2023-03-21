@@ -1,0 +1,11 @@
+{
+    "streams": {
+      "simple_stream": {
+        "partition_field": "date",
+        "partition_type": "YEAR",
+        "cluster_fields": [
+          "name"
+        ]
+      }
+    }
+}
