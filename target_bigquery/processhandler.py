@@ -350,14 +350,16 @@ class LoadJobProcessHandler(BaseProcessHandler):
         """
         logger = self.logger
         partition_field = table_config.get("partition_field", None)
-        partition_type = table_config.get("partition_type", bigquery.table.TimePartitioningType.DAY)
+        partition_type = table_config.get("partition_type", bigquery.TimePartitioningType.DAY)
         cluster_fields = table_config.get("cluster_fields", None)
         force_fields = table_config.get("force_fields", {})
 
-        if partition_type not in [bigquery.table.TimePartitioningType.DAY,
-                                  bigquery.table.TimePartitioningType.HOUR,
-                                  bigquery.table.TimePartitioningType.MONTH,
-                                  bigquery.table.TimePartitioningType.YEAR]:
+        if partition_type not in [
+            bigquery.TimePartitioningType.DAY,
+            bigquery.TimePartitioningType.HOUR,
+            bigquery.TimePartitioningType.MONTH,
+            bigquery.TimePartitioningType.YEAR
+        ]:
             raise NotImplementedError(
                 f"Table name '{dataset.dataset_id}.{table_name}' was set to partition by '{partition_type}' which is not supported! Use one of [DAY, HOUR, MONTH, YEAR]. If empty, DAY will be used as default if partition_field is set.")
 
@@ -370,7 +372,7 @@ class LoadJobProcessHandler(BaseProcessHandler):
 
         # partitioning
         if partition_field:
-            load_config.time_partitioning = bigquery.table.TimePartitioning(
+            load_config.time_partitioning = bigquery.TimePartitioning(
                 type_=partition_type,
                 field=partition_field
             )
