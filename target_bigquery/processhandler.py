@@ -1,3 +1,4 @@
+import copy
 import json
 import uuid
 from datetime import datetime
@@ -93,7 +94,7 @@ class BaseProcessHandler(object):
                               key_properties=msg.key_properties,
                               add_metadata=self.add_metadata_columns,
                               force_fields=self.table_configs.get(msg.stream, {}).get("force_fields", {}))
-        self.bq_schema_dicts[msg.stream] = self._build_bq_schema_dict(schema)
+        self.bq_schema_dicts[msg.stream] = self._build_bq_schema_dict(copy.deepcopy(schema))
         self.bq_schemas[msg.stream] = schema
 
         # This log statement throws a TypeError from BigQuery
