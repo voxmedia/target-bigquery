@@ -45,7 +45,6 @@ def process(
     for line in tap_stream:
         # parse JSON and extract SchemaMessage
         try:
-            logger.info(f"Parsing message: {line}")
             msg = singer.parse_message(line)
         except json.decoder.JSONDecodeError:
             logger.error("Unable to parse:\n{}".format(line))
