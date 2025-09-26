@@ -14,6 +14,33 @@ METADATA_FIELDS = {
 }
 
 
+def resolve_force_field_config(field_name, field_path, force_fields):
+    """
+    Resolves force_fields configuration for a field, supporting both path-based and simple name lookups.
+
+    Priority order:
+    1. Exact field path match (e.g., "data.object.created")
+    2. Simple field name match (e.g., "created") for backward compatibility
+
+    :param field_name: The simple field name (e.g., "created")
+    :param field_path: The full dot-notation path to the field (e.g., "data.object.created")
+    :param force_fields: The force_fields configuration dictionary
+    :return: The force_fields configuration for this field, or None if no match
+    """
+    if not force_fields:
+        return None
+
+    # First, try exact path match (highest priority)
+    if field_path and field_path in force_fields:
+        return force_fields[field_path]
+
+    # Fall back to simple field name match for backward compatibility
+    if field_name in force_fields:
+        return force_fields[field_name]
+
+    return None
+
+
 def cleanup_record(schema, record, force_fields={}):
     """
     Clean up / prettify field names, make sure they match BigQuery naming conventions.
@@ -48,7 +75,7 @@ def cleanup_record(schema, record, force_fields={}):
         raise Exception(f"unhandled instance of record: {record}")
 
 
-def create_valid_bigquery_field_name(field_name, force_fields={}):
+def create_valid_bigquery_field_name(field_name, force_fields={}, field_path=None):
     """
     Clean up / prettify field names, make sure they match BigQuery naming conventions.
 
@@ -69,10 +96,12 @@ def create_valid_bigquery_field_name(field_name, force_fields={}):
                 which contradicts tap catalog file, where we said it's a date. force_fields fixes this issue.
             You can also rename a field using the force_fields parameter.
         Please see README for more information and examples.
+    :param field_path: The full dot-notation path to the field (e.g., "data.object.created")
     :return: cleaned up JSON field name
     """
-    if field_name in force_fields and force_fields[field_name].get("bq_field_name"):
-        return force_fields[field_name]["bq_field_name"]
+    force_field_config = resolve_force_field_config(field_name, field_path, force_fields)
+    if force_field_config and force_field_config.get("bq_field_name"):
+        return force_field_config["bq_field_name"]
 
     cleaned_up_field_name = ""
 
@@ -164,7 +193,7 @@ def prioritize_one_data_type_from_multiple_ones_in_any_of(field_property):
     return min(any_of_data_types, key=any_of_data_types.get)
 
 
-def convert_field_type(field_name, field_property, force_fields={}):
+def convert_field_type(field_name, field_property, force_fields={}, field_path=None):
     """
     :param field_name: field/column name
     :param field_property: JSON field property
@@ -174,6 +203,7 @@ def convert_field_type(field_name, field_property, force_fields={}):
                 which contradicts tap catalog file, where we said it's a date. force_fields fixes this issue.
             You can also rename a field using the force_fields parameter.
         Please see README for more information and examples.
+    :param field_path: The full dot-notation path to the field (e.g., "data.object.created")
     :return: BigQuery SchemaField field_type
     """
     conversion_dict = {"string": "STRING",
@@ -190,8 +220,9 @@ def convert_field_type(field_name, field_property, force_fields={}):
                        "bq-bigdecimal": "BIGDECIMAL"
                        }
 
-    if field_name in force_fields and force_fields[field_name].get("type"):
-        return force_fields[field_name]["type"]
+    force_field_config = resolve_force_field_config(field_name, field_path, force_fields)
+    if force_field_config and force_field_config.get("type"):
+        return force_field_config["type"]
 
     elif "anyOf" in field_property:
 
@@ -231,7 +262,7 @@ def convert_field_type(field_name, field_property, force_fields={}):
     return field_type_bigquery
 
 
-def determine_field_mode(field_name, field_property, force_fields={}):
+def determine_field_mode(field_name, field_property, force_fields={}, field_path=None):
     """
     :param field_name: one nested JSON field name
     :param field_property: one nested JSON field property
@@ -241,10 +272,12 @@ def determine_field_mode(field_name, field_property, force_fields={}):
                     which contradicts tap catalog file, where we said it's a date. force_fields fixes this issue.
                 You can also rename a field using the force_fields parameter.
             Please see README for more information and examples.
+    :param field_path: The full dot-notation path to the field (e.g., "data.object.created")
     :return: BigQuery SchemaField mode
     """
-    if field_name in force_fields and force_fields[field_name].get("mode"):
-        return force_fields[field_name]["mode"]
+    force_field_config = resolve_force_field_config(field_name, field_path, force_fields)
+    if force_field_config and force_field_config.get("mode"):
+        return force_field_config["mode"]
 
     elif "items" in field_property:
 
@@ -316,7 +349,7 @@ def determine_precision_and_scale_for_decimal_or_bigdecimal(field_property):
     return precision, scale
 
 
-def build_field(field_name, field_property, force_fields):
+def build_field(field_name, field_property, force_fields={}, field_path=None):
     """
     :param field_name: one nested JSON field name
     :param field_property: one nested JSON field property
@@ -326,33 +359,47 @@ def build_field(field_name, field_property, force_fields):
                     which contradicts tap catalog file, where we said it's a date. force_fields fixes this issue.
                 You can also rename a field using the force_fields parameter.
             Please see README for more information and examples.
+    :param field_path: The parent path for building nested field paths (e.g., "data.object")
     :return: one BigQuery nested SchemaField
     """
+    # Build the complete field path for this field
+    complete_field_path = f"{field_path}.{field_name}" if field_path else field_name
 
     if not ("items" in field_property and "properties" in field_property["items"]) and not (
             "properties" in field_property):
 
-        field_type = convert_field_type(field_name, field_property, force_fields)
+        field_type = convert_field_type(field_name, field_property, force_fields, complete_field_path)
 
         precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property) if field_type in [
             "DECIMAL", "BIGDECIMAL"] else (None, None)
 
-        return (SchemaField(name=create_valid_bigquery_field_name(field_name,force_fields) ,
-                            field_type=field_type,
-                            mode=determine_field_mode(field_name, field_property, force_fields),
-                            description=None,
-                            fields=(),
-                            policy_tags=None,
-                            precision=precision,
-                            scale=scale
-                            )
-                )
+        schema_field = SchemaField(
+            create_valid_bigquery_field_name(field_name, force_fields, complete_field_path),
+            field_type,
+            determine_field_mode(field_name, field_property, force_fields, complete_field_path),
+            description=None,
+            fields=()
+        )
+
+        # Add precision and scale if needed and supported
+        if precision is not None and scale is not None and field_type in ["DECIMAL", "BIGDECIMAL"]:
+            schema_field = SchemaField(
+                schema_field.name,
+                schema_field.field_type,
+                schema_field.mode,
+                schema_field.description,
+                schema_field.fields,
+                precision=precision,
+                scale=scale
+            )
+
+        return schema_field
 
     elif ("items" in field_property and "properties" in field_property["items"]) or ("properties" in field_property):
 
         processed_subfields = []
 
-        field_type = convert_field_type(field_name, field_property, force_fields)
+        field_type = convert_field_type(field_name, field_property, force_fields, complete_field_path)
 
         precision, scale = determine_precision_and_scale_for_decimal_or_bigdecimal(field_property) if field_type in [
             "DECIMAL", "BIGDECIMAL"] else (None, None)
@@ -361,18 +408,29 @@ def build_field(field_name, field_property, force_fields):
         for subfield_name, subfield_property in field_property.get("properties",
                                                                    field_property.get("items", {}).get("properties")
                                                                    ).items():
-            processed_subfields.append(build_field(subfield_name, subfield_property, force_fields))
+            processed_subfields.append(build_field(subfield_name, subfield_property, force_fields, complete_field_path))
 
-        return (SchemaField(name=create_valid_bigquery_field_name(field_name, force_fields),
-                            field_type=field_type,
-                            mode=determine_field_mode(field_name, field_property, force_fields),
-                            description=None,
-                            fields=processed_subfields,
-                            policy_tags=None,
-                            precision=precision,
-                            scale=scale
-                            )
-                )
+        schema_field = SchemaField(
+            create_valid_bigquery_field_name(field_name, force_fields, complete_field_path),
+            field_type,
+            determine_field_mode(field_name, field_property, force_fields, complete_field_path),
+            description=None,
+            fields=processed_subfields
+        )
+
+        # Add precision and scale if needed and supported
+        if precision is not None and scale is not None and field_type in ["DECIMAL", "BIGDECIMAL"]:
+            schema_field = SchemaField(
+                schema_field.name,
+                schema_field.field_type,
+                schema_field.mode,
+                schema_field.description,
+                schema_field.fields,
+                precision=precision,
+                scale=scale
+            )
+
+        return schema_field
 
 
 def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}):
@@ -399,7 +457,7 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
 
         next_field = build_field(field_name, field_property, force_fields)
 
-        if field_name in required_fields and field_name not in force_fields:
+        if field_name in required_fields and not resolve_force_field_config(field_name, field_name, force_fields):
             next_field = replace_nullable_mode_with_required(next_field)
 
         schema_bigquery.append(next_field)
@@ -411,8 +469,7 @@ def build_schema(schema, key_properties=None, add_metadata=True, force_fields={}
                                                field_type=METADATA_FIELDS[field_name]["bq_type"],
                                                mode='NULLABLE',
                                                description=None,
-                                               fields=(),
-                                               policy_tags=None)
+                                               fields=())
                                    )
 
     return schema_bigquery
